@@ -1,0 +1,112 @@
+{
+  "schema": "faradaiq.electrochemistry.electrodeposition_model_registry.v1",
+  "skill_revision": "5.0-electrodeposition-models",
+  "models": [
+    {
+      "name": "Direct transient metrics",
+      "required_inputs": [
+        "time",
+        "current",
+        "applied waveform"
+      ],
+      "eligible_when": [
+        "valid time and current"
+      ],
+      "outputs": [
+        "Imax",
+        "tmax",
+        "induction time",
+        "charge",
+        "terminal current"
+      ],
+      "priority": 1
+    },
+    {
+      "name": "Cottrell",
+      "equation": "I = n F A c sqrt(D) / sqrt(pi t)",
+      "eligible_when": [
+        "planar semi-infinite diffusion",
+        "mass-transfer-limiting step",
+        "negligible convection and migration",
+        "stable area"
+      ],
+      "reject_when": [
+        "nucleation or film growth dominates",
+        "strong convection",
+        "unknown area or concentration for absolute D"
+      ]
+    },
+    {
+      "name": "Scharifker-Hills instantaneous",
+      "equation": "(I/Imax)^2 = 1.9542/(t/tmax) * [1-exp(-1.2564*t/tmax)]^2",
+      "eligible_when": [
+        "clear Imax and tmax",
+        "3D diffusion-controlled nucleation",
+        "hemispherical diffusion zones",
+        "overlap model plausible"
+      ],
+      "classification": "INSTANTANEOUS_LIKE"
+    },
+    {
+      "name": "Scharifker-Hills progressive",
+      "equation": "(I/Imax)^2 = 1.2254/(t/tmax) * [1-exp(-2.3367*(t/tmax)^2)]^2",
+      "eligible_when": [
+        "clear Imax and tmax",
+        "3D diffusion-controlled nucleation",
+        "hemispherical diffusion zones",
+        "overlap model plausible"
+      ],
+      "classification": "PROGRESSIVE_LIKE"
+    },
+    {
+      "name": "Scharifker-Mostany",
+      "eligible_when": [
+        "absolute nucleation parameters requested",
+        "material and transport constants available",
+        "model variant explicitly documented"
+      ],
+      "required_metadata": [
+        "concentration",
+        "diffusion coefficient",
+        "molar mass",
+        "deposit density",
+        "electron number",
+        "area"
+      ]
+    },
+    {
+      "name": "Heerman-Tarallo",
+      "eligible_when": [
+        "finite-rate nucleation",
+        "overlapping 3D diffusion zones",
+        "data can distinguish nucleation rate and site density"
+      ],
+      "required_validation": [
+        "parameter covariance",
+        "profile likelihood or bootstrap",
+        "limiting behavior"
+      ]
+    },
+    {
+      "name": "Bewick-Fleischmann-Thirsk",
+      "eligible_when": [
+        "2D or 3D growth is physically plausible",
+        "growth control and geometry are declared"
+      ],
+      "required_reporting": [
+        "instantaneous or progressive assumption",
+        "growth dimensionality",
+        "interface or diffusion control"
+      ]
+    },
+    {
+      "name": "Avrami",
+      "equation": "X = 1 - exp[-(k*(t-t0))^n_A]",
+      "eligible_when": [
+        "defensible transformed fraction",
+        "defensible final charge or phase fraction"
+      ],
+      "warning": "Avrami exponent does not uniquely identify microscopic mechanism"
+    }
+  ]
+}

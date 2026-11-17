@@ -1,0 +1,67 @@
+{
+  "schema": "faradaiq.electrochemistry.routing_contract.v290",
+  "application_version": "v290",
+  "skill_revision": "6.0-normal-cv-deterministic-routing",
+  "applies_to": [
+    "OCP",
+    "CV",
+    "LSV",
+    "CA",
+    "CP",
+    "EIS",
+    "GEIS",
+    "DPV",
+    "SWV",
+    "STRIPPING",
+    "DEPOSITION",
+    "SECCM",
+    "SPATIAL_ELECTROCHEMISTRY",
+    "DRT"
+  ],
+  "default": {
+    "route": "technique_specific_deterministic_electrochemistry",
+    "generic_curve_fitting_allowed": false,
+    "curve_fitting_agent_required": false,
+    "spectral_peak_fitting_allowed": false,
+    "best_of_n_allowed": false,
+    "adaptive_refit_allowed": false,
+    "generic_r2_gate_allowed": false,
+    "deterministic_analysis_required": true,
+    "run_analysis_allowed": false,
+    "select_agent_allowed": false,
+    "interpretation_only": true
+  },
+  "routing_conflict_code": "ROUTING_CONFLICT_ELECTROCHEMISTRY",
+  "conflict_values": {
+    "generic_curve_fitting_allowed": true,
+    "curve_fitting_agent_required": true,
+    "agent": "CurveFittingAgent",
+    "route": "CurveFit"
+  },
+  "conflict_action": "reject_and_replace_with_technique_specific_route",
+  "raw_data_read_only": true,
+  "approved_default": false,
+  "drt_requires_linked_eis_or_geis": true,
+  "execution_guard": {
+    "blocked_tools": [
+      "select_agent",
+      "run_analysis",
+      "CurveFittingAgent",
+      "Best-of-3",
+      "Best-of-N",
+      "adaptive refit",
+      "annealing",
+      "generic R² verification",
+      "generic spectroscopy peak fitting"
+    ],
+    "blocked_attempt_code": "BLOCKED_GENERIC_ANALYSIS_FOR_ELECTROCHEMISTRY",
+    "generic_fallback_allowed": false,
+    "analysis_orchestrator_instantiated": false,
+    "safe_read_only_tools": [
+      "list_job_files",
+      "read_job_file"
+    ]
+  },
+  "series_metadata_transport": "json.dumps(..., ensure_ascii=False) then json.loads() validation",
+  "exact_path_policy": "Path.resolve(strict=True); never reconstruct paths from dataset names or model output"
+}

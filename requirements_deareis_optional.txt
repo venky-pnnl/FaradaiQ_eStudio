@@ -1,0 +1,6 @@
+# Optional DearEIS integration for EIS validation, DRT, and equivalent-circuit fitting.
+# Installed in a separate .deareis_venv because DearEIS requires a newer scientific
+# stack than the pinned FaradaIQ GUI environment. The exact version is pinned so the
+# optional integration is reproducible and does not change unexpectedly after release.
+# Do not install this with -c requirements_all.txt.
+deareis==5.1.3

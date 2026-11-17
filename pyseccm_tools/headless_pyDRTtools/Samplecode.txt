@@ -1,0 +1,21 @@
+python headless_pyDRTtools.py C:\Data\SECCMdataanalysis\PythonParser\SECCM_Python_Parser\Sampledata\GO13000RPM_Ag_SS_081922\Figures\Nyquist --run_types simple --plot_types eis drt --export_types drt --rbf_type gaussian
+
+python headless_pyDRTtools.py C:\Data\SECCMdataanalysis\PythonParser\SECCM_Python_Parser\Sampledata\GO13000RPM_Ag_SS_081922\Figures\Nyquist2 --run_types bayesian --plot_types eis drt --export_types drt --rbf_type gaussian --sample_number 10000
+
+python headless_pyDRTtools.py C:\Data\SECCMdataanalysis\PythonParser\SECCM_Python_Parser\Sampledata\GO13000RPM_Ag_SS_081922\Figures\Nyquist3 --run_types bht --plot_types eis drt --export_types drt --rbf_type gaussian
+----
+
+
+
+
+python headless_pyDRTtools.py C:\Data\SECCMdataanalysis\PythonParser\SECCM_Python_Parser\Sampledata\AZ91_FSP_region_interface_side_XY_run2_data\Figures\Nyquist --run_types simple bayesian --plot_types eis drt --export_types drt --rbf_type gaussian c0 c2 --sample_number 10000
+
+python headless_pyDRTtools.py C:\Data\SECCMdataanalysis\PythonParser\SECCM_Python_Parser\Sampledata\AZ91_FSP_region_interface_side_XY_run2_data\Figures\Nyquist --run_types bayesian --plot_types eis drt --export_types drt --rbf_type c4 --sample_number 10000
+
+python headless_pyDRTtools.py C:\Data\SECCMdataanalysis\PythonParser\SECCM_Python_Parser\Sampledata\AZ91_FSP_region_interface_side_XY_run4_data\Figures\Nyquist --run_types bayesian --plot_types eis drt --export_types drt --rbf_type c4 --sample_number 10000
+
+python headless_pyDRTtools.py C:\Data\SECCMdataanalysis\PythonParser\SECCM_Python_Parser\Sampledata\AZ91_FSP_region_interface_side_XY_run4_data\Figures\Nyquist3 --run_types simple --plot_types eis drt --export_types drt --rbf_type gaussian
+
+python headless_pyDRTtools.py C:\Data\SECCMdataanalysis\PythonParser\SECCM_Python_Parser\Sampledata\AZ91_FSP_region_interface_side_XY_run2_data\Figures\Nyquist2 --run_types simple --plot_types eis drt --export_types drt --rbf_type gaussian
+
+python headless_pyDRTtools.py C:\Data\SECCMdataanalysis\PythonParser\SECCM_Python_Parser\Sampledata\GOsamples\Figures\Nyquist3 --run_types bayesian --plot_types eis drt --export_types drt --rbf_type c4 --sample_number 10000

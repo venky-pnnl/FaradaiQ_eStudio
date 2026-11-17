@@ -1,0 +1,32 @@
+# Environments and generated runtime state
+.faradaiq*venv*/
+.deareis_venv*/
+__pycache__/
+.pytest_cache/
+*.pyc
+FaradaIQ_launch_sessions/
+FaradaIQ_runtime_estimates/
+FaradaIQ_runtime_settings/
+scilink_home/
+logs/
+dist/
+qa/
+# Local configuration and credentials
+.env*
+github.json
+installation_complete.json
+current.json
+*.pem
+*.key
+*.pfx
+# Archives are attached to releases, never committed recursively
+*.zip
+
+FaradaIQ_export_jobs/
+llm_env_helpers/
+litellm_proxy/config*.yaml
+litellm_proxy/*settings*.json
+
+SciLink_ready/
+
+FaradaIQ_parser_jobs/

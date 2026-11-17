@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use FaradaIQ eStudio in a publication, please cite the software version used."
+type: software
+title: "FaradaIQ eStudio"
+authors:
+  - family-names: Prabhakaran
+    given-names: Venkateshkumar
+version: "v331"
+date-released: 2026-11-17
+url: "https://github.com/venky-pnnl/FaradaiQ_eStudio"

@@ -1,0 +1,32 @@
+{
+  "schema": "faradaiq.electrochemistry.analysis_mode_guidance.v1",
+  "skill_revision": "7.0-guided-hybrid-analysis",
+  "default_mode": "standard_scilink",
+  "modes": {
+    "standard_scilink": {
+      "description": "SciLink chooses appropriate tools with the electrochemistry skill applied.",
+      "select_agent_allowed": true,
+      "run_analysis_allowed": true,
+      "generated_code_allowed": true,
+      "literature_allowed": true,
+      "multimodal_allowed": true,
+      "deterministic_preanalysis_required": false
+    },
+    "optional_deterministic": {
+      "description": "FaradaIQ may calculate technique-specific metrics first when the user enables the GUI option.",
+      "select_agent_allowed": "application_choice",
+      "run_analysis_allowed": "application_choice",
+      "generated_code_allowed": "application_choice",
+      "literature_allowed": true,
+      "multimodal_allowed": true,
+      "deterministic_preanalysis_required": true
+    }
+  },
+  "scientific_principles": [
+    "Use electrochemical context rather than treating every curve as spectroscopy.",
+    "Prefer direct observables when sufficient.",
+    "Use fitting, simulation, or alternative agents when scientifically useful.",
+    "Do not select models solely to improve R-squared.",
+    "Validate deterministic and fitted results against raw data and metadata."
+  ]
+}

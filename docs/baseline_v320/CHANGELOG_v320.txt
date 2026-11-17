@@ -1,0 +1,7 @@
+FaradaIQ Studio v320
+- Added potential-resolved Nyquist overlay to summary PowerPoint.
+- Added Bode magnitude and phase overlays to summary PowerPoint.
+- Added potential-resolved DRT overlay.
+- Added DRT potential map and dominant-relaxation trend.
+- Added completed-DRT filesystem fallback when an older Browser manifest omits DRT distributions.
+- Preserved all v318 MT-specific analysis and validation-first interpretation safeguards.

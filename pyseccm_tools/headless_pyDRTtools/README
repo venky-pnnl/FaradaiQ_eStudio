@@ -1,0 +1,116 @@
+===================================================
+Command line tool for plotting DRT data
+
+Benjamin Helfrecht
+benjamin.helfrecht@pnnl.gov
+===================================================
+
+File contents
+-------------
+- pyDRTtools
+  Directory containing the Python modules required
+  to run the DRT analyses
+
+Usage
+-----
+In order to run the script, you will need to install Python
+along several external packages. 
+You can install a minimally functional version of
+Python on Windows through the Microsoft Store; you'll likely
+want Python 3.10, the most recent release.
+Once Python has been installed on your system,
+the additional packages can be installed through pip.
+Open the Windows command prompt and type:
+
+    pip install numpy scipy matplotlib pandas pyqt5 cvxpy
+
+to install the required external packages.
+
+For the moment, the script is purely a command line tool.
+To run the script, use the command prompt to navigate
+to the folder containing the script
+using the `cd` command, by typing "cd" followed by the
+path to the directory, e.g.,
+
+    cd C:\this\is\the\path\to\the\folder
+
+I think you can also just type "cd" followed by a space and then
+drag the relevant folder into the command prompt window to change directory
+to that folder as well. Once you have changed to the folder containing the Python
+script from the command prompt, you can 
+call the script from the command line as follows:
+
+    python headless_pyDRTtools.py input_dir [options]
+
+where "input_dir" is the filepath of the directory containing the input data
+for the DRT analysis. When executed, the script will search the "input_dir"
+for all of the files with a .csv extension. These CSV files must contain
+three columns of data: frequency, real Z, and imaginary Z, in that order.
+The "parse_EIS.py" script generates such CSV files when constructing the Nyquist plots.
+The DRT script also takes several options:
+
+--plot_types
+    Types of plots that will be generated and saved as PNG files.
+    Multiple plot types may be specified, and the options are
+    "eis", "magnitude", "phase", "re", "im", "re_residual", "im_residual", "drt", and "score"
+    ("score" is only for DRT runs with the BHT method).
+    When multiple plot types are specified, a plot is generated for each specified type.
+
+--run_types
+    Types of DRT analysis to perform. Multiple types may be specified.
+    Possible options are "simple", "bayesian", and "bht".
+
+The remaining options are consistent with that you find in the GUI for the DRT program:
+
+--export_types
+    Data to export as CSV. Options are to export the DRT and/or EIS data
+    with the options "drt" and "eis", respectively. More than one option may be provided.
+    These exports are in addition to those generated alongside the plots.
+
+--rbf_type
+    Kernel type used in the analysis. Options are "gaussian", "c0", "c2", "c4", "c6", "inverse_quadratic",
+    "inverse_quadric", and "cauchy". (This is the same as the "Method of Discretization" setting in the GUI).
+
+--data
+    Type of data to use for the analysis. Options are "re", "im", and "combined".
+    (This is the same as the "Data Used" setting in the GUI).
+
+--derivative
+    Order of the regularization derivative to use in the analysis. Options are "1" or "2"
+    for first- and second-order derivatives. (This is the same as the "Regularization Derivative"
+    setting in the GUI).
+
+--inductance
+    How to treat the inductance during the fit. Options are "with", "without", and "discard"
+    to fit with the inductance, fit without the inductance, or discard the inductance data.
+    (This is the same as the "Inductance Included" setting in the GUI).
+
+--regularization
+    Regularization parameter for the fit. (This is the same as the "Regularization Parameter"
+    setting in the GUI).
+
+
+--shape_control
+    Shape control for the radial basis function. Options are "fwhm" or "shape"
+    to use the FWHM coefficient or the shape factor to control the radial basis functions.
+    (This is the same as the "RBF Shape Control" setting in the GUI).
+
+--coefficient
+    Coefficient for the FWHM control of the radial basis functions.
+    (This is the same as the "FWHM Control" setting in the GUI).
+
+--sample_number
+    Number of samples to use in the analysis. (This is the same as the
+    "Number of Sammples" setting in the GUI).
+
+You can get more information about the required and optional arguments for the script
+by calling the script with the "--help" option:
+
+    python headless_pyDRTtools.py --help
+
+Outputs
+-------
+The script outputs the specified plots (and their corresponding data)
+within a folder named "DRT" within the "input_dir" as passed to the script.
+Each of the plots will be named identically to the data file from which it is derived,
+but has a suffix naming the type of plot and the method used to run the DRT.

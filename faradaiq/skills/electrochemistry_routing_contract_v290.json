@@ -1,0 +1,30 @@
+{
+  "schema": "faradaiq.electrochemistry.routing_contract.v290",
+  "application_version": "v290",
+  "skill_revision": "6.0-normal-cv-deterministic-routing",
+  "applies_to": [
+    "OCP", "CV", "LSV", "CA", "CP", "EIS", "GEIS", "DPV", "SWV",
+    "STRIPPING", "DEPOSITION", "SECCM", "SPATIAL_ELECTROCHEMISTRY", "DRT"
+  ],
+  "default": {
+    "route": "technique_specific_electrochemistry_analysis",
+    "generic_curve_fitting_allowed": false,
+    "curve_fitting_agent_required": false,
+    "spectral_peak_fitting_allowed": false,
+    "best_of_n_allowed": false,
+    "adaptive_refit_allowed": false,
+    "generic_r2_gate_allowed": false,
+    "deterministic_analysis_required": true
+  },
+  "routing_conflict_code": "ROUTING_CONFLICT_ELECTROCHEMISTRY",
+  "conflict_values": {
+    "generic_curve_fitting_allowed": true,
+    "curve_fitting_agent_required": true,
+    "agent": "CurveFittingAgent",
+    "route": "CurveFit"
+  },
+  "conflict_action": "reject_and_replace_with_technique_specific_route",
+  "raw_data_read_only": true,
+  "approved_default": false,
+  "drt_requires_linked_eis_or_geis": true
+}

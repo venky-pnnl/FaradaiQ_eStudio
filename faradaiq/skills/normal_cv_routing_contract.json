@@ -1,0 +1,44 @@
+{
+  "schema": "faradaiq.electrochemistry.normal_cv_routing.v2",
+  "skill_revision": "7.0-guided-hybrid-analysis",
+  "default_mode": "standard_scilink",
+  "applies_to": [
+    "CV",
+    "LSV",
+    "CV_SCAN_RATE_SERIES",
+    "CV_CYCLE_SERIES",
+    "SPATIAL_CV",
+    "SECCM_CV"
+  ],
+  "standard_scilink": {
+    "route": "standard_scilink_guided_electrochemistry",
+    "select_agent_allowed": true,
+    "run_analysis_allowed": true,
+    "generated_code_allowed": true,
+    "deterministic_analysis_required": false,
+    "scientific_guidance": "Start with direct electrochemical observables. Use fitting or alternative tools when scientifically justified, not solely to increase R-squared."
+  },
+  "optional_deterministic": {
+    "route": "deterministic_electrochemical_cv_analysis",
+    "enabled_only_by_gui_checkbox": true,
+    "deterministic_analysis_required": true,
+    "results_are_supporting_evidence": true,
+    "scilink_may_correct_signs_units_identities_and_sweeps": true,
+    "required_direct_outputs": [
+      "sweep_segmentation",
+      "direct_peak_metrics",
+      "onset_metrics",
+      "charge_or_hysteresis",
+      "cycle_stability",
+      "scan_rate_trends",
+      "metadata_applicability_checks"
+    ]
+  },
+  "shared_safeguards": {
+    "preserve_cycles_and_sweep_direction": true,
+    "preserve_raw_data": true,
+    "do_not_invent_metadata": true,
+    "generic_spectroscopy_components_not_selected_only_for_r2": true,
+    "drt_requires_linked_eis_or_geis": true
+  }
+}

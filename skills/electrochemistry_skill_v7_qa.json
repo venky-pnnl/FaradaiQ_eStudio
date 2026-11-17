@@ -1,0 +1,34 @@
+{
+  "schema": "faradaiq.electrochemistry.skill_v7_qa.v1",
+  "generated_utc": "2026-07-27T00:52:00.705277+00:00",
+  "skill_revision": "7.0-guided-hybrid-analysis",
+  "canonical_filename": "electrochemistry_skill.md",
+  "sha256": "624e31ad3754c22df0958b4adf2dd8ffd4fa0932c87546fcc7c26b5b076df06a",
+  "line_count": 2986,
+  "byte_count": 79806,
+  "level_2_headings": [
+    "Overview",
+    "Planning",
+    "Implementation",
+    "Analysis",
+    "Validation",
+    "Interpretation"
+  ],
+  "checks": {
+    "canonical_headings": true,
+    "revision": true,
+    "standard_scilink_default": true,
+    "optional_deterministic_mode": true,
+    "select_agent_allowed_guidance": true,
+    "run_analysis_allowed_guidance": true,
+    "generated_code_allowed": true,
+    "no_mandatory_deterministic_rule": true,
+    "no_interpretation_only_requirement": true,
+    "electrodeposition_retained": true,
+    "dummy_cell_retained": true,
+    "hdf5_retained": true,
+    "drt_guard_retained": true,
+    "approved_false_retained": true
+  },
+  "overall_status": "PASS"
+}

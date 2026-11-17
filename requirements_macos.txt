@@ -1,0 +1,52 @@
+# macOS Python 3.11/3.12; includes the complete core analysis and service stack.
+numpy==1.26.4
+pandas==2.2.2
+scipy==1.13.1
+matplotlib==3.8.4
+contourpy==1.2.0
+pillow==10.3.0
+cvxpy==1.6.7
+PyQt5==5.15.10; platform_machine != 'arm64'
+# Optional pyDRTtools Qt GUI requires a compatible Qt5 installation on Apple Silicon.
+# Optional AWS Bedrock direct support
+boto3>=1.34
+openpyxl==3.1.5
+h5py==3.11.0
+
+pyqtgraph>=0.13.7
+superqt>=0.7.0
+statsmodels>=0.14.0
+odfpy>=1.4.1
+xlrd>=2.0.1
+galvani>=0.4.1
+imageio>=2.34,<3
+imageio-ffmpeg>=0.5,<1
+
+# FaradaIQ Studio v273 multidimensional visualization
+altair>=6.0,<7
+plotly>=6.0,<7
+vl-convert-python>=1.9,<2
+# Optional native HTML viewer; falls back to the system browser if unavailable
+pywebview>=5.0,<7
+
+# FaradaIQ Studio v273 scientific intelligence
+impedance>=1.7,<2
+python-docx>=1.1,<2
+
+# FaradaIQ Studio v273 native file/folder drag and drop
+tkinterdnd2>=0.4,<1
+# FaradaIQ AI service transactions
+requests>=2.32,<3
+edison-client>=0.15.0,<0.16
+
+
+# FaradaIQ Studio v273 SciLink CurveFittingAgent runtime support
+lmfit>=1.3,<2
+scikit-learn>=1.4,<2
+
+# FaradaIQ Studio v273 package-local LabRIC MCP stdio bridge
+fastmcp>=3.4.2,<4
+mcp>=1.12,<2
+
+# FaradaIQ Studio v290 technique-aware PowerPoint summaries
+python-pptx>=1.0,<2

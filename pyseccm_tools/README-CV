@@ -1,0 +1,77 @@
+===================================================
+Command line tool for parsing and plotting CV data
+
+Benjamin Helfrecht
+benjamin.helfrecht@pnnl.gov
+===================================================
+
+File contents
+-------------
+- base.mplstyle
+  Text file containing matplotlib specifications
+  for generating the plots
+
+- parse_CV.py
+  Parsing and plotting script
+
+Note that `base.mplstyle` should be in the same
+folder as `parse_CV.py` if plots are desired.
+
+Usage
+-----
+In order to run the script, you will need to install Python
+along several external packages. 
+You can install a minimally functional version of
+Python on Windows through the Microsoft Store; you'll likely
+want Python 3.10, the most recent release.
+Once Python has been installed on your system,
+the additional packages can be installed through pip.
+Open the Windows command prompt and type:
+
+    pip install numpy scipy matplotlib pandas
+
+to install the required external packages.
+
+For the moment, the script is purely a command line tool.
+To run the script, use the command prompt to navigate
+to the folder containing the script
+using the `cd` command, by typing "cd" followed by the
+path to the directory, e.g.,
+
+    cd C:\this\is\the\path\to\the\folder
+
+I think you can also just type "cd" followed by a space and then
+drag the relevant folder into the command prompt window to change directory
+to that folder as well. Once you have changed to the folder containing the Python
+script from the command prompt, you can 
+call the script from the command line as follows:
+
+    python parse_CV.py cv_file --plot
+
+where "cv_file" is the filepath of the file containing the CV data. 
+The "--plot" option specifies whether or not to generate
+plots after parsing the data. The following plots are generated:
+
+1. Emon-2 vs. Imon-2
+
+You can get more information about the required and optional arguments for the script
+by calling the script with the "--help" option:
+
+    python parse_cv.py --help
+
+Outputs
+-------
+The script provides several outputs:
+
+1. A directory with the same base name as the `cv_file` and appended with "_Groups".
+   This directory contains the data from the `cv_file` split into separate (numbered) files,
+   with each numbered file contaning only the data corresponding to a single group of data from the `cv_file`.
+   The numerical order of the numbered files also corresponds to the ordering of the groups
+   in the `cv_file`. 
+2. A `Figures` directory containing the plots and their corresponding data.
+   This directory is only created and populated if the "--plot" option is provided.
+   A plot is generated for each data group in the `cv_file` and is also numbered
+   according to the ordering of the groups in the `cv_file`.
+
+
+V22 package note: plot outputs are sample-scoped under Figures/<input_file_sample_name>/... to prevent overwriting when multiple files are parsed in the same folder.

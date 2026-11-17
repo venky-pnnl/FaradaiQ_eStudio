@@ -1,0 +1,43 @@
+{
+  "schema": "faradaiq.electrochemistry.normal_cv_routing.v1",
+  "skill_revision": "6.0-normal-cv-deterministic-routing",
+  "applies_to": [
+    "CV",
+    "LSV",
+    "CV_SCAN_RATE_SERIES",
+    "CV_CYCLE_SERIES",
+    "SPATIAL_CV",
+    "SECCM_CV"
+  ],
+  "default_route": "deterministic_electrochemical_cv_analysis",
+  "generic_curve_fitting_allowed": false,
+  "curve_fitting_agent_required": false,
+  "spectral_peak_fitting_allowed": false,
+  "best_of_n_allowed": false,
+  "adaptive_refit_allowed": false,
+  "generic_r2_gate_allowed": false,
+  "deterministic_analysis_required": true,
+  "explicit_model_request_gate": {
+    "required": true,
+    "must_name_physical_model_or_deconvolution": true,
+    "must_preserve_sweep_direction": true,
+    "must_have_required_metadata": true,
+    "generic_spectral_models_remain_prohibited": true
+  },
+  "routing_conflict_values": {
+    "generic_curve_fitting_allowed": true,
+    "curve_fitting_agent_required": true,
+    "agent": "CurveFittingAgent",
+    "route": "CurveFit"
+  },
+  "routing_conflict_code": "ROUTING_CONFLICT_NORMAL_CV",
+  "required_direct_outputs": [
+    "sweep_segmentation",
+    "direct_peak_metrics",
+    "onset_metrics",
+    "charge_or_hysteresis",
+    "cycle_stability",
+    "scan_rate_trends",
+    "metadata_applicability_checks"
+  ]
+}

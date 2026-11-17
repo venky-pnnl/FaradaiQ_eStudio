@@ -1,0 +1,81 @@
+[
+  {
+    "project": "pySECCM tools",
+    "people": "Benjamin A. Helfrecht (PNNL)",
+    "role": "Original SECCM parser design and accompanying plotting tools",
+    "url": "../pyseccm_tools/",
+    "documentation": "../pyseccm_tools/README-CV"
+  },
+  {
+    "project": "pyDRTtools",
+    "people": "Ciucci Lab, Francesco Ciucci, Adeleke Maradesa, and contributors",
+    "role": "Distribution of relaxation times analysis for electrochemical impedance spectra",
+    "url": "https://github.com/ciuccislab/pyDRTtools",
+    "documentation": "https://github.com/ciuccislab/pyDRTtools#readme"
+  },
+  {
+    "project": "DearEIS",
+    "people": "Ville Yrjänä and contributors",
+    "role": "Impedance validation, equivalent-circuit fitting, DRT, and selected-spectrum handoff",
+    "url": "https://github.com/vyrjana/DearEIS",
+    "documentation": "https://vyrjana.github.io/DearEIS/"
+  },
+  {
+    "project": "pyimpspec",
+    "people": "Ville Yrjänä and contributors",
+    "role": "Impedance parsing, validation, DRT, and circuit analysis used by DearEIS",
+    "url": "https://github.com/vyrjana/pyimpspec",
+    "documentation": "https://vyrjana.github.io/pyimpspec/"
+  },
+  {
+    "project": "PySimpleEChem",
+    "people": "Kavin Teenakul and contributors",
+    "role": "Cyclic voltammetry analysis integration",
+    "url": "https://github.com/kevinsmia1939/PySimpleEChem",
+    "documentation": "https://github.com/kevinsmia1939/PySimpleEChem#readme"
+  },
+  {
+    "project": "SciLink",
+    "people": "Maxim Ziatdinov and the PNNL SciLink team (PNNL contact: Sarah Allec)",
+    "role": "Scientific analysis, literature review, and experiment planning",
+    "url": "https://github.com/ziatdinovmax/SciLink",
+    "documentation": "https://www.pnnl.gov/projects/center-robotics-autonomy/scilink"
+  },
+  {
+    "project": "Edison Scientific",
+    "people": "Edison Scientific team and contributors",
+    "role": "Scientific and literature analysis through the official client",
+    "url": "https://platform.edisonscientific.com/",
+    "documentation": "https://github.com/EdisonScientific/edison-client-docs#readme"
+  },
+  {
+    "project": "impedance.py",
+    "people": "ECSHackWeek contributors",
+    "role": "Impedance model support",
+    "url": "https://github.com/ECSHackWeek/impedance.py"
+  },
+  {
+    "project": "galvani",
+    "people": "echemdata contributors",
+    "role": "Electrochemical file support",
+    "url": "https://github.com/echemdata/galvani"
+  },
+  {
+    "project": "Scientific Python",
+    "people": "NumPy, SciPy, pandas, Matplotlib communities",
+    "role": "Arrays, numerical methods, tables, and plots",
+    "url": "https://scientific-python.org/"
+  },
+  {
+    "project": "HDF5 / h5py",
+    "people": "The HDF Group and h5py contributors",
+    "role": "Structured scientific data and metadata storage",
+    "url": "https://www.h5py.org/"
+  },
+  {
+    "project": "Desktop and reports",
+    "people": "Tcl/Tk, Pillow, Plotly, Altair, python-pptx, openpyxl communities",
+    "role": "User interface, graphics, and scientific reports",
+    "url": "https://www.tcl.tk/"
+  }
+]
