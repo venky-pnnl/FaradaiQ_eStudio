@@ -25,7 +25,7 @@ def test_windows_installer_manages_scilink_and_uses_windowless_launchers():
     assert '$shortcut.TargetPath = $quietPython' in installer
     assert '$browserShortcut.TargetPath = $quietPython' in installer
     assert 'if (-not $NoLaunch)' in installer
-    assert 'Python 3.11' not in (ROOT / '_ensure_faradaiq_venv_v337.ps1').read_text()
+    assert 'Python 3.11' not in (ROOT / '_ensure_faradaiq_venv_v338.ps1').read_text()
     shortcut_builder = (ROOT / 'scripts' / 'install_scilink_shortcut.ps1').read_text()
     assert 'install_scilink_shortcut.ps1' in installer
     assert 'bootstrap\\Scripts\\pythonw.exe' in shortcut_builder
@@ -34,7 +34,7 @@ def test_windows_installer_manages_scilink_and_uses_windowless_launchers():
 
 def test_windows_full_installer_runs_shared_tools_once_after_core_provisioning():
     installer = (ROOT / 'scripts' / 'install.ps1').read_text()
-    start = (ROOT / 'Start_FaradaIQ_eStudio_v337.bat').read_text()
+    start = (ROOT / 'Start_FaradaIQ_eStudio_v338.bat').read_text()
     assert installer.count('setup_analysis_tools.py') == 1
     assert installer.index('--install-only') < installer.index('setup_analysis_tools.py')
     assert installer.index('setup_analysis_tools.py') < installer.index('faradaiq.managed_scilink update')
@@ -46,8 +46,8 @@ def test_windows_full_installer_runs_shared_tools_once_after_core_provisioning()
 
 @pytest.mark.skipif(not Path('/bin/bash').is_file(), reason='Uses a POSIX test runtime')
 @pytest.mark.parametrize('mode,entry,log_name', [
-    ('desktop', 'faradaiq_estudio_v337.py', 'startup_v337.log'),
-    ('browser', 'faradaiq_browser_v337.py', 'browser_v337.log'),
+    ('desktop', 'faradaiq_estudio_v338.py', 'startup_v338.log'),
+    ('browser', 'faradaiq_browser_v338.py', 'browser_v338.log'),
 ])
 def test_quiet_launcher_detaches_the_private_worker_and_preserves_logs(tmp_path, monkeypatch, mode, entry, log_name):
     script = ROOT / 'scripts' / 'launch_estudio.pyw'
@@ -59,7 +59,7 @@ def test_quiet_launcher_detaches_the_private_worker_and_preserves_logs(tmp_path,
     target = tmp_path / "Venky's installed eStudio"
     runtime = target / '.faradaiq_venv_macos' / 'bin'
     runtime.mkdir(parents=True)
-    (target / 'release.json').write_text(json.dumps({'version': 'v337'}))
+    (target / 'release.json').write_text(json.dumps({'version': 'v338'}))
     (target / entry).touch()
     python = runtime / 'python'
     python.write_text('#!/bin/bash\nprintf "%s\\n" "$1" "$2" "$FARADAIQ_QUIET_LAUNCH"\n')
@@ -80,7 +80,7 @@ def test_mac_installer_sources_scilink_from_standalone_bootstrap(tmp_path, monke
     monkeypatch.syspath_prepend(str(ROOT / 'scripts'))
     import macos_install
 
-    target = tmp_path / 'V337'
+    target = tmp_path / 'V338'
     target.mkdir()
     runtime = target / '.faradaiq_venv_macos' / 'bin' / 'python'
     scilink = tmp_path / 'SciLink with spaces'
@@ -106,7 +106,7 @@ def test_mac_installer_sources_scilink_from_standalone_bootstrap(tmp_path, monke
 
 
 def test_mac_updater_uses_new_release_installer_for_seed_python_bootstrap():
-    installer = (ROOT / 'Install_FaradaIQ_eStudio_v337.sh').read_text()
+    installer = (ROOT / 'Install_FaradaIQ_eStudio_v338.sh').read_text()
     assert '(3, 12)' in installer and '(3, 11)' not in installer
     updater = (ROOT / 'scripts' / 'macos_update.py').read_text()
     assert '/bin/bash' in updater and 'Install_FaradaIQ_eStudio_' in updater
@@ -120,11 +120,11 @@ def test_mac_setup_can_open_all_three_or_defer_every_open(tmp_path, monkeypatch,
     import macos_install
 
     install_root = tmp_path / 'eStudio'
-    installed = install_root / 'V337'
+    installed = install_root / 'V338'
     runtime = installed / '.faradaiq_venv_macos' / 'bin' / 'python'
     runtime.parent.mkdir(parents=True)
     runtime.touch()
-    (installed / 'PACKAGE_MANIFEST_SHA256_v337.txt').touch()
+    (installed / 'PACKAGE_MANIFEST_SHA256_v338.txt').touch()
     scilink_root = tmp_path / 'SciLink'
     scilink_root.mkdir()
     tk = SimpleNamespace(withdraw=lambda: None, update=lambda: None, destroy=lambda: None)
@@ -132,8 +132,8 @@ def test_mac_setup_can_open_all_three_or_defer_every_open(tmp_path, monkeypatch,
     monkeypatch.setattr(macos_install.sys, 'platform', 'darwin')
     monkeypatch.setattr(macos_install, 'ROOT', installed)
     monkeypatch.setattr(macos_install, 'verify', lambda path: {
-        'version': 'v337', 'version_number': 337, 'app_name': 'FaradaIQ eStudio',
-        'package_asset': 'FaradaIQ_eStudio_v337_package.zip',
+        'version': 'v338', 'version_number': 338, 'app_name': 'FaradaIQ eStudio',
+        'package_asset': 'FaradaIQ_eStudio_v338_package.zip',
     })
     phases = []
 

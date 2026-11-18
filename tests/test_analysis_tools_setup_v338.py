@@ -9,7 +9,7 @@ from scripts import setup_analysis_tools as setup
 
 @pytest.fixture
 def target(tmp_path, monkeypatch):
-    root = tmp_path / 'eStudio V337'
+    root = tmp_path / 'eStudio V338'
     root.mkdir()
     python = root / '.faradaiq_venv_macos' / 'bin' / 'python'
     python.parent.mkdir(parents=True)
@@ -28,7 +28,7 @@ def test_setup_reuses_verified_tools_without_pip(target, monkeypatch):
     assert setup.setup(root) == 0
     assert calls == [[str(python), str(root / '_check_deareis_optional.py')],
                      [str(python), str(root / '_check_pydrttools_optional.py')]]
-    receipt = json.loads((root / 'analysis_tools_status_v337.json').read_text())
+    receipt = json.loads((root / 'analysis_tools_status_v338.json').read_text())
     assert receipt['tools']['DearEIS']['status'] == receipt['tools']['pyDRTtools']['status'] == 'already_ready'
 
 
@@ -51,7 +51,7 @@ def test_setup_recovers_and_checks_both_tools_using_target_python(target, monkey
     assert '--constraint' in prereq and '--only-binary=:all:' in prereq
     assert '--no-deps' in official and 'pyDRTtools==0.2' in official
     assert all(command[0] == str(python) for command in calls)
-    receipt = json.loads((root / 'analysis_tools_status_v337.json').read_text())
+    receipt = json.loads((root / 'analysis_tools_status_v338.json').read_text())
     assert receipt['tools']['DearEIS']['status'] == receipt['tools']['pyDRTtools']['status'] == 'repaired'
 
 
@@ -61,7 +61,7 @@ def test_failed_deareis_stage_keeps_pydrttools_and_bundled_drt_available(target,
         return 2 if 'deareis' in Path(command[1]).name.casefold() else 0
     monkeypatch.setattr(setup, 'run_logged', execute)
     assert setup.setup(root) == 1
-    receipt = json.loads((root / 'analysis_tools_status_v337.json').read_text())
+    receipt = json.loads((root / 'analysis_tools_status_v338.json').read_text())
     assert receipt['tools']['DearEIS']['status'] == 'needs_attention'
     assert receipt['tools']['pyDRTtools']['status'] == 'already_ready'
     assert receipt['bundled_drt_available']

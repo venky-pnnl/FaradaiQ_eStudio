@@ -9,7 +9,7 @@ if ([string]::IsNullOrWhiteSpace($Root)) {
 }
 
 $base = [IO.Path]::GetFullPath($Root).TrimEnd('\','/')
-$manifest = Join-Path $base 'PACKAGE_MANIFEST_SHA256_v337.txt'
+$manifest = Join-Path $base 'PACKAGE_MANIFEST_SHA256_v338.txt'
 $count = 0
 foreach ($line in Get-Content -LiteralPath $manifest) {
     if ($line -notmatch '^([a-fA-F0-9]{64})  (.+)$') { throw "Invalid manifest entry: $line" }

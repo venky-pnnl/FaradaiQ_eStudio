@@ -29,7 +29,7 @@ except Exception:  # pragma: no cover
     pd = None
 
 SCHEMA = "faradaiq-canonical-h5-bundle-v5"
-VERSION = "v337"
+VERSION = "v338"
 TABLE_EXTS = {".csv", ".txt", ".tsv", ".asc", ".mpt", ".xlsx", ".xls"}
 MEDIA_EXTS = {".gif", ".jpg", ".jpeg", ".png", ".tif", ".tiff", ".bmp", ".webp", ".mp4", ".avi", ".mov", ".mkv", ".wmv", ".mpeg", ".mpg", ".m4v", ".webm"}
 JSON_EXTS = {".json", ".jsonl"}
@@ -1064,7 +1064,7 @@ def _collect_heka_records(root: Path, log=None) -> Tuple[List[Dict[str, Any]], D
 #   3) EIS exports with two methods per point, where v136 de-duplicated method2.
 
 SCHEMA = "faradaiq-canonical-h5-bundle-v6"
-VERSION = "v337"
+VERSION = "v338"
 
 
 def _v138_parse_seq_order(path: Path) -> int:
@@ -1389,7 +1389,7 @@ if __name__ == "__main__":
 # the authoritative browser tables when they outnumber the compact fallback CV
 # records.
 
-VERSION = "v337"
+VERSION = "v338"
 
 
 def _v145_first_method_scan_rate_mVs(root: Path) -> Optional[float]:
@@ -1517,7 +1517,7 @@ def _collect_heka_records(root: Path, log=None) -> Tuple[List[Dict[str, Any]], D
 # manifest or method table so mixed scan-rate datasets no longer collapse to
 # one scan rate in the browser.
 
-VERSION = "v337"
+VERSION = "v338"
 
 
 def _v145_numeric_m_index(path: Path) -> int:
@@ -1760,7 +1760,7 @@ def _collect_heka_records(root: Path, log=None) -> Tuple[List[Dict[str, Any]], D
 # v145 fixes non-HEKA vendor exports where generic *_for_plotting_analysis folders
 # were sometimes mistaken for HEKA exports, and adds first-class technique cataloging
 # for PalmSens DPV, Solartron ConstV/Cond, BioLogic GCPL/charge-discharge, CA/CP/OCP.
-VERSION = "v337"
+VERSION = "v338"
 SCHEMA = "faradaiq-canonical-h5-bundle-v7"
 
 _V145_PREV_IS_HEKA_EXPORT_ROOT = is_heka_export_root
@@ -2315,7 +2315,7 @@ def _v145_canonical_from_manifest_entry(entry: Dict[str, Any], path: Path, cols:
 # Corrects HEKA/SECCM CA/CP line scans that were historically cataloged as CV/LSV
 # merely because they contain current and potential columns. It also invalidates
 # stale pre-v208 browser caches and emits method/point-aware CA/CP cache paths.
-VERSION = "v337"
+VERSION = "v338"
 
 
 def _v206_exact_token(text: str, token: str) -> bool:
@@ -2556,7 +2556,7 @@ def extract_h5_tables_for_browser(bundle_dir_or_h5: str | Path, prefer_reuse: bo
 # ---- End FaradaIQ canonical bundle v216 chrono repair ----
 
 # ---- FaradaIQ canonical bundle v210 structured HEKA manifest support ----
-VERSION = "v337"
+VERSION = "v338"
 SCHEMA = "faradaiq-canonical-h5-bundle-v6"
 
 _V208_PREV_COLLECT_HEKA_RECORDS = _collect_heka_records
@@ -2750,7 +2750,7 @@ def is_heka_export_root(root: Path) -> bool:
 
 
 # ---- FaradaIQ canonical bundle v216 media and hierarchy support ----
-VERSION = "v337"
+VERSION = "v338"
 _V211_PREV_COLLECT_HEKA_RECORDS = _collect_heka_records
 _V211_PREV_EXTRACT_H5_TABLES = extract_h5_tables_for_browser
 _MEDIA_VIDEO_EXTS = {".mp4", ".avi", ".mov", ".mkv", ".wmv", ".mpeg", ".mpg", ".m4v", ".webm"}
@@ -2917,38 +2917,38 @@ def extract_h5_tables_for_browser(bundle_dir_or_h5: str | Path, prefer_reuse: bo
 # ---- FaradaIQ Studio v290 public release identity ----
 # Parser/schema implementation identifiers remain in their dedicated fields,
 # while the public application version written to new canonical bundles is v290.
-VERSION = "v337"
-FARADAIQ_PUBLIC_VERSION = "v337"
+VERSION = "v338"
+FARADAIQ_PUBLIC_VERSION = "v338"
 
 # ---- FaradaIQ Studio v292 public release identity ----
 # Historical parser/schema identifiers remain intact; newly generated bundles report v292.
-VERSION = "v337"
-FARADAIQ_PUBLIC_VERSION = "v337"
+VERSION = "v338"
+FARADAIQ_PUBLIC_VERSION = "v338"
 # ---- End FaradaIQ Studio v292 public release identity ----
 
 
 # ---- FaradaIQ Studio v293 public release identity ----
 # Historical parser/schema identifiers remain intact; newly generated bundles report v293.
-VERSION = "v337"
-FARADAIQ_PUBLIC_VERSION = "v337"
+VERSION = "v338"
+FARADAIQ_PUBLIC_VERSION = "v338"
 # ---- End FaradaIQ Studio v293 public release identity ----
 
 # ---- FaradaIQ Studio v294 public release identity ----
 # Historical parser/schema identifiers remain intact; newly generated bundles report v294.
-VERSION = "v337"
-FARADAIQ_PUBLIC_VERSION = "v337"
+VERSION = "v338"
+FARADAIQ_PUBLIC_VERSION = "v338"
 # ---- End FaradaIQ Studio v294 public release identity ----
 
 
 # ---- FaradaIQ Studio v296 public release identity ----
 # Historical parser/schema identifiers remain intact; newly generated bundles report v295.
-VERSION = "v337"
-FARADAIQ_PUBLIC_VERSION = "v337"
+VERSION = "v338"
+FARADAIQ_PUBLIC_VERSION = "v338"
 # ---- End FaradaIQ Studio v296 public release identity ----
 
 # ---- FaradaIQ Studio v297 public release identity ----
-VERSION = "v337"
-FARADAIQ_PUBLIC_VERSION = "v337"
+VERSION = "v338"
+FARADAIQ_PUBLIC_VERSION = "v338"
 # ---- End FaradaIQ Studio v297 public release identity ----
 
 # ---- FaradaIQ Studio v311 public release identity ----
@@ -3033,8 +3033,8 @@ FARADAIQ_PUBLIC_VERSION = "v317"
 # ---- End FaradaIQ Studio v317 completed non-HEKA DRT inclusion ----
 
 # ---- FaradaIQ Studio v320 standalone public release identity ----
-VERSION = "v337"
-FARADAIQ_PUBLIC_VERSION = "v337"
+VERSION = "v338"
+FARADAIQ_PUBLIC_VERSION = "v338"
 # ---- End FaradaIQ Studio v320 standalone public release identity ----
 
 

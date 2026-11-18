@@ -15,8 +15,8 @@ from time import monotonic
 
 
 ROOT = Path(__file__).resolve().parents[1]
-STATUS_NAME = 'analysis_tools_status_v337.json'
-SETUP_LOG = 'analysis_tools_setup_v337.log'
+STATUS_NAME = 'analysis_tools_status_v338.json'
+SETUP_LOG = 'analysis_tools_setup_v338.log'
 
 
 def private_python(root):
@@ -91,7 +91,7 @@ def _deareis(root, python, log_path):
     script = '_check_deareis_optional.py'
     if _check(root, python, script, f'Checking {name}', log_path) == 0:
         return {'status': 'already_ready'}
-    installation_log = log_path.with_name('deareis_install_v337.log')
+    installation_log = log_path.with_name('deareis_install_v338.log')
     command = [python, root / '_install_deareis_optional.py', '--root', root, '--auto',
                '--seed-python', python, '--log', installation_log]
     result = run_logged(command, root=root, log_path=log_path, label=f'Installing or repairing {name}')
@@ -137,7 +137,7 @@ def setup(root=ROOT, *, tool='all'):
     logs = root / 'logs'
     logs.mkdir(exist_ok=True)
     log_path = logs / SETUP_LOG
-    report = {'version': 'v337', 'checked_utc': datetime.now(timezone.utc).isoformat(),
+    report = {'version': 'v338', 'checked_utc': datetime.now(timezone.utc).isoformat(),
               'python': str(python), 'setup_log': str(log_path), 'bundled_drt_available': True, 'tools': {}}
     tasks = {'deareis': ('DearEIS', _deareis), 'pydrttools': ('pyDRTtools', _pydrttools)}
     print(f'Checking optional analysis tools in {python.parent.parent}. Log {log_path}', flush=True)

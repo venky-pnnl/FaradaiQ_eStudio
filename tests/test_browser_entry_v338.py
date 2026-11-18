@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_startup_check_and_loopback_configuration():
-    entry = ROOT / 'faradaiq_browser_v337.py'
+    entry = ROOT / 'faradaiq_browser_v338.py'
     spec = importlib.util.spec_from_file_location('browser_entry', entry)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -22,7 +22,7 @@ def test_startup_check_and_loopback_configuration():
     assert '--server.port=8512' in command
     checked = subprocess.run([sys.executable, str(entry), '--check'], text=True, capture_output=True)
     assert checked.returncode == 0, checked.stderr
-    assert 'v337' in checked.stdout
+    assert 'v338' in checked.stdout
 
 
 def test_browser_displays_local_data_and_scilink_workspaces():

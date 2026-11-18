@@ -27,9 +27,9 @@ jobs:
           python-version: '3.12'
       - run: python -m pip install pytest numpy==1.26.4 pandas==2.2.2 scipy==1.13.1 matplotlib==3.8.4 pillow==10.3.0 contourpy==1.2.0 h5py==3.11.0 cvxpy==1.6.7 openpyxl python-pptx python-docx plotly impedance -r requirements_browser.txt
       - name: Unit contracts
-        run: python -m pytest tests/test_estudio_v337.py tests/test_estudio_distribution.py tests/test_v337_repairs.py tests/test_browser_entry_v337.py tests/test_browser_data_v337.py tests/test_browser_analysis_v337.py tests/test_browser_platform_launchers.py tests/test_browser_server_v337.py tests/test_v337_scilink_browser_handoff.py tests/test_managed_scilink_v337.py tests/test_managed_scilink_ui_v337.py tests/test_managed_platform_install_v337.py tests/test_v337_scilink_launch.py tests/test_publish_payload_v337.py tests/test_analysis_tools_setup_v337.py -q
+        run: python -m pytest tests/test_estudio_v338.py tests/test_estudio_distribution.py tests/test_v338_repairs.py tests/test_browser_entry_v338.py tests/test_browser_data_v338.py tests/test_browser_analysis_v338.py tests/test_browser_platform_launchers.py tests/test_browser_server_v338.py tests/test_v338_scilink_browser_handoff.py tests/test_managed_scilink_v338.py tests/test_managed_scilink_ui_v338.py tests/test_managed_platform_install_v338.py tests/test_v338_scilink_launch.py tests/test_publish_payload_v338.py tests/test_analysis_tools_setup_v338.py -q
       - name: Live GUI workflows
-        run: python tests/gui_estudio_v337.py
+        run: python tests/gui_estudio_v338.py
       - name: Build release and verify manifest
         run: |
           python scripts/build_release.py
@@ -46,10 +46,10 @@ jobs:
             if ($parseErrors) { throw ($parseErrors -join [Environment]::NewLine) }
           }
           ./scripts/install.ps1 -Root '' -Plan
-          cmd /c Install_FaradaIQ_eStudio_v337.bat -Plan
+          cmd /c Install_FaradaIQ_eStudio_v338.bat -Plan
       - uses: actions/upload-artifact@v4
         with:
-          name: FaradaIQ-eStudio-v337-package
+          name: FaradaIQ-eStudio-v338-package
           path: dist/*
 
   macos:
@@ -60,11 +60,11 @@ jobs:
         with:
           python-version: '3.12'
       - run: python -m pip install pytest numpy==1.26.4 pandas==2.2.2 scipy==1.13.1 matplotlib==3.8.4 pillow==10.3.0 contourpy==1.2.0 h5py==3.11.0 cvxpy==1.6.7 openpyxl python-pptx python-docx plotly impedance -r requirements_browser.txt
-      - run: python -m pytest tests/test_v337_repairs.py tests/test_estudio_v337.py tests/test_browser_entry_v337.py tests/test_browser_data_v337.py tests/test_browser_analysis_v337.py tests/test_browser_platform_launchers.py tests/test_browser_server_v337.py tests/test_v337_scilink_browser_handoff.py tests/test_managed_scilink_v337.py tests/test_managed_scilink_ui_v337.py tests/test_managed_platform_install_v337.py tests/test_v337_scilink_launch.py tests/test_publish_payload_v337.py tests/test_analysis_tools_setup_v337.py -q
+      - run: python -m pytest tests/test_v338_repairs.py tests/test_estudio_v338.py tests/test_browser_entry_v338.py tests/test_browser_data_v338.py tests/test_browser_analysis_v338.py tests/test_browser_platform_launchers.py tests/test_browser_server_v338.py tests/test_v338_scilink_browser_handoff.py tests/test_managed_scilink_v338.py tests/test_managed_scilink_ui_v338.py tests/test_managed_platform_install_v338.py tests/test_v338_scilink_launch.py tests/test_publish_payload_v338.py tests/test_analysis_tools_setup_v338.py -q
       - name: Build and validate macOS installation plan
         run: |
           python scripts/build_release.py
-          bash -n Install_FaradaIQ_eStudio_v337.command
-          bash -n Start_FaradaIQ_eStudio_v337.sh
-          bash -n Start_FaradaIQ_eStudio_Browser_v337.command
-          bash Install_FaradaIQ_eStudio_v337.sh --plan
+          bash -n Install_FaradaIQ_eStudio_v338.command
+          bash -n Start_FaradaIQ_eStudio_v338.sh
+          bash -n Start_FaradaIQ_eStudio_Browser_v338.command
+          bash Install_FaradaIQ_eStudio_v338.sh --plan

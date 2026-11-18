@@ -63,7 +63,7 @@ for arg in "$@"; do
   case "$arg" in
     --plan) plan=true ;;
     -h|--help)
-      printf '%s\n' 'Usage: Install_FaradaIQ_eStudio_v337.command [--install-root DIRECTORY] [--no-launch] [--plan]'
+      printf '%s\n' 'Usage: Install_FaradaIQ_eStudio_v338.command [--install-root DIRECTORY] [--no-launch] [--plan]'
       exit 0 ;;
   esac
 done
@@ -75,11 +75,11 @@ fi
 if [[ "$plan" == false ]]; then
   log_dir="$HOME/Library/Logs/FaradaIQ eStudio"
   if /bin/mkdir -p "$log_dir" && [[ -w "$log_dir" ]]; then
-    log_file="$log_dir/install_v337_$(/bin/date '+%Y%m%d_%H%M%S').log"
+    log_file="$log_dir/install_v338_$(/bin/date '+%Y%m%d_%H%M%S').log"
     exec > >(/usr/bin/tee -a "$log_file") 2> >(/usr/bin/tee -a "$log_file" >&2)
     printf 'Installation log: %s\n' "$log_file"
   fi
-  printf '%s\n' 'FaradaIQ eStudio v337 for macOS' 'Checking for Python 3.12 with Tk.'
+  printf '%s\n' 'FaradaIQ eStudio v338 for macOS' 'Checking for Python 3.12 with Tk.'
 fi
 
 if ! PYTHON="$(find_python)"; then

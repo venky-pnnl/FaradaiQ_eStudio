@@ -1,10 +1,10 @@
-# FaradaIQ eStudio
+# <img src="docs/media/faradaiq-estudio-logo.png" width="52" height="52" alt=""> FaradaIQ eStudio
 
 **From electrochemical instrument exports to research-ready results**
 
 Bring data from HEKA, PalmSens, BioLogic, VersaStudio, and Solartron into one local workflow. Inspect measurements, compare traces, and prepare tables, plots, reports, or SciLink bundles on your computer.
 
-[Download the latest release](https://github.com/venky-pnnl/FaradaiQ_eStudio/releases/latest) · [Windows and macOS setup](#install-and-start) · [Supported formats](#supported-instrument-files) · [Analysis methods](#scientific-analysis) · [SciLink](#send-a-bundle-to-scilink-streamlit) · [Cite and credit](#how-to-cite)
+[**Project website**](https://venky-pnnl.github.io/FaradaiQ_eStudio/) · [**Download the latest release**](https://github.com/venky-pnnl/FaradaiQ_eStudio/releases/latest) · [Windows and macOS setup](#install-and-start) · [Supported formats](#supported-instrument-files) · [Analysis methods](#scientific-analysis) · [SciLink](#send-a-bundle-to-scilink-streamlit) · [Cite and credit](#how-to-cite)
 
 ## From source files to results
 
@@ -15,6 +15,8 @@ Bring data from HEKA, PalmSens, BioLogic, VersaStudio, and Solartron into one lo
 3. **Export and share.** Save a canonical HDF5 bundle, plots and tables, portable HTML, or PowerPoint. Prepare a SciLink-ready HDF5 bundle and metadata for review.
 
 ## Compare measurements side by side
+
+Overlay impedance spectra in Nyquist or Bode views, then fit a circuit, run linear Kramers–Kronig validation, or estimate the distribution of relaxation times. The workspace also supports voltammetry, transients, corrosion, Mott–Schottky analysis, and SECCM.
 
 <img src="docs/media/estudio-browser-nyquist.png" alt="Live eStudio Browser v337 showing three synthetic impedance spectra in a Nyquist overlay" width="960">
 
@@ -58,7 +60,7 @@ To continue in SciLink, prepare a local HDF5 bundle in either mode. [Follow the 
 
 ## Scientific analysis
 
-Choose the relevant **Analysis tool** in the v337 local browser. The table also shows where to find the corresponding desktop workflows.
+Choose the relevant **Analysis tool** in the v338 local browser. The table also shows where to find the corresponding desktop workflows.
 
 | Measurement | Local browser | Desktop app |
 |---|---|---|
@@ -97,20 +99,20 @@ The recordings below use synthetic measurements and were captured in the v337 lo
 
 ## Install and start
 
-Download the full `FaradaIQ_eStudio_v337_package.zip` from [GitHub Releases](https://github.com/venky-pnnl/FaradaiQ_eStudio/releases). The matching `.zip.sha256` file contains the archive checksum. Keep the extracted files together and stay online while the installer sets up the runtime. The main installer checks DearEIS, official pyDRTtools, and managed SciLink before opening the apps. Run the same installer again to repair an incomplete tool setup.
+Download the full `FaradaIQ_eStudio_v338_package.zip` from [GitHub Releases](https://github.com/venky-pnnl/FaradaiQ_eStudio/releases). The matching `.zip.sha256` file contains the archive checksum. Keep the extracted files together and stay online while the installer sets up the runtime. The main installer checks DearEIS, official pyDRTtools, and managed SciLink before opening the apps. Run the same installer again to repair an incomplete tool setup.
 
 ### Windows
 
 1. In File Explorer, right-click the ZIP, choose **Extract All**, and open the extracted folder.
-2. Double-click **`Install_FaradaIQ_eStudio_v337.bat`**. Keep the console open while setup verifies the package and prepares the Python environment. If a compatible Python is missing, setup uses WinGet to install Python 3.12.
-3. Setup opens **FaradaIQ eStudio**, **FaradaIQ eStudio Browser**, and **SciLink**. Reopen any app from **Desktop → Holaris Apps**. The default eStudio install folder is `C:\FaradaIQ\eStudio\V337`.
+2. Double-click **`Install_FaradaIQ_eStudio_v338.bat`**. Keep the console open while setup verifies the package and prepares the Python environment. If a compatible Python is missing, setup uses WinGet to install Python 3.12.
+3. Setup opens **FaradaIQ eStudio**, **FaradaIQ eStudio Browser**, and **SciLink**. Reopen any app from **Desktop → Holaris Apps**. The default eStudio install folder is `C:\FaradaIQ\eStudio\V338`.
 
 ### macOS
 
 1. In Finder, double-click the ZIP and open the extracted folder.
-2. Double-click **`Install_FaradaIQ_eStudio_v337.command`**.
+2. Double-click **`Install_FaradaIQ_eStudio_v338.command`**.
 3. Keep Terminal open. The installer reuses Python 3.12 with Tk if available. Otherwise, it downloads and verifies the official Python 3.12 package, then installs it. Enter your Mac administrator password if Terminal prompts for it.
-4. Setup opens **FaradaIQ eStudio**, **FaradaIQ eStudio Browser**, and **SciLink**. Reopen any app from **Desktop → Holaris Apps**. The default eStudio install folder is `~/Applications/FaradaIQ eStudio/V337`.
+4. Setup opens **FaradaIQ eStudio**, **FaradaIQ eStudio Browser**, and **SciLink**. Reopen any app from **Desktop → Holaris Apps**. The default eStudio install folder is `~/Applications/FaradaIQ eStudio/V338`.
 
 #### If macOS blocks the installer
 
@@ -125,10 +127,10 @@ Download the full `FaradaIQ_eStudio_v337_package.zip` from [GitHub Releases](htt
 Open **Terminal**, paste the following command, and press **Return**.
 
 ```bash
-/bin/bash "$HOME/Applications/FaradaIQ eStudio/V337/Start_FaradaIQ_eStudio_v337.command"
+/bin/bash "$HOME/Applications/FaradaIQ eStudio/V338/Start_FaradaIQ_eStudio_v338.command"
 ```
 
-For another installed release, use that release’s folder and launcher version. For v337, startup messages are also saved in `~/Library/Logs/FaradaIQ eStudio/startup_v337.log`. If the app still closes, include the last lines of that log when reporting the issue.
+For another installed release, use that release’s folder and launcher version. For v338, startup messages are also saved in `~/Library/Logs/FaradaIQ eStudio/startup_v338.log`. If the app still closes, include the last lines of that log when reporting the issue.
 
 ### Local browser
 
@@ -136,9 +138,9 @@ Open **FaradaIQ eStudio Browser** under **Desktop → Holaris Apps**. Its local 
 
 Use a local folder path for large datasets or a mounted network share. The file and folder pickers send selected files to eStudio on the same computer. Keep instrument companions together. When a folder contains both raw instrument files and curated tables, open the curated folder separately to analyze those tables. Imports, plots, deterministic calculations, and reports run on your computer. A reviewed SciLink or Edison request can send selected data to the provider you configure.
 
-The browser launcher records the actual loopback address in the versioned startup log. The desktop app provides its saved native layouts and optional Qt tool windows. The browser provides method-specific controls, interactive charts, and downloadable outputs for the workflows listed under **Scientific analysis**. See the [verification report](QA_v337.md) for platform and service coverage.
+The browser launcher records the actual loopback address in the versioned startup log. The desktop app provides its saved native layouts and optional Qt tool windows. The browser provides method-specific controls, interactive charts, and downloadable outputs for the workflows listed under **Scientific analysis**. See the [verification report](QA_v338.md) for platform and service coverage.
 
-If the browser does not start, check `%LOCALAPPDATA%\FaradaIQ\eStudio\logs\browser_v337.log` on Windows or `~/Library/Logs/FaradaIQ eStudio/browser_v337.log` on macOS.
+If the browser does not start, check `%LOCALAPPDATA%\FaradaIQ\eStudio\logs\browser_v338.log` on Windows or `~/Library/Logs/FaradaIQ eStudio/browser_v338.log` on macOS.
 
 ## Configure integrations
 
@@ -198,11 +200,11 @@ Enter your [LabRIC](https://docs.labric.co/welcome) MCP endpoint and session-onl
 
 ## How to cite
 
-Use the version that produced the results reported in your article. The APA reference for v337 is below.
+Use the version that produced the results reported in your article. The APA reference for v338 is below.
 
-> Prabhakaran, V. (2026). *FaradaIQ eStudio* (Version v337) [Computer software]. <https://github.com/venky-pnnl/FaradaiQ_eStudio>
+> Prabhakaran, V. (2026). *FaradaIQ eStudio* (Version v338) [Computer software]. <https://github.com/venky-pnnl/FaradaiQ_eStudio>
 
-**Methods example.** “Electrochemical data were processed using FaradaIQ eStudio v337 (Prabhakaran, 2026).”
+**Methods example.** “Electrochemical data were processed using FaradaIQ eStudio v338 (Prabhakaran, 2026).”
 
 Add the versions of any third-party tools used and cite the applicable methods below. The repository’s [citation file](CITATION.cff) contains the software metadata that GitHub uses to provide APA and BibTeX export.
 

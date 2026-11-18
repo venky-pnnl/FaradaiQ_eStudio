@@ -207,3 +207,38 @@ def test_upload_rebuild_in_an_overlay_folder_uses_current_package_inventory(tmp_
         assert set(archive.namelist()) == {
             "README.md", "release.json", "Install.command", "PACKAGE_MANIFEST_SHA256_v337.txt",
         }
+
+
+def test_public_homepage_sets_up_only_missing_pages_and_website():
+    from scripts import publish_homepage
+
+    calls = []
+    def fake_gh(*args):
+        calls.append(args)
+        if args == ("repos/venky-pnnl/FaradaiQ_eStudio",):
+            return {"private": False, "has_pages": False, "homepage": ""}
+        return {"html_url": "https://venky-pnnl.github.io/FaradaiQ_eStudio/"}
+
+    url = publish_homepage.configure_homepage("venky-pnnl/FaradaiQ_eStudio", fake_gh)
+    assert url == "https://venky-pnnl.github.io/FaradaiQ_eStudio/"
+    assert calls[1] == ("--method", "POST", "repos/venky-pnnl/FaradaiQ_eStudio/pages",
+                        "-f", "source[branch]=main", "-f", "source[path]=/docs")
+    assert calls[2] == ("--method", "PATCH", "repos/venky-pnnl/FaradaiQ_eStudio",
+                        "-f", "homepage=" + url)
+
+
+def test_public_homepage_preserves_existing_pages_and_custom_website():
+    from scripts import publish_homepage
+
+    calls = []
+    def fake_gh(*args):
+        calls.append(args)
+        if args == ("repos/venky-pnnl/FaradaiQ_eStudio",):
+            return {"private": False, "has_pages": True, "homepage": "https://project.example/"}
+        return {"html_url": "https://custom.example/", "source": {"branch": "custom", "path": "/"}}
+
+    assert publish_homepage.configure_homepage("venky-pnnl/FaradaiQ_eStudio", fake_gh) == "https://custom.example/"
+    assert len(calls) == 2
+    assert publish_homepage.configure_homepage("another-owner/repo", fake_gh) is None
+    assert len(calls) == 2
+    assert publish_homepage.configure_homepage("venky-pnnl/FaradaiQ_eStudio", lambda *args: {"private": True}) is None

@@ -3,25 +3,25 @@ ROOT="$(cd -- "$(dirname -- "$0")" && pwd)" || exit 1
 cd -- "$ROOT" || exit 1
 PYTHON="$ROOT/.faradaiq_venv_macos/bin/python"
 if [ ! -x "$PYTHON" ]; then
-  printf '%s\n' 'Run Install_FaradaIQ_eStudio_v337.command from the extracted package before opening Browser mode.' >&2
+  printf '%s\n' 'Run Install_FaradaIQ_eStudio_v338.command from the extracted package before opening Browser mode.' >&2
   if [ -t 0 ]; then read -r -p 'Press Return to close. ' _; fi
   exit 1
 fi
 
 export PYTHONNOUSERSITE=1 PYTHONUTF8=1 PYTHONIOENCODING=utf-8
-export PYTHONFAULTHANDLER=1 FARADAIQ_APP_VERSION=v337
+export PYTHONFAULTHANDLER=1 FARADAIQ_APP_VERSION=v338
 LOG_DIR="$HOME/Library/Logs/FaradaIQ eStudio"
-LOG="$LOG_DIR/browser_v337.log"
+LOG="$LOG_DIR/browser_v338.log"
 if /bin/mkdir -p "$LOG_DIR" && [ -w "$LOG_DIR" ]; then
-  printf 'FaradaIQ eStudio Browser v337 log: %s\n' "$LOG"
+  printf 'FaradaIQ eStudio Browser v338 log: %s\n' "$LOG"
   {
-    printf '\n=== FaradaIQ eStudio Browser v337 started %s ===\n' "$(/bin/date)"
-    "$PYTHON" -u "$ROOT/faradaiq_browser_v337.py" "$@"
+    printf '\n=== FaradaIQ eStudio Browser v338 started %s ===\n' "$(/bin/date)"
+    "$PYTHON" -u "$ROOT/faradaiq_browser_v338.py" "$@"
   } 2>&1 | /usr/bin/tee -a "$LOG"
   RESULT=${PIPESTATUS[0]}
 else
   printf '%s\n' 'Could not create the Browser startup log folder. Output will appear in this window.' >&2
-  "$PYTHON" -u "$ROOT/faradaiq_browser_v337.py" "$@"
+  "$PYTHON" -u "$ROOT/faradaiq_browser_v338.py" "$@"
   RESULT=$?
 fi
 

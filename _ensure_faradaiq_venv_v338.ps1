@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $false)]
-    [string]$Root = $PSScriptRoot,
+    [string]$Root = '',
 
     [Parameter(Mandatory = $false)]
     [string]$VenvName = ".faradaiq_venv",
@@ -10,6 +10,7 @@ param(
     [switch]$AllowPythonInstall
 )
 
+if ([string]::IsNullOrWhiteSpace($Root)) { $Root = $PSScriptRoot }
 $ErrorActionPreference = "Stop"
 $ProgressPreference = "SilentlyContinue"
 
@@ -19,7 +20,7 @@ $venvPython = Join-Path $venvPath "Scripts\python.exe"
 $logRoot = if ($env:FARADAIQ_SESSION_DIR) {
     Join-Path $env:FARADAIQ_SESSION_DIR "logs"
 } else {
-    Join-Path $env:TEMP "FaradaIQ_Studio_v320"
+    Join-Path $env:TEMP "FaradaIQ_eStudio_v338"
 }
 New-Item -ItemType Directory -Path $logRoot -Force | Out-Null
 $logPath = Join-Path $logRoot ("bootstrap_{0}.log" -f ($VenvName.TrimStart('.') -replace '[^A-Za-z0-9_.-]', '_'))
@@ -34,10 +35,11 @@ function Write-BootstrapLog {
 
 function Test-VenvPython {
     param([string]$PythonPath)
+    $ErrorActionPreference = 'Continue'
     if (-not (Test-Path -LiteralPath $PythonPath -PathType Leaf)) {
         return $false
     }
-    & $PythonPath -c "import sys, venv; assert sys.prefix != ''; print('VENV_OK')" *> $null
+    & $PythonPath -c "import sys, tkinter, venv; assert sys.version_info[:2] == (3, 12); assert sys.prefix != sys.base_prefix; print('VENV_OK')" *> $null
     return ($LASTEXITCODE -eq 0)
 }
 
@@ -47,6 +49,7 @@ function Test-PythonCandidate {
         [string[]]$PrefixArguments,
         [string]$Label
     )
+    $ErrorActionPreference = 'Continue'
 
     if ([System.IO.Path]::IsPathRooted($Executable)) {
         if (-not (Test-Path -LiteralPath $Executable -PathType Leaf)) {
@@ -56,7 +59,7 @@ function Test-PythonCandidate {
         return $null
     }
 
-    $probeCode = "import sys,venv; print('PY_OK'); print(sys.executable); print(f'{sys.version_info.major}.{sys.version_info.minor}')"
+    $probeCode = "import sys, tkinter, venv; assert sys.version_info[:2] == (3, 12); print('PY_OK'); print(sys.executable); print(f'{sys.version_info.major}.{sys.version_info.minor}')"
     $output = @(& $Executable @PrefixArguments -c $probeCode 2>&1)
     $exitCode = $LASTEXITCODE
     if ($exitCode -ne 0 -or -not ($output -contains "PY_OK")) {
@@ -83,15 +86,6 @@ function Find-SeedPython {
         @{ Executable = "py"; Arguments = @("-3.12"); Label = "Python launcher 3.12" },
         @{ Executable = "$env:LOCALAPPDATA\Programs\Python\Python312\python.exe"; Arguments = @(); Label = "User Python 3.12" },
         @{ Executable = "C:\Program Files\Python312\python.exe"; Arguments = @(); Label = "Program Files Python 3.12" },
-        @{ Executable = "py"; Arguments = @("-3.11"); Label = "Python launcher 3.11" },
-        @{ Executable = "$env:LOCALAPPDATA\Programs\Python\Python311\python.exe"; Arguments = @(); Label = "User Python 3.11" },
-        @{ Executable = "C:\Program Files\Python311\python.exe"; Arguments = @(); Label = "Program Files Python 3.11" },
-        @{ Executable = "py"; Arguments = @("-3.13"); Label = "Python launcher 3.13" },
-        @{ Executable = "$env:LOCALAPPDATA\Programs\Python\Python313\python.exe"; Arguments = @(); Label = "User Python 3.13" },
-        @{ Executable = "C:\Program Files\Python313\python.exe"; Arguments = @(); Label = "Program Files Python 3.13" },
-        @{ Executable = "py"; Arguments = @("-3.10"); Label = "Python launcher 3.10" },
-        @{ Executable = "$env:LOCALAPPDATA\Programs\Python\Python311\python.exe"; Arguments = @(); Label = "User Python 3.10" },
-        @{ Executable = "C:\Program Files\Python311\python.exe"; Arguments = @(); Label = "Program Files Python 3.10" },
         @{ Executable = "python"; Arguments = @(); Label = "python.exe on PATH" },
         @{ Executable = "python3"; Arguments = @(); Label = "python3.exe on PATH" },
         @{ Executable = "py"; Arguments = @("-3"); Label = "Default Python 3 launcher" }
@@ -132,7 +126,7 @@ function Install-Python312Automatically {
 }
 
 $report = [ordered]@{
-    app_version = "v320"
+    app_version = "v338"
     root = $rootPath
     venv_name = $VenvName
     venv_path = $venvPath
@@ -146,7 +140,7 @@ $report = [ordered]@{
 }
 
 try {
-    Write-BootstrapLog "FaradaIQ v320 automatic environment bootstrap started for $VenvName."
+    Write-BootstrapLog "FaradaIQ v338 automatic environment bootstrap started for $VenvName."
 
     if (Test-VenvPython -PythonPath $venvPython) {
         $report.status = "ready"
@@ -172,7 +166,7 @@ try {
     }
 
     if ($null -eq $seed) {
-        throw "No usable Python 3 runtime was found. Automatic Python 3.12 installation was unavailable or failed."
+        throw "No usable Python 3.12 runtime with Tk was found. Automatic Python installation was unavailable or failed."
     }
 
     $report.seed_label = $seed.Label

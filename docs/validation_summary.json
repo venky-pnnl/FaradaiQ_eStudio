@@ -1,11 +1,10 @@
 {
-  "release": "v337",
+  "release": "v338",
   "archive_and_manifest": "PASS",
-  "local_mirror_of_live_main_cleanup": "PASS",
-  "publisher_inventory_and_concurrent_edit_tests": "PASS",
-  "homepage_desktop_mobile_links_and_credits": "PASS",
-  "synthetic_browser_method_demos_and_scilink_handoff": "PASS",
+  "local_mirror_release_cleanup": "PASS",
+  "homepage_logo_rendering_and_content": "PASS",
+  "pages_configuration_fixture": "PASS",
   "platform_install_fixtures_and_macos_plan": "PASS",
   "native_macos_windows_installs": "not run",
-  "remote_github_release_publish": "not run"
+  "live_github_pages_deploy": "not run"
 }

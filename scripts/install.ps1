@@ -52,7 +52,7 @@ try {
     }
     if (-not $validInstallation) {
         New-Item -ItemType Directory -Path $target -Force | Out-Null
-        $manifest = Get-Content -LiteralPath (Join-Path $Root 'PACKAGE_MANIFEST_SHA256_v337.txt')
+        $manifest = Get-Content -LiteralPath (Join-Path $Root 'PACKAGE_MANIFEST_SHA256_v338.txt')
         foreach ($line in $manifest) {
             if ($line -notmatch '^([a-fA-F0-9]{64})  (.+)$') { throw 'Malformed payload manifest.' }
             $relative = $Matches[2]
@@ -62,7 +62,7 @@ try {
             if ([IO.Path]::GetFullPath($from) -ne [IO.Path]::GetFullPath($to)) { Copy-Item -LiteralPath $from -Destination $to -Force }
         }
         if ($Root.TrimEnd('\','/') -ne [IO.Path]::GetFullPath($target).TrimEnd('\','/')) {
-            Copy-Item -LiteralPath (Join-Path $Root 'PACKAGE_MANIFEST_SHA256_v337.txt') -Destination $target -Force
+            Copy-Item -LiteralPath (Join-Path $Root 'PACKAGE_MANIFEST_SHA256_v338.txt') -Destination $target -Force
         }
         & (Join-Path $target 'scripts\verify.ps1') -Root $target
     } else {

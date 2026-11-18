@@ -1,7 +1,7 @@
 {
-  "baseline_filename": "FaradaIQ_eStudio_v336_package.zip",
-  "baseline_sha256": "d834e554ed355feb69c2b11821f153ce913c83f4bfac12c0e4cb9c5cc0d049cd",
-  "release": "v337",
+  "baseline_filename": "FaradaIQ_eStudio_v337_package.zip",
+  "baseline_sha256": "7de2a5b8078596d89739ce159c288420ca41242a0e91ae5a4eb2cad2854b8c02",
+  "release": "v338",
   "retained_skills": {
     "skills/electrochemistry_skill.md": "624e31ad3754c22df0958b4adf2dd8ffd4fa0932c87546fcc7c26b5b076df06a",
     "faradaiq/skills/electrochemistry_skill.md": "624e31ad3754c22df0958b4adf2dd8ffd4fa0932c87546fcc7c26b5b076df06a"

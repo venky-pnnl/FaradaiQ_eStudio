@@ -16,7 +16,7 @@ import pytest
 
 
 ROOT = Path(__file__).resolve().parents[1]
-ENTRY = ROOT / 'faradaiq_browser_v337.py'
+ENTRY = ROOT / 'faradaiq_browser_v338.py'
 OPENER = build_opener(ProxyHandler({}))
 
 

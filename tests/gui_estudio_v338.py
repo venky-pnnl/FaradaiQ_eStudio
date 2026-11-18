@@ -31,7 +31,7 @@ g=core.SessionReaderGUI(); errors=[]
 g.report_callback_exception=lambda *args:errors.append(str(args))
 g.tk.createcommand('bgerror',lambda msg:errors.append(msg))
 pump(g,9)
-assert g.title().startswith('FaradaIQ eStudio v337'),g.title()
+assert g.title().startswith('FaradaIQ eStudio v338'),g.title()
 assert str(g.estudio_brand_label.cget('text'))=='FaradaIQ eStudio'
 assert set(g.estudio_pages)=={'Data','Analysis','SciLink','Reports','Settings'}
 assert g.desc_text.winfo_viewable()
@@ -102,7 +102,7 @@ for w in tops:w.destroy()
 pump(g,2)
 g.estudio_credits.invoke();pump(g,.5)
 about=g._estudio_about_window
-assert 'v337' in about.title()
+assert 'v338' in about.title()
 assert g.show_about_credits() is about
 assert any(isinstance(w, ttk.Label) and w.cget('text') == 'FaradaIQ eStudio was designed by Venkateshkumar Prabhakaran.' for w in walk(about))
 tree=next(w for w in walk(about) if w.winfo_class()=='Treeview')
@@ -172,7 +172,7 @@ texts=[str(w.cget('text')) for w in walk(browser) if 'text' in w.keys()]
 assert any('SciLink' in t for t in texts)
 assert any('Edison' in t for t in texts)
 assert any('Smart' in t or 'Suggestions' in t for t in texts)
-assert 'v337' in browser.title()
+assert 'v338' in browser.title()
 browser.destroy();pump(g,2)
 resolver=core._v64_analysis_root_for_browser;showinfo=messagebox.showinfo
 core._v64_analysis_root_for_browser=lambda gui:(fixture,'NiCo_transport')
@@ -200,5 +200,5 @@ while not getattr(g,'_estudio_destroyed',False) and time.monotonic()<end:g.updat
 assert g._estudio_destroyed and not worker.is_alive()
 assert not errors,errors
 temp_settings.cleanup()
-print('eStudio v337 GUI smoke: PASS',flush=True)
+print('eStudio v338 GUI smoke: PASS',flush=True)
 sys.exit(0)

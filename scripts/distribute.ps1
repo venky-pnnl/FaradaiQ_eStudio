@@ -218,4 +218,13 @@ try {
     if ($publishExit -ne 0 -or $sha -notmatch '^[a-f0-9]{40}$') { throw 'Source upload failed. Review the Git diagnostic above.' }
     Invoke-Gh -Arguments @('release','create',$metadata.version,$package,($package+'.sha256'),'--repo',$Repository,'--target',$sha,'--latest','--title',"FaradaIQ eStudio $($metadata.version)",'--notes-file',(Join-Path $root "RELEASE_NOTES_$($metadata.version).md")) | Out-Host
     Write-Output "Published https://github.com/$Repository/releases/tag/$($metadata.version)"
+    Write-Host 'Checking the project website on GitHub Pages.'
+    $ErrorActionPreference = 'Continue'
+    try {
+        & $python (Join-Path $PSScriptRoot 'publish_homepage.py') --gh $script:gh --repository $Repository | Out-Host
+        if ($LASTEXITCODE -ne 0) {
+            Write-Warning "Release uploaded. Set Pages to main /docs at https://github.com/$Repository/settings/pages if the project website is unavailable."
+        }
+    } finally { $ErrorActionPreference='Stop' }
 } finally { Pop-Location }
+exit 0

@@ -5,11 +5,11 @@ cd /d "%~dp0"
 set "INSTALL_ONLY=0"
 if /I "%~1"=="--install-only" set "INSTALL_ONLY=1"
 
-set "APP_VERSION=v337"
-set "SCRIPT=faradaiq_estudio_v337.py"
+set "APP_VERSION=v338"
+set "SCRIPT=faradaiq_estudio_v338.py"
 set "CHECKER=_check_bridge_dependencies.py"
 set "REQ_ALL=requirements_all.txt"
-set "BOOTSTRAP_PS1=_ensure_faradaiq_venv_v337.ps1"
+set "BOOTSTRAP_PS1=_ensure_faradaiq_venv_v338.ps1"
 set "VENV_DIR=.faradaiq_venv"
 set "VENV_PY=%VENV_DIR%\Scripts\python.exe"
 set "PYTHONUTF8=1"
@@ -36,7 +36,7 @@ if exist "%FARADAIQ_SESSION_DIR%" (
     goto unique_launch_folder
 )
 set "FARADAIQ_LAUNCH_BAT=%~f0"
-set "FARADAIQ_APP_VERSION=v337"
+set "FARADAIQ_APP_VERSION=v338"
 set "FARADAIQ_RUNTIME_STATS_DIR=%CD%\FaradaIQ_runtime_estimates"
 mkdir "%FARADAIQ_SESSION_DIR%\logs" >nul 2>&1
 mkdir "%FARADAIQ_SESSION_DIR%\activity" >nul 2>&1
@@ -53,10 +53,10 @@ mkdir "%FARADAIQ_RUNTIME_STATS_DIR%" >nul 2>&1
 ) > "%FARADAIQ_SESSION_DIR%\session_info.txt"
 
 set "CHECK_FILE=%FARADAIQ_SESSION_DIR%\logs\dependency_check.txt"
-title FaradaIQ eStudio v337 - %FARADAIQ_SESSION_ID%
+title FaradaIQ eStudio v338 - %FARADAIQ_SESSION_ID%
 
 echo ============================================================
-echo  FaradaIQ eStudio v337 automatic launcher
+echo  FaradaIQ eStudio v338 automatic launcher
 echo  Private environment: %VENV_DIR%
 echo ============================================================
 echo.
@@ -116,7 +116,7 @@ echo Checking FaradaIQ GUI, pySECCM, DRT, and visualization dependencies...
 set "CHECK_EXIT=!ERRORLEVEL!"
 type "%CHECK_FILE%"
 if "!CHECK_EXIT!"=="0" if "%INSTALL_ONLY%"=="1" (
-    "%VENV_PY%" "%CD%\faradaiq_browser_v337.py" --check >> "%CHECK_FILE%" 2>&1
+    "%VENV_PY%" "%CD%\faradaiq_browser_v338.py" --check >> "%CHECK_FILE%" 2>&1
     set "CHECK_EXIT=!ERRORLEVEL!"
 )
 
@@ -142,7 +142,7 @@ if not "!CHECK_EXIT!"=="0" (
 
 if "%INSTALL_ONLY%"=="1" (
     echo Checking the local browser application...
-    "%VENV_PY%" "%CD%\faradaiq_browser_v337.py" --check
+    "%VENV_PY%" "%CD%\faradaiq_browser_v338.py" --check
     if errorlevel 1 (
         echo ERROR: The local browser application could not start in the private environment.
         exit /b 1
@@ -152,9 +152,9 @@ if "%INSTALL_ONLY%"=="1" (
 if "%INSTALL_ONLY%"=="1" (
     echo.
     echo ============================================================
-    echo FaradaIQ eStudio v337 automatic bootstrap completed.
+    echo FaradaIQ eStudio v338 automatic bootstrap completed.
     echo Installed folder: %CD%
-    echo Launcher: %CD%\Start_FaradaIQ_eStudio_v337.bat
+    echo Launcher: %CD%\Start_FaradaIQ_eStudio_v338.bat
     echo ============================================================
     >> "%FARADAIQ_SESSION_DIR%\logs\launcher_events.log" echo [%DATE% %TIME%] Install-only bootstrap completed
     exit /b 0
@@ -166,7 +166,7 @@ set "FARADAIQ_EDISON_ENABLED=1"
 set "FARADAIQ_DIRECT_EDISON_ENABLED=1"
 set "FARADAIQ_LLM_TOOLS_ENABLED=1"
 set "FARADAIQ_SCIENCE_MODE=scilink_edison_llm"
-echo Launching FaradaIQ eStudio v337...
+echo Launching FaradaIQ eStudio v338...
 >> "%FARADAIQ_SESSION_DIR%\logs\launcher_events.log" echo [%DATE% %TIME%] Starting GUI with %VENV_PY%
 "%VENV_PY%" "%SCRIPT%"
 set "APP_EXIT=!ERRORLEVEL!"

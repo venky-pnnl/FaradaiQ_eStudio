@@ -28,7 +28,7 @@ def test_bode_uses_conventional_phase_and_keeps_frequency_order(tmp_path):
     assert set(csv["panel"]) == {1, 2}
     assert len(csv) == 4
     with h5py.File(io.BytesIO(displayed_plot_hdf5(figure))) as plots:
-        assert plots.attrs["application_version"] == "v337"
+        assert plots.attrs["application_version"] == "v338"
         assert plots["curves/trace_002"][:, 1] == pytest.approx(figure.data[1].y)
     assert table["neg_zimag_ohm"].tolist() == [4., 3.]
 

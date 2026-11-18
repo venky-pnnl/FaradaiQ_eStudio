@@ -2,7 +2,7 @@
 setlocal EnableExtensions
 cd /d "%~dp0"
 if not exist ".faradaiq_venv\Scripts\python.exe" (
-  echo Run Install_FaradaIQ_eStudio_v337.bat first to prepare the private runtime.
+  echo Run Install_FaradaIQ_eStudio_v338.bat first to prepare the private runtime.
   if /I not "%~1"=="--auto" pause
   exit /b 1
 )

@@ -74,7 +74,7 @@ def test_batch_folder_and_old_access(tmp_path):
 def test_brand_and_mac_syntax():
     from faradaiq.estudio_ui import brand_text,brand_window_title
     assert brand_text('FaradaIQ Studio v320')=='FaradaIQ eStudio'
-    assert brand_window_title('FaradaIQ Studio v320 — Data')=='FaradaIQ eStudio v337 — Data'
+    assert brand_window_title('FaradaIQ Studio v320 — Data')=='FaradaIQ eStudio v338 — Data'
     assert (ROOT/'assets/estudio.png').read_bytes()==(ROOT/'faradaiq_clean_icon.png').read_bytes()
     for p in list(ROOT.glob('*.sh'))+list(ROOT.glob('*.command')):subprocess.run(['bash','-n',str(p)],check=True)
     for filename in ['install.ps1','verify.ps1']:
