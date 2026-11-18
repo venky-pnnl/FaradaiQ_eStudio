@@ -483,10 +483,10 @@ def install(core):
         for attr,value in dict(VERSION=APP_VERSION,APP_VERSION=SEMVER,SEMVER=SEMVER,VERSION_NUMBER=VERSION_NUMBER,
                                APP_NAME=APP_NAME,APP_TITLE=TITLE,INSTALL_TARGET=INSTALL_TARGET).items():
             if hasattr(module,attr):setattr(module,attr,value)
-        if name=='faradaiq.v290_portable_browser':module.SCHEMA='faradaiq-portable-browser-v336'
+        if name=='faradaiq.v290_portable_browser':module.SCHEMA='faradaiq-portable-browser-v337'
         if hasattr(module,'normalize_release_text'):module.normalize_release_text=brand_text
         if hasattr(module,'FRONT_SLIDE_FOOTER'):module.FRONT_SLIDE_FOOTER='Made by '+TITLE
-    for k,v in dict(APP_TITLE=TITLE,FARADAIQ_PUBLIC_VERSION='v336',FARADAIQ_APP_VERSION='v336',FARADAIQ_RELEASE_VERSION='v336',FARADAIQ_RELEASE_TITLE=TITLE,FARADAIQ_INSTALL_TARGET=r'C:\FaradaIQ\eStudio\V336').items():core[k]=v
+    for k,v in dict(APP_TITLE=TITLE,FARADAIQ_PUBLIC_VERSION='v337',FARADAIQ_APP_VERSION='v337',FARADAIQ_RELEASE_VERSION='v337',FARADAIQ_RELEASE_TITLE=TITLE,FARADAIQ_INSTALL_TARGET=r'C:\FaradaIQ\eStudio\V337').items():core[k]=v
     core['_v290_normalize_release_text']=brand_text
     old_theme=core.get('_v36_apply_theme')
     def themed(root,*args,**kwargs):

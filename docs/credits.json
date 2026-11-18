@@ -74,7 +74,7 @@
   },
   {
     "project": "Desktop and reports",
-    "people": "Tcl/Tk, Pillow, Plotly, Altair, python-pptx, openpyxl communities",
+    "people": "Tcl/Tk, Streamlit, Pillow, Plotly, Altair, python-pptx, openpyxl communities",
     "role": "User interface, graphics, and scientific reports",
     "url": "https://www.tcl.tk/"
   }

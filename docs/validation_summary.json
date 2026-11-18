@@ -1,9 +1,11 @@
 {
-  "release": "v336",
-  "publisher_local_git_existing_empty_and_concurrent_remotes": "PASS",
-  "platform_setup_order_fixture": "PASS",
-  "optional_analysis_tool_setup_and_handoff": "PASS",
+  "release": "v337",
+  "archive_and_manifest": "PASS",
+  "local_mirror_of_live_main_cleanup": "PASS",
+  "publisher_inventory_and_concurrent_edit_tests": "PASS",
+  "homepage_desktop_mobile_links_and_credits": "PASS",
+  "synthetic_browser_method_demos_and_scilink_handoff": "PASS",
+  "platform_install_fixtures_and_macos_plan": "PASS",
   "native_macos_windows_installs": "not run",
-  "live_github_release_publish": "not run",
-  "linux_deareis_import_and_pydrttools_gui_construction": "PASS"
+  "remote_github_release_publish": "not run"
 }

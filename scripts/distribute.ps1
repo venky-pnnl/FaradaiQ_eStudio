@@ -202,7 +202,7 @@ try {
         $authorName=$user.login
         $authorEmail="$($user.id)+$($user.login)@users.noreply.github.com"
     }
-    & $python (Join-Path $PSScriptRoot 'build_release.py')
+    & $python (Join-Path $PSScriptRoot 'build_release.py') --from-manifest
     if ($LASTEXITCODE -ne 0) { throw 'Release build failed.' }
     $package=Join-Path $root ('dist\'+$metadata.package_asset)
     Write-Host "Fetching GitHub main and publishing the verified $($metadata.version) source files."
@@ -216,6 +216,6 @@ try {
         $publishExit=$LASTEXITCODE
     } finally { $ErrorActionPreference='Stop' }
     if ($publishExit -ne 0 -or $sha -notmatch '^[a-f0-9]{40}$') { throw 'Source upload failed. Review the Git diagnostic above.' }
-    Invoke-Gh -Arguments @('release','create',$metadata.version,$package,($package+'.sha256'),'--repo',$Repository,'--target',$sha,'--title',"FaradaIQ eStudio $($metadata.version)",'--notes-file',(Join-Path $root "RELEASE_NOTES_$($metadata.version).md")) | Out-Host
+    Invoke-Gh -Arguments @('release','create',$metadata.version,$package,($package+'.sha256'),'--repo',$Repository,'--target',$sha,'--latest','--title',"FaradaIQ eStudio $($metadata.version)",'--notes-file',(Join-Path $root "RELEASE_NOTES_$($metadata.version).md")) | Out-Host
     Write-Output "Published https://github.com/$Repository/releases/tag/$($metadata.version)"
 } finally { Pop-Location }

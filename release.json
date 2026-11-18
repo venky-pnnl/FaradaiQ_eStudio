@@ -1,9 +1,9 @@
 {
   "app_name": "FaradaIQ eStudio",
-  "version": "v336",
-  "version_number": 336,
-  "semver": "0.336.0",
+  "version": "v337",
+  "version_number": 337,
+  "semver": "0.337.0",
   "repository": "venky-pnnl/FaradaiQ_eStudio",
-  "package_asset": "FaradaIQ_eStudio_v336_package.zip",
+  "package_asset": "FaradaIQ_eStudio_v337_package.zip",
   "install_root": "C:\\FaradaIQ\\eStudio"
 }

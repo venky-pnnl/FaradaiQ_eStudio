@@ -16,7 +16,7 @@ The projects and people below contributed tools, methods, or services used in Fa
 | [galvani](https://github.com/echemdata/galvani) | echemdata contributors | Electrochemical file support |
 | [Scientific Python](https://scientific-python.org/) | NumPy, SciPy, pandas, Matplotlib communities | Arrays, numerical methods, tables, and plots |
 | [HDF5 / h5py](https://www.h5py.org/) | The HDF Group and h5py contributors | Structured scientific data and metadata storage |
-| [Desktop and reports](https://www.tcl.tk/) | Tcl/Tk, Pillow, Plotly, Altair, python-pptx, openpyxl communities | User interface, graphics, and scientific reports |
+| [Desktop and reports](https://www.tcl.tk/) | Tcl/Tk, Streamlit, Pillow, Plotly, Altair, python-pptx, openpyxl communities | User interface, graphics, and scientific reports |
 
 The eStudio package includes the original pySECCM attribution and usage notes in its `pyseccm_tools` folder. PySimpleEChem retains its GPL license in the [upstream license file](https://github.com/kevinsmia1939/PySimpleEChem/blob/main/LICENSE). Keep all bundled license and notice files. External services retain their respective terms.
 

@@ -64,6 +64,27 @@ figcaption { margin-top: .5rem; color: var(--muted); font-size: .88rem; }
 .info article p { margin-top: .7rem; overflow-wrap: anywhere; }
 .footer { padding-block: 1.45rem 2rem; background: #f5f9f9; border-top: 1px solid var(--line); }
 .footer p { font-size: .92rem; }
+.table-scroll { overflow-x: auto; margin-top: .9rem; }
+table { width: 100%; border-collapse: collapse; font-size: .94rem; }
+th, td { border-bottom: 1px solid var(--line); padding: .65rem .75rem; text-align: left; vertical-align: top; }
+th { background: #e2efef; }
+td { color: var(--muted); }
+td strong { color: var(--ink); }
+td p { margin: 0; }
+.details-guide details { border: 1px solid var(--line); border-radius: 8px; padding: .5rem 1rem; margin-top: .75rem; }
+.details-guide summary { color: var(--accent); cursor: pointer; font-weight: 650; padding-block: .35rem; }
+.details-guide h2 { margin-top: 1.75rem; }
+.details-guide h2:first-child { margin-top: 0; }
+.details-guide h3, .details-guide h4 { margin: 1rem 0 0; }
+.details-guide li { color: var(--muted); }
+.details-guide img { max-width: 960px; border: 1px solid var(--line); border-radius: 8px; }
+pre { border: 1px solid var(--line); border-radius: 6px; padding: .8rem; overflow: auto; }
+pre code { padding: 0; background: transparent; }
+.footer h3 { margin-top: 1.3rem; }
+.footer .table-scroll { background: #fff; border: 1px solid var(--line); border-radius: 8px; }
+@media (max-width: 640px) {
+  .table-scroll table { min-width: 36rem; }
+}
 @media (max-width: 720px) {
   .container { width: calc(100% - 32px); }
   .section { padding-block: 1.8rem; }
@@ -77,6 +98,7 @@ figcaption { margin-top: .5rem; color: var(--muted); font-size: .88rem; }
     <a class="brand" href="#top">FaradaIQ eStudio</a>
     <nav aria-label="Page navigation">
       <a href="#from-source-files-to-results">Workflow</a>
+      <a href="#scientific-analysis">Methods</a>
       <a href="#install-and-start">Install</a>
       <a href="#configure-integrations">SciLink</a>
       <a href="#cite-and-credit">Cite and credit</a>
@@ -89,8 +111,8 @@ figcaption { margin-top: .5rem; color: var(--muted); font-size: .88rem; }
       <h1>From electrochemical instrument exports to research-ready results</h1>
       <p class="lead">Bring data from HEKA, PalmSens, BioLogic, VersaStudio, and Solartron into a single analysis workflow. Inspect measurements, compare traces, and prepare tables, plots, reports, or SciLink bundles on your computer.</p>
       <div class="actions">
-        <a class="primary" href="https://github.com/venky-pnnl/FaradaiQ_eStudio/releases">Download from GitHub</a>
-        <a href="workflows.md#supported-instrument-files">Supported file formats</a>
+        <a class="primary" href="https://github.com/venky-pnnl/FaradaiQ_eStudio/releases/latest">Download from GitHub</a>
+        <a href="#supported-instrument-files">Supported file formats</a>
       </div>
     </div>
   </section>
@@ -98,49 +120,386 @@ figcaption { margin-top: .5rem; color: var(--muted); font-size: .88rem; }
   <div class="container">
     <section class="section" id="from-source-files-to-results">
       <h2>From source files to results</h2>
-      <img class="schematic" src="media/estudio-v334-workflow.png" alt="Import native instrument exports or curated files. Inspect and analyze measurements. Export tables, plots, reports, and reviewable SciLink bundles." width="1980" height="453">
+      <img class="schematic" src="media/estudio-workflow.png" alt="Import native instrument exports or curated files. Inspect and analyze measurements. Export tables, plots, reports, and reviewable SciLink bundles." width="1980" height="453">
       <ol class="stage-notes">
         <li><strong>Import and inspect.</strong> Keep instrument companion files together. Review the measurement catalog and record sample context.</li>
         <li><strong>Compare and analyze.</strong> Overlay traces, run electrochemical diagnostics, or examine spatial measurements.</li>
         <li><strong>Export and share.</strong> Save a canonical HDF5 bundle, plots and tables, portable HTML, or PowerPoint. Build a SciLink-ready package for further analysis.</li>
       </ol>
-      <p><a href="workflows.md">Workflow guide and method demos</a></p>
+      <p><a href="#detailed-workflows">Workflow guide and method demos</a></p>
     </section>
 
     <section class="section example" aria-labelledby="analysis-example">
       <div>
         <h2 id="analysis-example">Compare measurements side by side</h2>
         <p>Overlay impedance spectra in Nyquist or Bode views, then fit a circuit, run linear Kramers–Kronig validation, or estimate the distribution of relaxation times. The workspace also supports voltammetry, transients, corrosion, Mott–Schottky analysis, and SECCM.</p>
-        <p><a href="workflows.md#scientific-analysis">Analysis methods and examples</a></p>
+        <p><a href="#scientific-analysis">Analysis methods and examples</a></p>
       </div>
       <figure>
         <div class="screenshot">
-          <img src="media/estudio-v334-nyquist.png" alt="Three synthetic impedance spectra compared as a Nyquist plot in FaradaIQ eStudio Browser v334" width="1800" height="1138" loading="lazy">
+          <img src="media/estudio-browser-nyquist.png" alt="Three synthetic impedance spectra compared as a Nyquist plot in FaradaIQ eStudio Browser v337" width="1800" height="1138" loading="lazy">
         </div>
-        <figcaption>Nyquist overlay of three synthetic spectra in eStudio Browser v334.</figcaption>
+        <figcaption>Nyquist overlay of three synthetic spectra in eStudio Browser v337.</figcaption>
       </figure>
     </section>
 
     <section class="section info" aria-label="Install and connect">
       <article id="install-and-start">
-        <h2>Install v336</h2>
-        <p>Extract the ZIP before running <code>Install_FaradaIQ_eStudio_v336.bat</code> on Windows or <code>Install_FaradaIQ_eStudio_v336.command</code> on macOS. Setup checks DearEIS, pyDRTtools, and managed SciLink before opening eStudio Desktop, eStudio Browser, and SciLink Streamlit. All three shortcuts appear under <strong>Desktop → Holaris Apps</strong>.</p>
-        <p><a href="workflows.md#install-and-start">Installation and troubleshooting</a></p>
+        <h2>Install v337</h2>
+        <p>Extract the ZIP before running <code>Install_FaradaIQ_eStudio_v337.bat</code> on Windows or <code>Install_FaradaIQ_eStudio_v337.command</code> on macOS. Setup checks DearEIS, pyDRTtools, and managed SciLink before opening eStudio Desktop, eStudio Browser, and SciLink Streamlit. All three shortcuts appear under <strong>Desktop → Holaris Apps</strong>.</p>
+        <p><a href="#installation-details">Installation and troubleshooting</a></p>
       </article>
       <article id="configure-integrations">
         <h2>SciLink setup</h2>
         <p>Choose <strong>SciLink → Make SciLink-ready bundle</strong>. Open the installed SciLink app from either eStudio interface, then attach the generated HDF5 and metadata JSON under <strong>Analyze</strong>. Review the selected files before sending a request to a configured service.</p>
-        <p><a href="workflows.md#send-a-bundle-to-scilink-streamlit">SciLink handoff</a> · <a href="workflows.md#configure-integrations">Integration settings</a></p>
+        <p><a href="#send-a-bundle-to-scilink-streamlit">SciLink handoff</a> · <a href="#configure-tools-and-services">Integration settings</a></p>
       </article>
+    </section>
+    <section class="section details-guide" aria-label="Detailed workflows, methods, and installation">
+<h2 id="detailed-workflows">Detailed workflows</h2>
+<div class="table-scroll" tabindex="0"><table>
+<thead>
+<tr class="header">
+<th>Start here</th>
+<th>Use it for</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>FaradaIQ eStudio</strong></td>
+<td>Desktop analysis, saved plot layouts, and optional native tool windows.</td>
+</tr>
+<tr class="even">
+<td><strong>FaradaIQ eStudio Browser</strong></td>
+<td>Open experiments, analyze and compare traces, export data and reports, and prepare or run reviewed service requests. <a href="#local-browser">Start the browser</a>.</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="analyze-measurements-in-the-desktop-app">Analyze measurements in the desktop app</h3>
+<ol type="1">
+<li>In <strong>Data</strong>, select an instrument file or experiment folder and use <strong>Inspect</strong> to check measurement counts and units. Keep instrument companion files together.</li>
+<li>Open <strong>Data Browser</strong> to group measurements by point, method, or cycle, overlay traces, and open technique-specific analysis tools.</li>
+<li>Use <strong>Save Session</strong> to keep your work. Open <strong>Reports</strong> for a PowerPoint summary or portable HTML data browser.</li>
+</ol>
+<details><summary>View the desktop workspace</summary>
+<img src="media/estudio-workspace.png" alt="Native FaradaIQ eStudio desktop workspace with session controls, a Data Browser sidebar, and experiment preview" width="960" loading="lazy">
+</details>
+
+<h3 id="analyze-measurements-in-the-local-browser">Analyze measurements in the local browser</h3>
+<ol type="1">
+<li>In <strong>Data</strong>, choose files or a folder, or enter a local path. Select <strong>Open data</strong>, then search or filter the measurement catalog. Save the sample, session ID, and notes under <strong>Experiment context</strong>.</li>
+<li>In <strong>Analysis</strong>, choose a measurement. Use <strong>Plots and table</strong> to set axes, display Nyquist or Bode plots, overlay traces, or export the plotted values. Open <strong>Analysis tools</strong> for method-specific settings and <strong>Interactive views</strong> for 2D, 3D, and hyperspectral views when the data include the required coordinates.</li>
+<li>Use <strong>Data → Open or save a session</strong> to keep the experiment context and plot choices. Use <strong>Batch jobs</strong> to configure, save, and resume an export queue. In <strong>Reports</strong>, export canonical HDF5, portable HTML, or a PowerPoint summary.</li>
+</ol>
+<p>To continue in SciLink, prepare a local HDF5 bundle in either mode. <a href="#send-a-bundle-to-scilink-streamlit">Follow the SciLink handoff</a>.</p>
+<h2 id="supported-instrument-files">Supported instrument files</h2>
+<div class="table-scroll" tabindex="0"><table>
+<thead>
+<tr class="header">
+<th>Software</th>
+<th>Files</th>
+<th>Open in eStudio</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="https://www.heka.com/downloads/downloads_main.html">HEKA</a> POTMASTER / PATCHMASTER DAT2</td>
+<td><code>.dat</code> and companion sections such as <code>.pul</code>, <code>.pgf</code>, <code>.amp</code>, <code>.mrk</code>, <code>.mth</code>, and <code>.onl</code></td>
+<td>Select the bundled <code>.dat</code> or the folder containing the associated files. Keep position files for spatial analysis.</td>
+</tr>
+<tr class="even">
+<td><a href="https://www.palmsens.com/software/ps-trace/">PalmSens</a> PSTrace</td>
+<td><code>.pssession</code></td>
+<td>Select a session file, a folder, or a supported ZIP of sessions.</td>
+</tr>
+<tr class="odd">
+<td><a href="https://www.biologic.net/softwares/ec-lab-software/">BioLogic</a> EC-Lab</td>
+<td><code>.mpr</code>, <code>.mps</code>, <code>.mgr</code></td>
+<td>Keep the binary data and method files together.</td>
+</tr>
+<tr class="even">
+<td><a href="https://www.ameteksi.com/Products/Software/Princeton-Applied-Research/VersaStudio-Software">Princeton Applied Research</a> VersaStudio</td>
+<td><code>.par</code>, with the same-stem <code>.par.psbd</code> where present</td>
+<td>Open the <code>.par</code> with its binary companion beside it. The companion can hold the numerical traces.</td>
+</tr>
+<tr class="odd">
+<td><a href="https://www.scribner.com/software/">Solartron Analytical</a> CorrWare / ZPlot</td>
+<td><code>.cor</code>, <code>.z</code></td>
+<td>Open the original files with their headers intact.</td>
+</tr>
+<tr class="even">
+<td>Delimited tables</td>
+<td><code>.csv</code>, <code>.tsv</code>, <code>.txt</code>, <code>.asc</code></td>
+<td>Use recognizable headers such as <code>time_s</code>, <code>potential_V</code>, <code>current_A</code>, <code>frequency_Hz</code>, <code>Zreal_ohm</code>, and <code>Zimag_ohm</code>.</td>
+</tr>
+<tr class="odd">
+<td>Excel</td>
+<td><code>.xlsx</code>, <code>.xls</code></td>
+<td>Read the first worksheet. The SciLink export retains the original workbook alongside its extracted values.</td>
+</tr>
+<tr class="even">
+<td>FaradaIQ bundles</td>
+<td><code>.h5</code>, <code>.hdf5</code></td>
+<td>Open a bundle through <strong>Data</strong>. The browser catalog shows tables, metadata, and packaged media.</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="scientific-analysis">Scientific analysis</h2>
+<p>Choose the relevant <strong>Analysis tool</strong> in the v337 local browser. The table also shows where to find the corresponding desktop workflows.</p>
+<div class="table-scroll" tabindex="0"><table>
+<thead>
+<tr class="header">
+<th>Measurement</th>
+<th>Local browser</th>
+<th>Desktop app</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>CV, LSV, FSCV</strong></td>
+<td>Choose <strong>Voltammetry and transients</strong>, then <strong>Calculate trace metrics</strong>. <strong>CV peaks and baselines</strong> adds branch metrics and PySimpleEChem analysis.</td>
+<td>Compare sweeps and cycles, inspect branches and baselines, and open selected CV data in PySimpleEChem.</td>
+</tr>
+<tr class="even">
+<td><strong>DPV, SWV, NPV, and stripping</strong></td>
+<td>Select the technique under <strong>Voltammetry and transients</strong> and calculate metrics from the recorded potential and current.</td>
+<td>Inspect and compare pulse and stripping traces and use the technique-specific tools available for the dataset.</td>
+</tr>
+<tr class="odd">
+<td><strong>CA, CP, OCP, and deposition</strong></td>
+<td>Choose the technique under <strong>Voltammetry and transients</strong>. Review integrated charge when current is recorded, potential transients, or the final-time OCP statistics.</td>
+<td>Inspect time-series data, review charge and transients, or compare OCP by position.</td>
+</tr>
+<tr class="even">
+<td><strong>EIS and DRT</strong></td>
+<td>Choose <strong>EIS and DRT</strong> and select a circuit fit, linear Kramers–Kronig validation, DRT, or a DearEIS handoff. Select <strong>Run analysis</strong>. Configure simple, Bayesian, or Bayesian Hilbert transform DRT. Output includes calculated spectra, selected figures, and settings files.</td>
+<td>Compare Nyquist and Bode views, configure DRT runs, and open selected spectra in DearEIS or pyDRTtools.</td>
+</tr>
+<tr class="odd">
+<td><strong>Tafel and corrosion</strong></td>
+<td>Choose <strong>Tafel and corrosion</strong> to set Tafel ranges, reference potential, or corrosion criteria. Review the fit and download the result files.</td>
+<td>Set fitting ranges and inspect polarization, normalization, and corrosion diagnostics.</td>
+</tr>
+<tr class="even">
+<td><strong>Mott–Schottky</strong></td>
+<td>Choose <strong>Mott–Schottky</strong> for impedance measured across DC potential steps on a common frequency grid.</td>
+<td>Review potential-dependent impedance, capacitance, fits, and related views.</td>
+</tr>
+<tr class="odd">
+<td><strong>Spatial and SECCM</strong></td>
+<td>Choose <strong>Spatial points</strong> for point metrics or <strong>Interactive views</strong> for 2D maps, 3D surfaces, and hyperspectral views with suitable input.</td>
+<td>Group traces by point, method, and cycle. Review line scans, spatial maps, and multidimensional views.</td>
+</tr>
+</tbody>
+</table></div>
+<p>The recordings below use synthetic measurements and were captured in the v337 local browser.</p>
+<details>
+<summary>Watch CV, LSV, FSCV, pulse, and stripping measurements</summary>
+<p><img src="media/estudio-browser-voltammetry-workflow.gif" alt="FaradaIQ eStudio browser displaying synthetic CV, LSV, FSCV, DPV, SWV, NPV, and stripping traces" width="960" loading="lazy"></p>
+</details>
+
+<details>
+<summary>Watch CA, CP, OCP, and deposition measurements</summary>
+<p><img src="media/estudio-browser-transients-workflow.gif" alt="FaradaIQ eStudio browser cycling through synthetic chronoamperometry, chronopotentiometry, open-circuit potential, and deposition measurements" width="960" loading="lazy"></p>
+<p><img src="media/estudio-browser-ca.png" alt="Synthetic chronoamperometric current transient in the local FaradaIQ eStudio browser" width="960" loading="lazy"></p>
+</details>
+
+<details>
+<summary>Watch impedance overlays, circuit fitting, lin-KK, and DRT</summary>
+<p><img src="media/estudio-browser-eis-workflow.gif" alt="eStudio Browser overlaying impedance spectra and showing an equivalent-circuit fit, lin-KK validation, and DRT output" width="960" loading="lazy"></p>
+<p><img src="media/estudio-browser-nyquist.png" alt="FaradaIQ eStudio v337 local browser with three overlaid synthetic EIS spectra in a Nyquist plot" width="960" loading="lazy"></p>
+</details>
+
+<details>
+<summary>Watch Tafel, corrosion, Mott–Schottky, and spatial analysis</summary>
+<p><img src="media/estudio-browser-diagnostics-workflow.gif" alt="FaradaIQ eStudio browser showing Tafel fit results, corrosion metrics, Mott–Schottky diagnostics, and a point-resolved spatial plot" width="960" loading="lazy"></p>
+<p><img src="media/estudio-browser-spatial.png" alt="FaradaIQ eStudio browser plotting synthetic spatial response metrics using measured X and Y coordinates" width="960" loading="lazy"></p>
+</details>
+
+<h2 id="installation-details">Installation details</h2>
+<p>Download the full <code>FaradaIQ_eStudio_v337_package.zip</code> from <a href="https://github.com/venky-pnnl/FaradaiQ_eStudio/releases">GitHub Releases</a>. The matching <code>.zip.sha256</code> file contains the archive checksum. Keep the extracted files together and stay online while the installer sets up the runtime. The main installer checks DearEIS, official pyDRTtools, and managed SciLink before opening the apps. Run the same installer again to repair an incomplete tool setup.</p>
+<h3 id="windows">Windows</h3>
+<ol type="1">
+<li>In File Explorer, right-click the ZIP, choose <strong>Extract All</strong>, and open the extracted folder.</li>
+<li>Double-click <strong><code>Install_FaradaIQ_eStudio_v337.bat</code></strong>. Keep the console open while setup verifies the package and prepares the Python environment. If a compatible Python is missing, setup uses WinGet to install Python 3.12.</li>
+<li>Setup opens <strong>FaradaIQ eStudio</strong>, <strong>FaradaIQ eStudio Browser</strong>, and <strong>SciLink</strong>. Reopen any app from <strong>Desktop → Holaris Apps</strong>. The default eStudio install folder is <code>C:\FaradaIQ\eStudio\V337</code>.</li>
+</ol>
+<h3 id="macos">macOS</h3>
+<ol type="1">
+<li>In Finder, double-click the ZIP and open the extracted folder.</li>
+<li>Double-click <strong><code>Install_FaradaIQ_eStudio_v337.command</code></strong>.</li>
+<li>Keep Terminal open. The installer reuses Python 3.12 with Tk if available. Otherwise, it downloads and verifies the official Python 3.12 package, then installs it. Enter your Mac administrator password if Terminal prompts for it.</li>
+<li>Setup opens <strong>FaradaIQ eStudio</strong>, <strong>FaradaIQ eStudio Browser</strong>, and <strong>SciLink</strong>. Reopen any app from <strong>Desktop → Holaris Apps</strong>. The default eStudio install folder is <code>~/Applications/FaradaIQ eStudio/V337</code>.</li>
+</ol>
+<h4 id="if-macos-blocks-the-installer">If macOS blocks the installer</h4>
+<ol type="1">
+<li>After the warning appears, click <strong>Done</strong>.</li>
+<li>Open <strong> → System Settings → Privacy &amp; Security</strong>. Scroll to <strong>Security</strong> and look for the installer you just tried to open.</li>
+<li>After verifying the ZIP against the release’s SHA-256 file, click <strong>Open Anyway</strong> and confirm in the next dialog. If the button is missing, try opening the installer again and return to <strong>Privacy &amp; Security</strong>. <a href="https://support.apple.com/en-us/102445">Apple’s Gatekeeper instructions</a></li>
+</ol>
+<blockquote>
+<p><strong>macOS security disclaimer.</strong> The downloaded eStudio installer is not Apple-notarized. <strong>Open Anyway</strong> creates an exception for the specific installer. Use it only for a copy obtained from an authorized release source whose SHA-256 checksum you have verified. On an organization-managed Mac, follow your organization’s software approval policy.</p>
+</blockquote>
+<h4 id="if-the-icon-closes-immediately">If the icon closes immediately</h4>
+<p>Open <strong>Terminal</strong>, paste the following command, and press <strong>Return</strong>.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">/bin/bash</span> <span class="st">&quot;</span><span class="va">$HOME</span><span class="st">/Applications/FaradaIQ eStudio/V337/Start_FaradaIQ_eStudio_v337.command&quot;</span></span></code></pre></div>
+<p>For another installed release, use that release’s folder and launcher version. For v337, startup messages are also saved in <code>~/Library/Logs/FaradaIQ eStudio/startup_v337.log</code>. If the app still closes, include the last lines of that log when reporting the issue.</p>
+<h3 id="local-browser">Local browser</h3>
+<p>Open <strong>FaradaIQ eStudio Browser</strong> under <strong>Desktop → Holaris Apps</strong>. Its local server runs in the background. It uses <code>http://127.0.0.1:8512</code> when available. The versioned BAT or COMMAND launcher in the installation folder can also run the server in a terminal for diagnostics.</p>
+<p>Use a local folder path for large datasets or a mounted network share. The file and folder pickers send selected files to eStudio on the same computer. Keep instrument companions together. When a folder contains both raw instrument files and curated tables, open the curated folder separately to analyze those tables. Imports, plots, deterministic calculations, and reports run on your computer. A reviewed SciLink or Edison request can send selected data to the provider you configure.</p>
+<p>The browser launcher records the actual loopback address in the versioned startup log. The desktop app provides its saved native layouts and optional Qt tool windows. The browser provides method-specific controls, interactive charts, and downloadable outputs for the workflows listed under <strong>Scientific analysis</strong>. See the <a href="https://github.com/venky-pnnl/FaradaiQ_eStudio/blob/main/QA_v337.md">verification report</a> for platform and service coverage.</p>
+<p>If the browser does not start, check <code>%LOCALAPPDATA%\FaradaIQ\eStudio\logs\browser_v337.log</code> on Windows or <code>~/Library/Logs/FaradaIQ eStudio/browser_v337.log</code> on macOS.</p>
+<h2 id="configure-tools-and-services">Configure tools and services</h2>
+<h3 id="local-analysis-tools">Local analysis tools</h3>
+<div class="table-scroll" tabindex="0"><table>
+<thead>
+<tr class="header">
+<th>Tool</th>
+<th>Setup</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="https://vyrjana.github.io/DearEIS/">DearEIS</a></td>
+<td>The main installer checks DearEIS in a separate Python environment. Select a spectrum and choose <strong>Analyze EIS with DearEIS</strong>.</td>
+</tr>
+<tr class="even">
+<td><a href="https://github.com/ciuccislab/pyDRTtools">pyDRTtools</a></td>
+<td>The main installer checks the official package and its Qt5 GUI prerequisites. Select a spectrum and choose <strong>Open in pyDRTtools</strong>. The bundled eStudio DRT engine is available as part of the core installation.</td>
+</tr>
+<tr class="odd">
+<td><a href="https://github.com/kevinsmia1939/PySimpleEChem#readme">PySimpleEChem</a></td>
+<td>Use the bundled tools. Select a CV trace or group and choose <strong>Open in PySimpleEChem</strong> for the optional native interface.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Setup reports which tools are ready and where to find the diagnostic logs. If an integration fails, use the same main installer to retry.</p>
+<h3 id="scilink">SciLink</h3>
+<p>Setup checks the <a href="https://github.com/ziatdinovmax/SciLink">official SciLink GitHub repository</a> every time it runs. SciLink lives at <code>C:\FaradaIQ\SciLink</code> on Windows or <code>~/Applications/FaradaIQ SciLink</code> on macOS, with its own Python environment. Its <strong>SciLink</strong> shortcut under <strong>Desktop → Holaris Apps</strong> starts the standalone Streamlit app using the upstream SciLink logo.</p>
+<p>Choose <strong>Update SciLink</strong> in eStudio Desktop or in eStudio Browser's <strong>SciLink</strong> panel. eStudio compares the upstream Git commit to your installed commit, then installs and verifies the new revision when it changes. An unsuccessful installation leaves the previous SciLink revision selected. <strong>Open SciLink</strong> launches the installed version. Setup needs access to GitHub and a Python package index to provision SciLink.</p>
+<p>Configure the model and credentials in SciLink for interactive analysis. Reviewed jobs started in eStudio can use the managed installation or an explicit SciLink executable or Python override.</p>
+<h4 id="send-a-bundle-to-scilink-streamlit">Send a bundle to SciLink Streamlit</h4>
+<ol type="1">
+<li><strong>Prepare.</strong> Open the experiment in either eStudio interface. Select <strong>SciLink → Make SciLink-ready bundle</strong>. eStudio writes the bundle to the local analysis folder.</li>
+<li><strong>Review.</strong> Check the file list and experiment context. Select <strong>Open bundle folder</strong> to locate the files. In the local browser, <strong>Download Data</strong> and <strong>Download Metadata</strong> are available for smaller files.</li>
+<li><strong>Open SciLink.</strong> Select <strong>Open SciLink</strong> in eStudio or use the <strong>SciLink</strong> shortcut. The launcher opens the actual loopback address in your browser.</li>
+<li><strong>Attach and analyze.</strong> In SciLink, choose <strong>Analyze</strong>, attach the files below, and review the attachments before selecting <strong>Analyze</strong>. When chat opens, paste or adapt eStudio’s suggested question.</li>
+</ol>
+<div class="table-scroll" tabindex="0"><table>
+<thead>
+<tr class="header">
+<th>eStudio output</th>
+<th>Where to attach it in SciLink</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>experiment_faradaiq_bundle.h5</code></td>
+<td><strong>Data file(s)</strong></td>
+</tr>
+<tr class="even">
+<td><code>scilink_upload_metadata.json</code></td>
+<td><strong>Metadata (optional)</strong></td>
+</tr>
+<tr class="odd">
+<td><code>electrochemistry_skill.md</code></td>
+<td><strong>Skills → Upload Skills</strong> if you want to include the electrochemistry skill</td>
+</tr>
+</tbody>
+</table></div>
+<img src="media/estudio-browser-scilink.png" alt="SciLink page in the local eStudio browser showing a completed HDF5 bundle, review and download controls, and the link to local SciLink" width="960" loading="lazy">
+
+<p><sub>eStudio v337 Browser handoff for the synthetic impedance example.</sub></p>
+<details>
+<summary>Watch the SciLink bundle handoff</summary>
+<p><img src="media/estudio-browser-scilink-workflow.gif" alt="Recording of eStudio Browser generating a SciLink-ready bundle, revealing downloads, and showing the local SciLink launch control" width="960" loading="lazy"></p>
+</details>
+
+<p>The HDF5 bundle includes curated tables under <code>/tables/</code>, recorded units, and original table and metadata documents. The full manifest and request record stay in the local bundle folder. SciLink processes the attachments after you submit them using the provider configured there.</p>
+<h4 id="run-a-reviewed-analysis-from-estudio-browser">Run a reviewed analysis from eStudio Browser</h4>
+<p>Open <strong>SciLink → Run SciLink or Edison Scientific from eStudio</strong>, choose SciLink or Edison Scientific, and prepare a local review with the exact prompt and selected files. Configure the service and approve the displayed request before selecting <strong>Start reviewed SciLink job</strong> or <strong>Start reviewed Edison Scientific job</strong>. The run folder contains the request and available results and logs. The runner uses the managed SciLink Python when available.</p>
+<h3 id="edison-scientific">Edison Scientific</h3>
+<p>Create a key in your <a href="https://platform.edisonscientific.com/profile">Edison Scientific profile</a>. Under <strong>Settings → LLM settings → Data Sharing</strong>, enter it in <strong>Edison API key (session only)</strong> and apply the settings. Leave <strong>Legacy custom upload URL</strong> blank for the standard client. Open <strong>Ask Edison Scientific</strong> to review the prompt and files before submitting. <a href="https://github.com/EdisonScientific/edison-client-docs#readme">Client documentation</a></p>
+<h3 id="labric-mcp">LabRIC MCP</h3>
+<p>Enter your <a href="https://docs.labric.co/welcome">LabRIC</a> MCP endpoint and session-only key under <strong>Settings → LLM settings → Data Sharing</strong>. Use <strong>Test LabRIC MCP connection</strong>, then enable <strong>Use LabRIC MCP cloud context</strong> if you want SciLink to query authorized LabRIC data. In the browser, open <strong>SciLink → LabRIC MCP connection</strong> to check the HTTPS connection and configure LabRIC for a reviewed SciLink job.</p>
     </section>
   </div>
 </main>
 <footer class="footer" id="cite-and-credit">
   <div class="container">
     <h2>Cite and credit</h2>
-    <p>Prabhakaran, V. (2026). <em>FaradaIQ eStudio</em> (Version v336) [Computer software]. <a href="../CITATION.cff">Citation file</a></p>
-    <p>Venkateshkumar Prabhakaran designed FaradaIQ eStudio. Benjamin A. Helfrecht (PNNL) designed the original SECCM parser. <a href="workflows.md#project-credits">Project credits and method citations</a></p>
+    <p>Prabhakaran, V. (2026). <em>FaradaIQ eStudio</em> (Version v337) [Computer software]. <a href="https://github.com/venky-pnnl/FaradaiQ_eStudio/blob/main/CITATION.cff">Citation file</a></p>
+    <p>Venkateshkumar Prabhakaran designed FaradaIQ eStudio. Benjamin A. Helfrecht (PNNL) designed the original SECCM parser. <a href="#project-credits">Project credits and method citations</a></p>
+    <h3 id="funding-acknowledgment">Funding acknowledgment</h3>
     <p>Development was supported by the Non-Equilibrium Transport Driven Separations Initiative (NETS) through PNNL’s Laboratory Directed Research and Development (LDRD) Program. <a href="https://www.pnnl.gov/projects/nets">NETS</a></p>
+<h3 id="project-credits">Project credits</h3>
+<div class="table-scroll" tabindex="0"><table>
+<thead>
+<tr class="header">
+<th>Project</th>
+<th>Contributors and role</th>
+<th>Citation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>pySECCM parsing and plotting tools</td>
+<td>Benjamin A. Helfrecht (PNNL) designed the original SECCM parser. eStudio includes that parser and the accompanying plotting tools.</td>
+<td>Helfrecht, B. A. (n.d.). <em>pySECCM parsing and plotting tools</em> [Computer software]. <a href="https://github.com/venky-pnnl/FaradaiQ_eStudio/blob/main/pyseccm_tools/README-CV">Bundled parser notes</a></td>
+</tr>
+<tr class="even">
+<td><a href="https://github.com/ciuccislab/pyDRTtools">pyDRTtools</a></td>
+<td>Ciucci Lab, Francesco Ciucci, Adeleke Maradesa, and contributors. Distribution of relaxation times (DRT) analysis.</td>
+<td><a href="https://doi.org/10.1016/j.electacta.2015.09.097">Wan et al. (2015), radial basis functions</a>, <a href="https://doi.org/10.1016/j.electacta.2015.03.123">Ciucci &amp; Chen (2015), Bayesian DRT</a>, or <a href="https://doi.org/10.1149/1945-7111/acbca4">Maradesa et al. (2023), regularization</a>, according to the method used.</td>
+</tr>
+<tr class="odd">
+<td><a href="https://github.com/vyrjana/DearEIS">DearEIS</a> and <a href="https://github.com/vyrjana/pyimpspec">pyimpspec</a></td>
+<td>Ville Yrjänä and contributors. Impedance analysis and equivalent-circuit workflows.</td>
+<td><a href="https://doi.org/10.21105/joss.04808">Yrjänä (2022), DearEIS</a>. If using pyimpspec directly, cite its software version.</td>
+</tr>
+<tr class="even">
+<td><a href="https://github.com/kevinsmia1939/PySimpleEChem">PySimpleEChem</a></td>
+<td>Kavin Teenakul and contributors. Cyclic voltammetry visualization and analysis.</td>
+<td><a href="https://github.com/kevinsmia1939/PySimpleEChem">PySimpleEChem software repository</a>. Include the version or commit used.</td>
+</tr>
+<tr class="odd">
+<td><a href="https://github.com/ziatdinovmax/SciLink">SciLink</a></td>
+<td>Maxim Ziatdinov and the PNNL SciLink team (PNNL contact: Sarah Allec). Scientific analysis, literature review, and planning. <a href="https://www.pnnl.gov/projects/center-robotics-autonomy/scilink">PNNL project page</a></td>
+<td><a href="https://arxiv.org/abs/2508.06569">Yao et al. (2025), SciLink preprint</a></td>
+</tr>
+<tr class="even">
+<td><a href="https://platform.edisonscientific.com/">Edison Scientific</a></td>
+<td>Edison Scientific team. Scientific and literature analysis through the official client.</td>
+<td><a href="https://github.com/EdisonScientific/edison-client-docs">Edison Scientific client documentation</a>. Identify the service, agent, and client version if used.</td>
+</tr>
+<tr class="odd">
+<td><a href="https://github.com/ECSHackWeek/impedance.py">impedance.py</a></td>
+<td>ECSHackWeek contributors. Electrochemical impedance analysis.</td>
+<td><a href="https://doi.org/10.21105/joss.02349">Murbach et al. (2020), impedance.py</a></td>
+</tr>
+<tr class="even">
+<td><a href="https://github.com/echemdata/galvani">galvani</a></td>
+<td>echemdata contributors. Electrochemical file support.</td>
+<td>Cite the software version used.</td>
+</tr>
+<tr class="odd">
+<td><a href="https://scientific-python.org/">Scientific Python</a></td>
+<td>NumPy, SciPy, pandas, and Matplotlib communities. Arrays, numerical methods, tables, and plots.</td>
+<td>Cite the libraries used in the analysis.</td>
+</tr>
+<tr class="even">
+<td><a href="https://www.h5py.org/">HDF5 / h5py</a></td>
+<td>The HDF Group and h5py contributors. Structured data and metadata storage.</td>
+<td>Cite the software if relevant to the workflow.</td>
+</tr>
+<tr class="odd">
+<td>Desktop, browser, and reporting tools</td>
+<td>Tcl/Tk, Streamlit, Pillow, Plotly, Altair, python-pptx, and openpyxl communities. User interfaces, graphics, and scientific reports.</td>
+<td><a href="https://github.com/venky-pnnl/FaradaiQ_eStudio/blob/main/docs/THIRD_PARTY.md">Third-party notices</a></td>
+</tr>
+</tbody>
+</table></div>
+<p>Open <strong>Credits</strong> in eStudio for project links and setup guides. See the <a href="https://github.com/venky-pnnl/FaradaiQ_eStudio/blob/main/docs/THIRD_PARTY.md">full references and third-party notices</a> for citation details, attribution, licenses, and service terms.</p>
   </div>
 </footer>
 </body>

@@ -259,11 +259,11 @@ def transactional_install(
     backup = root / ".deareis_venv.__backup_v292"
     python = env_python(env_dir)
     if log_path is None:
-        log_path = root / "logs" / "deareis_install_v336.log"
+        log_path = root / "logs" / "deareis_install_v337.log"
     log = InstallLog(log_path)
     old_moved = False
     try:
-        log.write("FaradaIQ eStudio DearEIS transactional installer v336")
+        log.write("FaradaIQ eStudio DearEIS transactional installer v337")
         log.write(f"Root: {root}")
         log.write(f"Log:  {log_path}")
 

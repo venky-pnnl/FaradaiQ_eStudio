@@ -13,6 +13,21 @@ import tempfile
 from zipfile import BadZipFile, ZipFile
 
 MAIN = "refs/heads/main"
+MANIFEST = re.compile(r"PACKAGE_MANIFEST_SHA256_v([0-9]+)\.txt")
+
+
+def _parse_manifest(raw):
+    entries = {}
+    for line in raw.decode("utf-8").splitlines():
+        digest, relative = line.split("  ", 1)
+        path = PurePosixPath(relative)
+        if (not relative or path.is_absolute() or path.as_posix() != relative or ".." in path.parts
+                or any(part.casefold() == ".git" for part in path.parts)
+                or any(ord(char) < 32 or char in "\\:" for char in relative)
+                or relative.casefold() in entries or not re.fullmatch(r"[0-9a-f]{64}", digest)):
+            raise ValueError(f"Invalid release manifest entry: {relative!r}")
+        entries[relative.casefold()] = (relative, digest)
+    return entries
 
 
 def _release_files(archive):
@@ -25,16 +40,7 @@ def _release_files(archive):
             raise ValueError("Release metadata and ZIP name disagree.")
         manifest_name = f"PACKAGE_MANIFEST_SHA256_{version}.txt"
         manifest = package.read(manifest_name)
-        expected = {}
-        for line in manifest.decode("utf-8").splitlines():
-            digest, relative = line.split("  ", 1)
-            path = PurePosixPath(relative)
-            if (not relative or path.is_absolute() or path.as_posix() != relative or ".." in path.parts
-                    or any(part.casefold() == ".git" for part in path.parts)
-                    or any(ord(char) < 32 or char in "\\:" for char in relative)
-                    or relative.casefold() in expected or not re.fullmatch(r"[0-9a-f]{64}", digest)):
-                raise ValueError(f"Invalid release manifest entry: {relative!r}")
-            expected[relative.casefold()] = (relative, digest)
+        expected = _parse_manifest(manifest)
         entries = package.infolist()
         if (len(entries) != len(expected) + 1 or {entry.filename for entry in entries}
                 != {relative for relative, _ in expected.values()} | {manifest_name}):
@@ -85,10 +91,45 @@ class _Repository:
         self.command("fetch", "--no-tags", "origin", MAIN)
         return self.value("rev-parse", "FETCH_HEAD")
 
-    def stage(self, parent, index_info, files):
+    def stale_files(self, parent, number, files):
+        if parent is None:
+            return set()
+        records = self.command("ls-tree", "-r", "-z", parent).stdout.split(b"\0")
+        blobs = {}
+        for record in filter(None, records):
+            metadata, path = record.split(b"\t", 1)
+            mode, _, blob = metadata.decode("ascii").split()
+            if mode in {"100644", "100755"}:
+                blobs[path.decode("utf-8", errors="surrogateescape")] = blob
+
+        manifests = []
+        for path in blobs:
+            match = MANIFEST.fullmatch(path)
+            if match and int(match[1]) < number:
+                manifests.append((int(match[1]), path))
+
+        stale, prior_digests = set(), {}
+        for _, path in sorted(manifests, reverse=True):
+            try:
+                entries = _parse_manifest(self.command("cat-file", "blob", blobs[path]).stdout)
+            except ValueError:
+                continue  # Keep manifests whose ownership cannot be established.
+            if not entries:
+                continue
+            stale.add(path)
+            for name, digest in entries.values():
+                if name in blobs and name not in files and not MANIFEST.fullmatch(name):
+                    prior_digests.setdefault(name, digest)
+        for path, digest in prior_digests.items():
+            content = self.command("cat-file", "blob", blobs[path]).stdout
+            if hashlib.sha256(content).hexdigest() == digest:
+                stale.add(path)
+        return stale
+
+    def stage(self, parent, index_info, files, stale):
         self.command("read-tree", parent if parent else "--empty")
         original = self.value("write-tree")
-        existing = set(self.command("ls-files", "-z").stdout.decode("utf-8", errors="surrogateescape").split("\0")) - {""}
+        existing = set(self.command("ls-files", "-z").stdout.decode("utf-8", errors="surrogateescape").split("\0")) - stale - {""}
         existing_lower = {path.casefold(): path for path in existing}
         for relative in files:
             parents = PurePosixPath(relative).parents
@@ -97,7 +138,8 @@ class _Repository:
                 raise RuntimeError(f"Remote has a file/folder conflict at {relative}.")
             if existing_lower.get(relative.casefold(), relative) != relative:
                 raise RuntimeError(f"Remote has a filename case conflict at {relative}.")
-        self.command("update-index", "-z", "--index-info", data=index_info)
+        deletions = "".join(f"0 {'0' * len(original)}\t{path}\0" for path in sorted(stale))
+        self.command("update-index", "-z", "--index-info", data=deletions.encode("utf-8") + index_info)
         return original, self.value("write-tree")
 
 
@@ -142,11 +184,14 @@ def publish(archive: Path, remote: str, git: str, author_name: str, author_email
         repo.command("remote", "add", "origin", remote)
         parent = repo.fetch_main(repo.tip(version))
         index_info = _index_payload(repo, directory / "payload", files)
+        stale = repo.stale_files(parent, number, files)
+        if stale:
+            print(f"Replacing {len(stale)} retired release files on main.", file=sys.stderr)
         for attempt in range(2):
             remote_number = _remote_version(repo, parent)
             if remote_number is not None and remote_number > number:
                 raise RuntimeError(f"GitHub main already contains newer eStudio v{remote_number}.")
-            original, tree = repo.stage(parent, index_info, files)
+            original, tree = repo.stage(parent, index_info, files, stale)
             if tree == original and parent:
                 return parent
             if remote_number == number:
@@ -166,7 +211,7 @@ def publish(archive: Path, remote: str, git: str, author_name: str, author_email
             if parent and repo.command("merge-base", "--is-ancestor", parent, newer, check=False).returncode:
                 raise RuntimeError("GitHub main history changed during upload. Review it before retrying.")
             changed = set(repo.command("diff", "--name-only", "-z", original, newer).stdout.decode("utf-8", errors="surrogateescape").split("\0"))
-            overlap = sorted(changed & files.keys())
+            overlap = sorted(changed & (files.keys() | stale))
             if overlap:
                 raise RuntimeError("GitHub main changed release files during upload. Review: " + ", ".join(overlap))
             parent = newer

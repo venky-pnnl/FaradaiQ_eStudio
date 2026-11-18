@@ -13,7 +13,7 @@ def payload_files():
         rel=p.relative_to(ROOT)
         if not p.is_file() or any(part in EXCLUDED or part.startswith('.deareis_venv') for part in rel.parts):continue
         if rel.parts[0]=='litellm_proxy' and p.name not in {'README_litellm_proxy.txt','requirements_litellm_proxy.txt','start_faradaiq_litellm_proxy.bat'}:continue
-        if p.name in EXCLUDED_FILES or p.name.startswith(('.env','analysis_tools_status_v','.analysis-tools-')) or p.suffix.lower() in {'.zip','.pyc','.log','.pem','.key','.pfx'}:continue
+        if p.name in EXCLUDED_FILES or p.name.startswith(('.env','analysis_tools_status_v','.analysis-tools-')) or p.suffix.lower() in {'.zip','.whl','.pyc','.log','.pem','.key','.pfx'}:continue
         result.append(p)
     return result
 
@@ -26,11 +26,18 @@ def screen(files):
             if pattern.search(content):failures.append(str(p.relative_to(ROOT)))
     if failures:raise RuntimeError('Possible credentials found; inspect these files before publishing: '+', '.join(sorted(set(failures))))
 
-def build(output=None):
+def build(output=None, *, from_manifest=False):
     meta=json.loads((ROOT/'release.json').read_text())
-    files=payload_files();screen(files)
     manifest=ROOT/f"PACKAGE_MANIFEST_SHA256_{meta['version']}.txt"
-    files=[f for f in files if not f.name.startswith('PACKAGE_MANIFEST_SHA256_')]
+    files=[f for f in payload_files() if not f.name.startswith('PACKAGE_MANIFEST_SHA256_')]
+    if from_manifest:
+        available = {path.relative_to(ROOT).as_posix(): path for path in files}
+        listed = [line.split('  ', 1)[1] for line in manifest.read_text(encoding='utf-8').splitlines()]
+        missing = sorted(set(listed) - available.keys())
+        if missing:
+            raise RuntimeError('Current package is missing files. Extract the full ZIP again: ' + ', '.join(missing))
+        files = [available[name] for name in listed]
+    screen(files)
     manifest.write_text(''.join(hashlib.sha256(f.read_bytes()).hexdigest()+'  '+f.relative_to(ROOT).as_posix()+'\n' for f in files),encoding='utf-8')
     dest=Path(output) if output else ROOT/'dist'/meta['package_asset']
     dest.parent.mkdir(parents=True,exist_ok=True)
@@ -47,10 +54,10 @@ def build(output=None):
     return dest
 
 if __name__=='__main__':
-    parser=argparse.ArgumentParser();parser.add_argument('--scan-only',action='store_true');parser.add_argument('--output');parser.add_argument('--list-files',action='store_true')
+    parser=argparse.ArgumentParser();parser.add_argument('--scan-only',action='store_true');parser.add_argument('--output');parser.add_argument('--list-files',action='store_true');parser.add_argument('--from-manifest',action='store_true',help='Use the existing release manifest as the payload inventory.')
     args=parser.parse_args()
     if args.list_files:
         files=payload_files();screen(files)
         print('\n'.join(f.relative_to(ROOT).as_posix() for f in files))
     elif args.scan_only:screen(payload_files());print('Source credential-pattern screening: PASS')
-    else:build(args.output)
+    else:build(args.output, from_manifest=args.from_manifest)

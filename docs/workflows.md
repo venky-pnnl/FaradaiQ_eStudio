@@ -40,7 +40,7 @@ To continue in SciLink, prepare a local HDF5 bundle in either mode. [Follow the 
 
 ## Scientific analysis
 
-Choose the relevant **Analysis tool** in the v336 local browser. The table also shows where to find the corresponding desktop workflows.
+Choose the relevant **Analysis tool** in the v337 local browser. The table also shows where to find the corresponding desktop workflows.
 
 | Measurement | Local browser | Desktop app |
 |---|---|---|
@@ -52,7 +52,7 @@ Choose the relevant **Analysis tool** in the v336 local browser. The table also 
 | **Mott–Schottky** | Choose **Mott–Schottky** for impedance measured across DC potential steps on a common frequency grid. | Review potential-dependent impedance, capacitance, fits, and related views. |
 | **Spatial and SECCM** | Choose **Spatial points** for point metrics or **Interactive views** for 2D maps, 3D surfaces, and hyperspectral views with suitable input. | Group traces by point, method, and cycle. Review line scans, spatial maps, and multidimensional views. |
 
-The recordings below use synthetic measurements and were captured in the v333 local browser.
+The recordings below use synthetic measurements and were captured in the v337 local browser.
 
 <details>
 <summary>Watch CV, LSV, FSCV, pulse, and stripping measurements</summary>
@@ -68,7 +68,7 @@ The recordings below use synthetic measurements and were captured in the v333 lo
 <details>
 <summary>Watch impedance overlays, circuit fitting, lin-KK, and DRT</summary>
 <p><img src="media/estudio-browser-eis-workflow.gif" alt="eStudio Browser overlaying impedance spectra and showing an equivalent-circuit fit, lin-KK validation, and DRT output" width="960"></p>
-<p><img src="media/estudio-browser-eis.png" alt="FaradaIQ eStudio v333 local browser with three overlaid synthetic EIS spectra in a Nyquist plot" width="960"></p>
+<p><img src="media/estudio-browser-nyquist.png" alt="FaradaIQ eStudio v337 local browser with three overlaid synthetic EIS spectra in a Nyquist plot" width="960"></p>
 </details>
 
 <details>
@@ -79,20 +79,20 @@ The recordings below use synthetic measurements and were captured in the v333 lo
 
 ## Install and start
 
-Download the full `FaradaIQ_eStudio_v336_package.zip` from [GitHub Releases](https://github.com/venky-pnnl/FaradaiQ_eStudio/releases). The matching `.zip.sha256` file contains the archive checksum. Keep the extracted files together and stay online while the installer sets up the runtime. The main installer checks DearEIS, official pyDRTtools, and managed SciLink before opening the apps. Run the same installer again to repair an incomplete tool setup.
+Download the full `FaradaIQ_eStudio_v337_package.zip` from [GitHub Releases](https://github.com/venky-pnnl/FaradaiQ_eStudio/releases). The matching `.zip.sha256` file contains the archive checksum. Keep the extracted files together and stay online while the installer sets up the runtime. The main installer checks DearEIS, official pyDRTtools, and managed SciLink before opening the apps. Run the same installer again to repair an incomplete tool setup.
 
 ### Windows
 
 1. In File Explorer, right-click the ZIP, choose **Extract All**, and open the extracted folder.
-2. Double-click **`Install_FaradaIQ_eStudio_v336.bat`**. Keep the console open while setup verifies the package and prepares the Python environment. If a compatible Python is missing, setup uses WinGet to install Python 3.12.
-3. Setup opens **FaradaIQ eStudio**, **FaradaIQ eStudio Browser**, and **SciLink**. Reopen any app from **Desktop → Holaris Apps**. The default eStudio install folder is `C:\FaradaIQ\eStudio\V336`.
+2. Double-click **`Install_FaradaIQ_eStudio_v337.bat`**. Keep the console open while setup verifies the package and prepares the Python environment. If a compatible Python is missing, setup uses WinGet to install Python 3.12.
+3. Setup opens **FaradaIQ eStudio**, **FaradaIQ eStudio Browser**, and **SciLink**. Reopen any app from **Desktop → Holaris Apps**. The default eStudio install folder is `C:\FaradaIQ\eStudio\V337`.
 
 ### macOS
 
 1. In Finder, double-click the ZIP and open the extracted folder.
-2. Double-click **`Install_FaradaIQ_eStudio_v336.command`**.
+2. Double-click **`Install_FaradaIQ_eStudio_v337.command`**.
 3. Keep Terminal open. The installer reuses Python 3.12 with Tk if available. Otherwise, it downloads and verifies the official Python 3.12 package, then installs it. Enter your Mac administrator password if Terminal prompts for it.
-4. Setup opens **FaradaIQ eStudio**, **FaradaIQ eStudio Browser**, and **SciLink**. Reopen any app from **Desktop → Holaris Apps**. The default eStudio install folder is `~/Applications/FaradaIQ eStudio/V336`.
+4. Setup opens **FaradaIQ eStudio**, **FaradaIQ eStudio Browser**, and **SciLink**. Reopen any app from **Desktop → Holaris Apps**. The default eStudio install folder is `~/Applications/FaradaIQ eStudio/V337`.
 
 #### If macOS blocks the installer
 
@@ -107,10 +107,10 @@ Download the full `FaradaIQ_eStudio_v336_package.zip` from [GitHub Releases](htt
 Open **Terminal**, paste the following command, and press **Return**.
 
 ```bash
-/bin/bash "$HOME/Applications/FaradaIQ eStudio/V336/Start_FaradaIQ_eStudio_v336.command"
+/bin/bash "$HOME/Applications/FaradaIQ eStudio/V337/Start_FaradaIQ_eStudio_v337.command"
 ```
 
-For another installed release, use that release’s folder and launcher version. For v336, startup messages are also saved in `~/Library/Logs/FaradaIQ eStudio/startup_v336.log`. If the app still closes, include the last lines of that log when reporting the issue.
+For another installed release, use that release’s folder and launcher version. For v337, startup messages are also saved in `~/Library/Logs/FaradaIQ eStudio/startup_v337.log`. If the app still closes, include the last lines of that log when reporting the issue.
 
 ### Local browser
 
@@ -118,9 +118,9 @@ Open **FaradaIQ eStudio Browser** under **Desktop → Holaris Apps**. Its local 
 
 Use a local folder path for large datasets or a mounted network share. The file and folder pickers send selected files to eStudio on the same computer. Keep instrument companions together. When a folder contains both raw instrument files and curated tables, open the curated folder separately to analyze those tables. Imports, plots, deterministic calculations, and reports run on your computer. A reviewed SciLink or Edison request can send selected data to the provider you configure.
 
-The browser launcher records the actual loopback address in the versioned startup log. The desktop app provides its saved native layouts and optional Qt tool windows. The browser provides method-specific controls, interactive charts, and downloadable outputs for the workflows listed under **Scientific analysis**. See the [verification report](../QA_v336.md) for platform and service coverage.
+The browser launcher records the actual loopback address in the versioned startup log. The desktop app provides its saved native layouts and optional Qt tool windows. The browser provides method-specific controls, interactive charts, and downloadable outputs for the workflows listed under **Scientific analysis**. See the [verification report](../QA_v337.md) for platform and service coverage.
 
-If the browser does not start, check `%LOCALAPPDATA%\FaradaIQ\eStudio\logs\browser_v336.log` on Windows or `~/Library/Logs/FaradaIQ eStudio/browser_v336.log` on macOS.
+If the browser does not start, check `%LOCALAPPDATA%\FaradaIQ\eStudio\logs\browser_v337.log` on Windows or `~/Library/Logs/FaradaIQ eStudio/browser_v337.log` on macOS.
 
 ## Configure integrations
 
@@ -157,7 +157,7 @@ Configure the model and credentials in SciLink for interactive analysis. Reviewe
 
 <img src="media/estudio-browser-scilink.png" alt="SciLink page in the local eStudio browser showing a completed HDF5 bundle, review and download controls, and the link to local SciLink" width="960">
 
-<sub>eStudio v333 Browser handoff for the synthetic impedance example.</sub>
+<sub>eStudio v337 Browser handoff for the synthetic impedance example.</sub>
 
 <details>
 <summary>Watch the SciLink bundle handoff</summary>
@@ -180,11 +180,11 @@ Enter your [LabRIC](https://docs.labric.co/welcome) MCP endpoint and session-onl
 
 ## How to cite
 
-Use the version that produced the results reported in your article. The APA reference for v336 is below.
+Use the version that produced the results reported in your article. The APA reference for v337 is below.
 
-> Prabhakaran, V. (2026). *FaradaIQ eStudio* (Version v336) [Computer software]. <https://github.com/venky-pnnl/FaradaiQ_eStudio>
+> Prabhakaran, V. (2026). *FaradaIQ eStudio* (Version v337) [Computer software]. <https://github.com/venky-pnnl/FaradaiQ_eStudio>
 
-**Methods example.** “Electrochemical data were processed using FaradaIQ eStudio v336 (Prabhakaran, 2026).”
+**Methods example.** “Electrochemical data were processed using FaradaIQ eStudio v337 (Prabhakaran, 2026).”
 
 Add the versions of any third-party tools used and cite the applicable methods below. The repository’s [citation file](../CITATION.cff) contains the software metadata that GitHub uses to provide APA and BibTeX export.
 
@@ -202,8 +202,12 @@ FaradaIQ eStudio was designed by Venkateshkumar Prabhakaran.
 | [pyDRTtools](https://github.com/ciuccislab/pyDRTtools) | Ciucci Lab, Francesco Ciucci, Adeleke Maradesa, and contributors. Distribution of relaxation times (DRT) analysis. | [Wan et al. (2015), radial basis functions](https://doi.org/10.1016/j.electacta.2015.09.097), [Ciucci & Chen (2015), Bayesian DRT](https://doi.org/10.1016/j.electacta.2015.03.123), or [Maradesa et al. (2023), regularization](https://doi.org/10.1149/1945-7111/acbca4), according to the method used. |
 | [DearEIS](https://github.com/vyrjana/DearEIS) and [pyimpspec](https://github.com/vyrjana/pyimpspec) | Ville Yrjänä and contributors. Impedance analysis and equivalent-circuit workflows. | [Yrjänä (2022), DearEIS](https://doi.org/10.21105/joss.04808). If using pyimpspec directly, cite its software version. |
 | [PySimpleEChem](https://github.com/kevinsmia1939/PySimpleEChem) | Kavin Teenakul and contributors. Cyclic voltammetry visualization and analysis. | [PySimpleEChem software repository](https://github.com/kevinsmia1939/PySimpleEChem). Include the version or commit used. |
-| [SciLink](https://github.com/ziatdinovmax/SciLink) | Maxim Ziatdinov and the PNNL SciLink team. Scientific analysis, literature review, and planning. [PNNL project page](https://www.pnnl.gov/projects/center-robotics-autonomy/scilink) | [Yao et al. (2025), SciLink preprint](https://arxiv.org/abs/2508.06569) |
+| [SciLink](https://github.com/ziatdinovmax/SciLink) | Maxim Ziatdinov and the PNNL SciLink team (PNNL contact: Sarah Allec). Scientific analysis, literature review, and planning. [PNNL project page](https://www.pnnl.gov/projects/center-robotics-autonomy/scilink) | [Yao et al. (2025), SciLink preprint](https://arxiv.org/abs/2508.06569) |
 | [Edison Scientific](https://platform.edisonscientific.com/) | Edison Scientific team. Scientific and literature analysis through the official client. | [Edison Scientific client documentation](https://github.com/EdisonScientific/edison-client-docs). Identify the service, agent, and client version if used. |
 | [impedance.py](https://github.com/ECSHackWeek/impedance.py) | ECSHackWeek contributors. Electrochemical impedance analysis. | [Murbach et al. (2020), impedance.py](https://doi.org/10.21105/joss.02349) |
+| [galvani](https://github.com/echemdata/galvani) | echemdata contributors. Electrochemical file support. | Cite the software version used. |
+| [Scientific Python](https://scientific-python.org/) | NumPy, SciPy, pandas, and Matplotlib communities. Arrays, numerical methods, tables, and plots. | Cite the libraries used in the analysis. |
+| [HDF5 / h5py](https://www.h5py.org/) | The HDF Group and h5py contributors. Structured data and metadata storage. | Cite the software if relevant to the workflow. |
+| Desktop, browser, and reporting tools | Tcl/Tk, Streamlit, Pillow, Plotly, Altair, python-pptx, and openpyxl communities. User interfaces, graphics, and scientific reports. | [Third-party notices](THIRD_PARTY.md) |
 
 Open **Credits** in eStudio for project links and setup guides. See the [full references and third-party notices](THIRD_PARTY.md) for citation details, attribution, licenses, and service terms.
