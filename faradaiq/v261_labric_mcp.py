@@ -28,6 +28,9 @@ def proxy_script() -> Path:
 
 def faradaiq_python() -> Path:
     root = package_root()
+    mac_python = root / ".faradaiq_venv_macos" / "bin" / "python"
+    if sys.platform == "darwin" and mac_python.is_file():
+        return mac_python
     candidate = (
         root / ".faradaiq_venv" / "Scripts" / "python.exe"
         if os.name == "nt"

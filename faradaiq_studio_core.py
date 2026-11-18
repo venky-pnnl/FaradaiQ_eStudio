@@ -367,7 +367,7 @@ VMPdata_colID_dtype_map = {
     272: ("Phase(Z2) / deg", "<f4"),
     301: ("|Z1|/Ohm", "<f4"),
     302: ("|Z2|/Ohm", "<f4"),
-    331: ("Re(Z1)/Ohm", "<f4"),
+    332: ("Re(Z1)/Ohm", "<f4"),
     332: ("Re(Z2)/Ohm", "<f4"),
     361: ("-Im(Z1)/Ohm", "<f4"),
     362: ("-Im(Z2)/Ohm", "<f4"),
@@ -68922,7 +68922,7 @@ def _v219_start_new_session(gui, source_path=None, reason='manual', preserve_des
     _os.environ['FARADAIQ_SESSION_ID'] = sid
     _os.environ['FARADAIQ_LAUNCH_ROOT'] = str(root)
     _os.environ['FARADAIQ_SESSION_DIR'] = str(session_dir)
-    _os.environ['FARADAIQ_APP_VERSION'] = 'v331'
+    _os.environ['FARADAIQ_APP_VERSION'] = 'v336'
     _os.environ['FARADAIQ_SESSION_NAME'] = display_name
     if selected:
         _os.environ['FARADAIQ_SESSION_SOURCE'] = selected
@@ -68941,7 +68941,7 @@ def _v219_start_new_session(gui, source_path=None, reason='manual', preserve_des
         'pid': _os.getpid(),
         'script': str(_Path(__file__).resolve()),
         'reason': str(reason),
-        'app_version': 'v331',
+        'app_version': 'v336',
     }
     try:
         (session_dir / 'session_context.json').write_text(json.dumps(_v177_json_safe(ctx), ensure_ascii=False, indent=2), encoding='utf-8')
@@ -68953,7 +68953,7 @@ def _v219_start_new_session(gui, source_path=None, reason='manual', preserve_des
                 f'Source: {selected or "not selected"}',
                 f'Created: {ctx["created_or_seen"]}',
                 f'Reason: {reason}',
-                'App version: v331',
+                'App version: v336',
             ]) + '\n',
             encoding='utf-8',
         )
@@ -71173,9 +71173,9 @@ def _v320_main_final():
     return _v80_main()
 # ---- End FaradaIQ Studio v320 patch ----
 
-# Standalone eStudio v331 presentation and distribution release.
-from faradaiq.estudio_ui import install as _install_estudio_v331
-_install_estudio_v331(globals())
-def _v331_main_final():
+# Standalone eStudio v336 presentation and distribution release.
+from faradaiq.estudio_ui import install as _install_estudio_v336
+_install_estudio_v336(globals())
+def _v336_main_final():
     _v83_set_windows_app_id()
     return _v80_main()

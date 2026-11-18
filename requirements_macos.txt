@@ -1,4 +1,4 @@
-# macOS Python 3.11/3.12; includes the complete core analysis and service stack.
+# macOS Python 3.12; includes the complete core analysis and service stack.
 numpy==1.26.4
 pandas==2.2.2
 scipy==1.13.1
@@ -7,7 +7,7 @@ contourpy==1.2.0
 pillow==10.3.0
 cvxpy==1.6.7
 PyQt5==5.15.10; platform_machine != 'arm64'
-# Optional pyDRTtools Qt GUI requires a compatible Qt5 installation on Apple Silicon.
+# The optional-tool stage adds the published Apple Silicon Qt 5 wheels where available.
 # Optional AWS Bedrock direct support
 boto3>=1.34
 openpyxl==3.1.5
@@ -50,3 +50,5 @@ mcp>=1.12,<2
 
 # FaradaIQ Studio v290 technique-aware PowerPoint summaries
 python-pptx>=1.0,<2
+
+-r requirements_browser.txt

@@ -70,9 +70,9 @@ if missing_nonpip:
     sys.exit(3)
 
 print("\nOptional integrations:")
-print("  [OPTION]  DearEIS: checked separately in .deareis_venv by _check_deareis_optional.py")
-print("  [OPTION]  Official pyDRTtools GUI: checked at every launcher start by _check_pydrttools_optional.py")
-print("             If missing/broken, install_official_pydrttools_optional starts automatically in a separate window.")
+print("  [OPTION]  DearEIS: the main installer checks and repairs its separate .deareis_venv.")
+print("  [OPTION]  Official pyDRTtools GUI: the main installer checks and repairs it in the private eStudio runtime.")
+print("             Rerunning setup retries either integration. Bundled DRT remains available.")
 
 print("\nAll required FaradaIQ Studio / pySECCM / DRT / scientific intelligence dependencies imported successfully.")
 sys.exit(0)

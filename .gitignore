@@ -30,3 +30,7 @@ litellm_proxy/*settings*.json
 SciLink_ready/
 
 FaradaIQ_parser_jobs/
+
+# Local integration status and its atomic write staging
+analysis_tools_status_v*.json
+.analysis-tools-*

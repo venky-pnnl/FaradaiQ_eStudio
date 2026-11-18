@@ -1,14 +1,9 @@
 {
-  "release": "v331",
-  "targeted_tests_passed": 53,
-  "subtests_passed": 4,
-  "macos_bootstrap_simulated_cases_passed": 11,
-  "macos_finder_launcher_cases_passed": 4,
-  "live_gui_smoke_linux_tk": "PASS",
-  "documentation_links_and_manifest": "PASS",
-  "windows_installer_plan": "PASS",
-  "macos_installer_plan": "PASS",
-  "package_checksums": "PASS",
-  "native_installs": "not run",
-  "funding_citations_and_parser_attribution": "PASS"
+  "release": "v336",
+  "publisher_local_git_existing_empty_and_concurrent_remotes": "PASS",
+  "platform_setup_order_fixture": "PASS",
+  "optional_analysis_tool_setup_and_handoff": "PASS",
+  "native_macos_windows_installs": "not run",
+  "live_github_release_publish": "not run",
+  "linux_deareis_import_and_pydrttools_gui_construction": "PASS"
 }

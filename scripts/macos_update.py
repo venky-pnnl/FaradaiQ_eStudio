@@ -28,7 +28,8 @@ def main():
         meta=json.loads((payload/'release.json').read_text())
         if meta['package_asset']!=name or meta['version']!=release['tag_name']:raise RuntimeError('Release identity mismatch.')
         environment=os.environ.copy();environment['FARADAIQ_SOURCE_PACKAGE_ZIP']=str(archive)
-        subprocess.run([sys.executable,str(payload/'scripts/macos_install.py'),*sys.argv[1:]],env=environment,check=True)
+        installer=payload/f"Install_FaradaIQ_eStudio_{meta['version']}.sh"
+        subprocess.run(['/bin/bash',str(installer),*sys.argv[1:]],env=environment,check=True)
 if __name__=='__main__':
     try:main()
     except Exception as exc:sys.exit('Update failed: '+str(exc))

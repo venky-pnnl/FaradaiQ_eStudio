@@ -15,7 +15,7 @@ import traceback
 
 # Permit a non-interactive import on workstations that are launching through a
 # remote session.  This does not affect the later real pyDRTtools GUI process.
-os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+os.environ["QT_QPA_PLATFORM"] = "offscreen"
 
 
 def _version(distribution: str) -> str:
@@ -32,7 +32,8 @@ def main() -> int:
         cvxopt = importlib.import_module("cvxopt")
         sklearn = importlib.import_module("sklearn")
         requests = importlib.import_module("requests")
-        importlib.import_module("PyQt5")
+        widgets = importlib.import_module("PyQt5.QtWidgets")
+        application = widgets.QApplication.instance() or widgets.QApplication([])
         gui_module = importlib.import_module("pyDRTtools.GUI")
         runs_module = importlib.import_module("pyDRTtools.runs")
 
@@ -43,12 +44,16 @@ def main() -> int:
         if eis_object is None or not hasattr(eis_object, "from_file"):
             raise RuntimeError("pyDRTtools.runs.EIS_object.from_file was not found")
 
+        window = gui()
+        window.close()
+        application.processEvents()
+
         print("PYDRTTOOLS_CHECK=READY")
         print("pyDRTtools distribution:", _version("pyDRTtools"))
         print("cvxopt:", getattr(cvxopt, "__version__", _version("cvxopt")))
         print("scikit-learn:", getattr(sklearn, "__version__", _version("scikit-learn")))
         print("requests:", getattr(requests, "__version__", _version("requests")))
-        print("GUI class and EIS selected-data loader imported successfully.")
+        print(f"GUI construction and EIS selected-data loader verified ({application.platformName()}).")
         return 0
     except Exception:
         print("PYDRTTOOLS_CHECK=MISSING_OR_BROKEN")

@@ -13,14 +13,14 @@ def payload_files():
         rel=p.relative_to(ROOT)
         if not p.is_file() or any(part in EXCLUDED or part.startswith('.deareis_venv') for part in rel.parts):continue
         if rel.parts[0]=='litellm_proxy' and p.name not in {'README_litellm_proxy.txt','requirements_litellm_proxy.txt','start_faradaiq_litellm_proxy.bat'}:continue
-        if p.name in EXCLUDED_FILES or p.name.startswith('.env') or p.suffix.lower() in {'.zip','.pyc','.log','.pem','.key','.pfx'}:continue
+        if p.name in EXCLUDED_FILES or p.name.startswith(('.env','analysis_tools_status_v','.analysis-tools-')) or p.suffix.lower() in {'.zip','.pyc','.log','.pem','.key','.pfx'}:continue
         result.append(p)
     return result
 
 def screen(files):
     failures=[]
     for p in files:
-        if p.suffix.lower() not in {'.py','.ps1','.bat','.json','.yml','.yaml','.toml','.txt','.md','.ini','.cfg','.sh','.command'}:continue
+        if p.suffix.lower() not in {'.py','.pyw','.ps1','.bat','.json','.yml','.yaml','.toml','.txt','.md','.ini','.cfg','.sh','.command'}:continue
         content=p.read_text(encoding='utf-8',errors='replace')
         for pattern in PATTERNS:
             if pattern.search(content):failures.append(str(p.relative_to(ROOT)))

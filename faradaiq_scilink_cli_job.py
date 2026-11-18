@@ -69,6 +69,8 @@ _SCILINK_RUNTIME_IMPORTS = (
 
 
 def _candidate_commands(settings: Mapping[str, Any]) -> list[list[str]]:
+    from faradaiq.managed_scilink import runtime_cli
+
     out: list[list[str]] = []
     override = str(
         settings.get("scilink_executable_override")
@@ -79,11 +81,13 @@ def _candidate_commands(settings: Mapping[str, Any]) -> list[list[str]]:
     ).strip()
     if override:
         raw_override = override.strip('"')
-        p = Path(raw_override)
-        resolved = str(p.resolve()) if p.exists() else (shutil.which(raw_override) or "")
+        p = Path(raw_override).expanduser()
+        resolved = str(p.absolute()) if p.exists() else (shutil.which(raw_override) or "")
         if resolved:
             candidate = Path(resolved)
             out.append([resolved, "-m", "scilink"] if candidate.name.lower().startswith("python") else [resolved])
+    if managed := runtime_cli():
+        out.append([str(managed)])
     for name in ("scilink.exe", "scilink"):
         found = shutil.which(name)
         if found:
@@ -123,7 +127,7 @@ def _scilink_python(command: list[str]) -> Path | None:
         return None
     executable = Path(command[0])
     if executable.name.lower().startswith("python") and executable.is_file():
-        return executable.resolve()
+        return executable.absolute()
     if executable.name.lower() in {"scilink.exe", "scilink"}:
         candidates = [
             executable.with_name("python.exe"),
@@ -133,7 +137,7 @@ def _scilink_python(command: list[str]) -> Path | None:
         ]
         for candidate in candidates:
             if candidate.is_file():
-                return candidate.resolve()
+                return candidate.absolute()
     return None
 
 
@@ -1404,8 +1408,8 @@ def main() -> int:
 
     base, sub, help_text = _choose_command(settings)
     if base is None:
-        print("[ERROR] SciLink CLI was not found in PATH, C:\\SciLink, C:\\FaradaiqSIED, or the configured override.")
-        print("The reviewed job is preserved. Set SCILINK_EXE or choose a SciLink executable in LLM Settings -> Data Sharing.")
+        print("[ERROR] No managed or external SciLink CLI was found.")
+        print("The reviewed job is preserved. Choose Update SciLink in eStudio or set the SciLink executable override under LLM Settings -> Data Sharing.")
         return 2
 
     skill_flag = next((flag for flag in ("--skills", "--skill-file", "--skill") if _supports(help_text, flag)), "")

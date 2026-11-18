@@ -3,286 +3,145 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="FaradaIQ eStudio is a desktop workspace for electrochemical data analysis.">
-<title>FaradaIQ eStudio</title>
+<meta name="description" content="FaradaIQ eStudio brings electrochemical instrument exports into a local workflow for measurement review, analysis, reports, and SciLink handoff.">
+<title>FaradaIQ eStudio · Electrochemical data workflows</title>
 <style>
 :root {
   color-scheme: light;
-  --paper: #ffffff;
-  --background: #f0f4f5;
-  --ink: #162c39;
-  --muted: #425b68;
-  --line: #d9e4e8;
-  --accent: #026557;
+  --ink: #142d3e;
+  --muted: #405b6b;
+  --accent: #00665e;
+  --paper: #fff;
+  --tint: #edf3f5;
+  --line: #cfdde3;
 }
-* { box-sizing: border-box; }
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-padding-block: 1.5rem; }
 body {
   margin: 0;
-  background: var(--background);
+  background: var(--paper);
   color: var(--ink);
-  font: 16px/1.62 "Instrument Sans", "Segoe UI", system-ui, sans-serif;
+  font: 16px/1.57 "Instrument Sans", "Segoe UI", system-ui, sans-serif;
 }
-main { max-width: 1110px; margin: auto; background: var(--paper); }
-.intro {
-  padding: 48px clamp(20px, 5.5vw, 68px) 48px;
-  background: linear-gradient(160deg, #f0f8f6, #f8fbfc 65%);
-  border-bottom: 1px solid var(--line);
-}
-h1, h2, h3 { line-height: 1.18; letter-spacing: -.026em; }
-h1 { margin: 12px 0 4px; font-size: clamp(38px, 7vw, 72px); font-weight: 720; }
-h1 + p { margin: 2px 0 21px; font-size: clamp(18px, 3vw, 25px); }
-h2 { margin: 42px 0 14px; padding-top: 23px; border-top: 1px solid var(--line); font-size: clamp(26px, 4vw, 35px); }
-.guide > h2:first-child { border-top: 0; padding-top: 0; margin-top: 0; }
-h3 { margin: 24px 0 8px; font-size: 21px; }
-.intro p { max-width: 72ch; color: var(--muted); }
-.intro > p:first-child { margin-top: 0; }
-.intro > p:has(.workspace) { max-width: none; margin-bottom: 0; }
-p, ol, ul { margin: 10px 0 16px; }
-li + li { margin-top: 5px; }
-a { color: var(--accent); text-decoration-thickness: .08em; text-underline-offset: .17em; }
+h1, h2, h3 { margin: 0; line-height: 1.13; letter-spacing: -.025em; }
+h1 { font-size: clamp(2.05rem, 5.3vw, 4.15rem); max-width: 21ch; font-weight: 690; }
+h2 { font-size: clamp(1.45rem, 3vw, 2.15rem); }
+h3 { font-size: 1.08rem; }
+p { margin: .85rem 0 0; color: var(--muted); }
+a { color: var(--accent); text-underline-offset: .18em; }
+a:hover { color: #00443f; }
 a:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
-.navigation { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
-.navigation a { padding-block: 5px; font-size: 15px; font-weight: 600; }
-.navigation .download { background: var(--accent); color: var(--paper); text-decoration: none; border-radius: 7px; padding: 7px 15px; }
-.navigation .download:hover { background: #054d43; }
-img { display: block; max-width: 100%; height: auto; }
-.workspace { width: 100%; margin-top: 26px; border: 1px solid #253d4d; border-radius: 12px; }
-.guide { padding: 38px clamp(20px, 5.5vw, 68px) 60px; }
-.guide img { border-radius: 8px; }
-.guide p:last-child img { margin-top: 34px; }
-.reference { width: 100%; border-collapse: collapse; margin: 12px 0 20px; font-size: .94rem; }
-th, td { text-align: left; vertical-align: top; padding: .6rem .73rem; border-bottom: 1px solid var(--line); }
-th { background: #eaf3f3; }
-code { background: #edf3f5; padding: .06em .23em; border-radius: 4px; overflow-wrap: anywhere; }
-@media (max-width: 600px) {
-  .intro { padding-top: 32px; padding-bottom: 30px; }
-  .guide { padding-top: 28px; }
-  th, td { padding: .48rem .34rem; overflow-wrap: anywhere; }
-  .reference { table-layout: fixed; font-size: .86rem; }
+code { padding: .13em .22em; background: #e1ebee; border-radius: .2em; overflow-wrap: anywhere; }
+img { display: block; width: 100%; height: auto; }
+figure { margin: 0; }
+.container { width: min(100% - 48px, 1100px); margin-inline: auto; }
+.top { border-bottom: 1px solid var(--line); }
+.top .container {
+  display: flex; justify-content: space-between; align-items: center; gap: .5rem 1.5rem;
+  flex-wrap: wrap; padding-block: 1.1rem;
+}
+.brand { color: var(--ink); font-size: 1.22rem; font-weight: 750; text-decoration: none; white-space: nowrap; }
+nav { display: flex; gap: .35rem 1.25rem; flex-wrap: wrap; }
+nav a { font-weight: 600; font-size: .9rem; text-decoration: none; }
+nav a:hover { text-decoration: underline; }
+.hero { background: #f5f9f9; border-bottom: 1px solid var(--line); }
+.hero .container { padding-block: clamp(2.65rem, 6vw, 4.6rem); }
+.hero .lead { max-width: 65ch; font-size: clamp(1rem, 1.7vw, 1.18rem); margin-top: 1.2rem; }
+.actions { display: flex; flex-wrap: wrap; gap: .6rem 1rem; align-items: center; margin-top: 1.5rem; }
+.primary { background: var(--accent); color: white; font-weight: 660; text-decoration: none; border-radius: 5px; padding: .58rem .95rem; }
+.primary:hover { background: #004b45; color: #fff; }
+.section { padding-block: 2.6rem; }
+.section + .section { border-top: 1px solid var(--line); }
+.schematic { background: var(--tint); border-radius: 10px; margin-top: 1.25rem; }
+.stage-notes { margin: 1.15rem 0 0; padding-left: 1.3rem; color: var(--muted); }
+.stage-notes li + li { margin-top: .42rem; }
+.stage-notes strong { color: var(--ink); }
+.example { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 1.6rem; align-items: center; }
+.screenshot { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+figcaption { margin-top: .5rem; color: var(--muted); font-size: .88rem; }
+.info { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; }
+.info article { background: var(--tint); border: 1px solid var(--line); border-radius: 8px; padding: 1.25rem; }
+.info article p { margin-top: .7rem; overflow-wrap: anywhere; }
+.footer { padding-block: 1.45rem 2rem; background: #f5f9f9; border-top: 1px solid var(--line); }
+.footer p { font-size: .92rem; }
+@media (max-width: 720px) {
+  .container { width: calc(100% - 32px); }
+  .section { padding-block: 1.8rem; }
+  .example, .info { grid-template-columns: 1fr; }
 }
 </style>
 </head>
-<body>
-<main>
-<header class="intro">
-<p><img src="media/faradaiq-estudio-logo.png" alt="" width="76"></p>
-<h1>FaradaIQ eStudio</h1>
-<p><strong>A desktop workspace for electrochemical data analysis</strong></p>
-<p class="navigation" aria-label="Page navigation"><a class="download" href="https://github.com/venky-pnnl/FaradaiQ_eStudio/releases">Download</a> <a href="#install-and-start">Install</a> <a href="#supported-instrument-files">File formats</a> <a href="#scientific-analysis">Analysis tools</a> <a href="#configure-integrations">Integrations</a> <a href="#how-to-cite">Cite</a> <a href="#project-credits">Credits</a></p>
-<p>Open instrument exports, compare measurements across samples and cycles, and save the session so you can pick up where you left off. eStudio brings CV, EIS, transients, and spatial electrochemistry into the same Data Browser. Export figures and reports or package selected data and experiment metadata for SciLink.</p>
-<img class="workspace" src="media/estudio-workspace.png" alt="FaradaIQ eStudio showing session controls, the Data Browser sidebar, and an experiment preview" width="960">
+<body id="top">
+<header class="top">
+  <div class="container">
+    <a class="brand" href="#top">FaradaIQ eStudio</a>
+    <nav aria-label="Page navigation">
+      <a href="#from-source-files-to-results">Workflow</a>
+      <a href="#install-and-start">Install</a>
+      <a href="#configure-integrations">SciLink</a>
+      <a href="#cite-and-credit">Cite and credit</a>
+    </nav>
+  </div>
 </header>
-<div class="guide">
-<h2 id="from-source-files-to-results">From source files to results</h2>
-<img src="media/data-workflow.png" alt="Data workflow from instrument files through inspection and analysis to reports and SciLink-ready bundles" width="960">
-<ol>
-<li>Open a file or folder in <strong>Data</strong> and select <strong>Inspect</strong> to check the techniques, units, and measurement counts.</li>
-<li>Use the <strong>Data Browser</strong> to find measurements by site, method, or cycle. Overlay selected traces and open the analysis tools for that technique.</li>
-<li>Use <strong>Save Session</strong> or save a browser session to reopen the experiment or view later. Export a PowerPoint summary or a portable HTML data browser to review results outside the app.</li>
-</ol>
-<p><strong>Make SciLink-ready bundle</strong> writes a local HDF5 file with curated numerical data, a JSON manifest, source files and hashes, and an electrochemistry skill and request template. Open <strong>Ask SciLink</strong> when you want to review a question and choose the files to submit.</p>
-<h2 id="supported-instrument-files">Supported instrument files</h2>
-<table class="reference">
-<thead>
-<tr>
-<th>Software</th>
-<th>Files</th>
-<th>Open in eStudio</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><a href="https://www.heka.com/downloads/downloads_main.html">HEKA</a> POTMASTER / PATCHMASTER DAT2</td>
-<td><code>.dat</code> and companion sections such as <code>.pul</code>, <code>.pgf</code>, <code>.amp</code>, <code>.mrk</code>, <code>.mth</code>, and <code>.onl</code></td>
-<td>Select the bundled <code>.dat</code> or the folder containing the associated files. Keep position files for spatial analysis.</td>
-</tr>
-<tr>
-<td><a href="https://www.palmsens.com/software/ps-trace/">PalmSens</a> PSTrace</td>
-<td><code>.pssession</code></td>
-<td>Select a session file, a folder, or a supported ZIP of sessions.</td>
-</tr>
-<tr>
-<td><a href="https://www.biologic.net/softwares/ec-lab-software/">BioLogic</a> EC-Lab</td>
-<td><code>.mpr</code>, <code>.mps</code>, <code>.mgr</code></td>
-<td>Keep the binary data and method files together.</td>
-</tr>
-<tr>
-<td><a href="https://www.ameteksi.com/Products/Software/Princeton-Applied-Research/VersaStudio-Software">Princeton Applied Research</a> VersaStudio</td>
-<td><code>.par</code>, with the same-stem <code>.par.psbd</code> where present</td>
-<td>Open the <code>.par</code> with its binary companion beside it. The companion can hold the numerical traces.</td>
-</tr>
-<tr>
-<td><a href="https://www.scribner.com/software/">Solartron Analytical</a> CorrWare / ZPlot</td>
-<td><code>.cor</code>, <code>.z</code></td>
-<td>Open the original files with their headers intact.</td>
-</tr>
-<tr>
-<td>Delimited tables</td>
-<td><code>.csv</code>, <code>.tsv</code>, <code>.txt</code>, <code>.asc</code></td>
-<td>Use recognizable headers such as <code>time_s</code>, <code>potential_V</code>, <code>current_A</code>, <code>frequency_Hz</code>, <code>Zreal_ohm</code>, and <code>Zimag_ohm</code>.</td>
-</tr>
-<tr>
-<td>FaradaIQ bundles</td>
-<td><code>.h5</code>, <code>.hdf5</code></td>
-<td>Open the existing bundle from the Data Browser.</td>
-</tr>
-</tbody>
-</table>
-<h2 id="scientific-analysis">Scientific analysis</h2>
-<table class="reference">
-<thead>
-<tr>
-<th>Measurement</th>
-<th>What you can do</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>CV and LSV</td>
-<td>Overlay sweeps, compare cycles, and inspect peaks and baselines. Send selected CV data to PySimpleEChem.</td>
-</tr>
-<tr>
-<td>EIS and DRT</td>
-<td>Compare Nyquist and Bode plots. Review relaxation-time distributions or hand off selected spectra to DearEIS or pyDRTtools.</td>
-</tr>
-<tr>
-<td>CA, CP, and OCP</td>
-<td>Compare current and potential transients. Inspect integrated CA charge and compare OCP over time or by position.</td>
-</tr>
-<tr>
-<td>Tafel and corrosion</td>
-<td>Select polarization ranges for fitting and review corrosion metrics with the fitting range and normalization in view.</td>
-</tr>
-<tr>
-<td>Mott–Schottky</td>
-<td>Examine capacitance as a function of potential when the EIS data include associated potentials.</td>
-</tr>
-<tr>
-<td>Spatial and SECCM</td>
-<td>Group traces by point, method, and cycle. Compare line scans and maps when position metadata are available.</td>
-</tr>
-</tbody>
-</table>
-<img src="media/electrochemical-examples.png" alt="Synthetic cyclic voltammograms and a synthetic Nyquist impedance plot" width="960">
-<h2 id="install-and-start">Install and start</h2>
-<p>Download the full <code>FaradaIQ_eStudio_v331_package.zip</code> from <a href="https://github.com/venky-pnnl/FaradaiQ_eStudio/releases">GitHub Releases</a>. The matching <code>.zip.sha256</code> file contains the archive checksum. Keep the extracted files together and stay online while the installer sets up the runtime.</p>
-<h3 id="windows">Windows</h3>
-<ol>
-<li>In File Explorer, right-click the ZIP, choose <strong>Extract All</strong>, and open the extracted folder.</li>
-<li>Double-click <strong><code>Install_FaradaIQ_eStudio_v331.bat</code></strong>. Keep the console open while setup verifies the package and prepares the Python environment. If a compatible Python is missing, setup uses WinGet to install Python 3.12.</li>
-<li>Open <strong>Desktop → Holaris Apps → FaradaIQ eStudio</strong>. The default install folder is <code>C:\FaradaIQ\eStudio\V331</code>.</li>
-</ol>
-<h3 id="macos">macOS</h3>
-<ol>
-<li>In Finder, double-click the ZIP and open the extracted folder.</li>
-<li>Double-click <strong><code>Install_FaradaIQ_eStudio_v331.command</code></strong>.</li>
-<li>Keep Terminal open. The installer reuses Python 3.11 or 3.12 with Tk if available. Otherwise, it downloads and verifies the official Python 3.12 package, then installs it. Enter your Mac administrator password if Terminal prompts for it.</li>
-<li>Open <strong>Desktop → Holaris Apps → FaradaIQ eStudio</strong>. The icon opens Terminal to start eStudio. The default install folder is <code>~/Applications/FaradaIQ eStudio/V331</code>.</li>
-</ol>
-<h4 id="if-macos-blocks-the-installer">If macOS blocks the installer</h4>
-<ol>
-<li>After the warning appears, click <strong>Done</strong>.</li>
-<li>Open <strong> → System Settings → Privacy &amp; Security</strong>. Scroll to <strong>Security</strong> and look for the installer you just tried to open.</li>
-<li>After verifying the ZIP against the release’s SHA-256 file, click <strong>Open Anyway</strong> and confirm in the next dialog. If the button is missing, try opening the installer again and return to <strong>Privacy &amp; Security</strong>. <a href="https://support.apple.com/en-us/102445">Apple’s Gatekeeper instructions</a></li>
-</ol>
-<blockquote>
-<p><strong>macOS security disclaimer.</strong> The downloaded eStudio installer is not Apple-notarized. <strong>Open Anyway</strong> creates an exception for the specific installer. Use it only for a copy obtained from an authorized release source whose SHA-256 checksum you have verified. On an organization-managed Mac, follow your organization’s software approval policy.</p>
-</blockquote>
-<h4 id="if-the-icon-closes-immediately">If the icon closes immediately</h4>
-<p>Open <strong>Terminal</strong>, paste the following command, and press <strong>Return</strong>.</p>
-<pre><code class="language-bash">/bin/bash &quot;$HOME/Applications/FaradaIQ eStudio/V331/Start_FaradaIQ_eStudio_v331.command&quot;
-</code></pre>
-<p>For another installed release, use that release’s folder and launcher version. For v331, startup messages are also saved in <code>~/Library/Logs/FaradaIQ eStudio/startup_v331.log</code>. If the app still closes, include the last lines of that log when reporting the issue.</p>
-<h2 id="configure-integrations">Configure integrations</h2>
-<h3 id="local-analysis-tools">Local analysis tools</h3>
-<table class="reference">
-<thead>
-<tr>
-<th>Tool</th>
-<th>Setup</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><a href="https://github.com/ciuccislab/pyDRTtools">pyDRTtools</a></td>
-<td>Run <code>install_official_pydrttools_optional.bat</code> on Windows or <code>install_official_pydrttools_optional.command</code> on macOS. The upstream GUI requires Qt5. Select an EIS spectrum and choose <strong>Open in pyDRTtools</strong>.</td>
-</tr>
-<tr>
-<td><a href="https://vyrjana.github.io/DearEIS/">DearEIS</a></td>
-<td>Run <code>install_deareis_optional.bat</code> on Windows or <code>install_deareis_optional_macos.command</code> on macOS. The environment includes <a href="https://vyrjana.github.io/pyimpspec/">pyimpspec</a>. Select EIS data and choose <strong>Analyze EIS with DearEIS</strong>.</td>
-</tr>
-<tr>
-<td><a href="https://github.com/kevinsmia1939/PySimpleEChem#readme">PySimpleEChem</a></td>
-<td>Use the bundled tools and follow the upstream PyQt5 instructions for the optional GUI. Select a CV trace or group and choose <strong>Open in PySimpleEChem</strong>.</td>
-</tr>
-</tbody>
-</table>
-<h3 id="scilink">SciLink</h3>
-<p>Install the <a href="https://github.com/ziatdinovmax/SciLink#readme">SciLink CLI</a> and check it with <code>scilink --help</code>. If eStudio cannot find it, set <strong>SciLink executable override</strong> in <strong>Settings → LLM settings → Data Sharing</strong>. In <strong>Providers and Services</strong>, set the provider, model, and credentials and use <strong>Ping selected</strong> to test the connection.</p>
-<h3 id="edison-scientific">Edison Scientific</h3>
-<p>Create a key in your <a href="https://platform.edisonscientific.com/profile">Edison Scientific profile</a>. Under <strong>Settings → LLM settings → Data Sharing</strong>, enter it in <strong>Edison API key (session only)</strong> and apply the settings. Leave <strong>Legacy custom upload URL</strong> blank for the standard client. Open <strong>Ask Edison Scientific</strong> to review the prompt and files before submitting. <a href="https://github.com/EdisonScientific/edison-client-docs#readme">Client documentation</a></p>
-<h3 id="labric-mcp">LabRIC MCP</h3>
-<p>Enter your <a href="https://docs.labric.co/welcome">LabRIC</a> MCP endpoint and session-only key under <strong>Settings → LLM settings → Data Sharing</strong>. Use <strong>Test LabRIC MCP connection</strong>, then enable <strong>Use LabRIC MCP cloud context</strong> if you want SciLink to query authorized LabRIC data.</p>
-<h2 id="how-to-cite">How to cite</h2>
-<p>Use the version that produced the results reported in your article. For v331, the software reference in APA style is:</p>
-<blockquote>
-<p>Prabhakaran, V. (2026). <em>FaradaIQ eStudio</em> (Version v331) [Computer software]. <a href="https://github.com/venky-pnnl/FaradaiQ_eStudio">https://github.com/venky-pnnl/FaradaiQ_eStudio</a></p>
-</blockquote>
-<p><strong>Methods example.</strong> “Electrochemical data were processed using FaradaIQ eStudio v331 (Prabhakaran, 2026).”</p>
-<p>Add the versions of any third-party tools used and cite the applicable methods below. The repository’s <a href="../CITATION.cff">citation file</a> contains the software metadata that GitHub uses to provide APA and BibTeX export.</p>
-<h2 id="funding-acknowledgment">Funding acknowledgment</h2>
-<p>Development of FaradaIQ eStudio was supported by the <a href="https://www.pnnl.gov/projects/nets">Non-Equilibrium Transport Driven Separations Initiative (NETS)</a> through the Laboratory Directed Research and Development (LDRD) Program at Pacific Northwest National Laboratory (PNNL).</p>
-<h2 id="project-credits">Project credits</h2>
-<p>FaradaIQ eStudio was designed by Venkateshkumar Prabhakaran.</p>
-<table class="reference">
-<thead>
-<tr>
-<th>Project</th>
-<th>Contributors and role</th>
-<th>Citation</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>pySECCM parsing and plotting tools</td>
-<td>Benjamin A. Helfrecht (PNNL) designed the original SECCM parser. eStudio includes that parser and the accompanying plotting tools.</td>
-<td>Helfrecht, B. A. (n.d.). <em>pySECCM parsing and plotting tools</em> [Computer software]. <a href="../pyseccm_tools/README-CV">Bundled parser notes</a></td>
-</tr>
-<tr>
-<td><a href="https://github.com/ciuccislab/pyDRTtools">pyDRTtools</a></td>
-<td>Ciucci Lab, Francesco Ciucci, Adeleke Maradesa, and contributors. Distribution of relaxation times (DRT) analysis.</td>
-<td><a href="https://doi.org/10.1016/j.electacta.2015.09.097">Wan et al. (2015), radial basis functions</a>, <a href="https://doi.org/10.1016/j.electacta.2015.03.123">Ciucci &amp; Chen (2015), Bayesian DRT</a>, or <a href="https://doi.org/10.1149/1945-7111/acbca4">Maradesa et al. (2023), regularization</a>, according to the method used.</td>
-</tr>
-<tr>
-<td><a href="https://github.com/vyrjana/DearEIS">DearEIS</a> and <a href="https://github.com/vyrjana/pyimpspec">pyimpspec</a></td>
-<td>Ville Yrjänä and contributors. Impedance analysis and equivalent-circuit workflows.</td>
-<td><a href="https://doi.org/10.21105/joss.04808">Yrjänä (2022), DearEIS</a>. If using pyimpspec directly, cite its software version.</td>
-</tr>
-<tr>
-<td><a href="https://github.com/kevinsmia1939/PySimpleEChem">PySimpleEChem</a></td>
-<td>Kavin Teenakul and contributors. Cyclic voltammetry visualization and analysis.</td>
-<td><a href="https://github.com/kevinsmia1939/PySimpleEChem">PySimpleEChem software repository</a>. Include the version or commit used.</td>
-</tr>
-<tr>
-<td><a href="https://github.com/ziatdinovmax/SciLink">SciLink</a></td>
-<td>Maxim Ziatdinov and the PNNL SciLink team. Scientific analysis, literature review, and planning. <a href="https://www.pnnl.gov/projects/center-robotics-autonomy/scilink">PNNL project page</a></td>
-<td><a href="https://arxiv.org/abs/2508.06569">Yao et al. (2025), SciLink preprint</a></td>
-</tr>
-<tr>
-<td><a href="https://platform.edisonscientific.com/">Edison Scientific</a></td>
-<td>Edison Scientific team. Scientific and literature analysis through the official client.</td>
-<td><a href="https://github.com/EdisonScientific/edison-client-docs">Edison Scientific client documentation</a>. Identify the service, agent, and client version if used.</td>
-</tr>
-<tr>
-<td><a href="https://github.com/ECSHackWeek/impedance.py">impedance.py</a></td>
-<td>ECSHackWeek contributors. Electrochemical impedance analysis.</td>
-<td><a href="https://doi.org/10.21105/joss.02349">Murbach et al. (2020), impedance.py</a></td>
-</tr>
-</tbody>
-</table>
-<p>Open <strong>Credits</strong> in eStudio for project links and setup guides. See the <a href="THIRD_PARTY.md">full references and third-party notices</a> for citation details, attribution, licenses, and service terms.</p>
-<img src="media/electrochemical-cell.jpg" alt="Three-electrode electrochemical cell on a laboratory bench" width="960">
-</div>
+<main>
+  <section class="hero">
+    <div class="container">
+      <h1>From electrochemical instrument exports to research-ready results</h1>
+      <p class="lead">Bring data from HEKA, PalmSens, BioLogic, VersaStudio, and Solartron into a single analysis workflow. Inspect measurements, compare traces, and prepare tables, plots, reports, or SciLink bundles on your computer.</p>
+      <div class="actions">
+        <a class="primary" href="https://github.com/venky-pnnl/FaradaiQ_eStudio/releases">Download from GitHub</a>
+        <a href="workflows.md#supported-instrument-files">Supported file formats</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="container">
+    <section class="section" id="from-source-files-to-results">
+      <h2>From source files to results</h2>
+      <img class="schematic" src="media/estudio-v334-workflow.png" alt="Import native instrument exports or curated files. Inspect and analyze measurements. Export tables, plots, reports, and reviewable SciLink bundles." width="1980" height="453">
+      <ol class="stage-notes">
+        <li><strong>Import and inspect.</strong> Keep instrument companion files together. Review the measurement catalog and record sample context.</li>
+        <li><strong>Compare and analyze.</strong> Overlay traces, run electrochemical diagnostics, or examine spatial measurements.</li>
+        <li><strong>Export and share.</strong> Save a canonical HDF5 bundle, plots and tables, portable HTML, or PowerPoint. Build a SciLink-ready package for further analysis.</li>
+      </ol>
+      <p><a href="workflows.md">Workflow guide and method demos</a></p>
+    </section>
+
+    <section class="section example" aria-labelledby="analysis-example">
+      <div>
+        <h2 id="analysis-example">Compare measurements side by side</h2>
+        <p>Overlay impedance spectra in Nyquist or Bode views, then fit a circuit, run linear Kramers–Kronig validation, or estimate the distribution of relaxation times. The workspace also supports voltammetry, transients, corrosion, Mott–Schottky analysis, and SECCM.</p>
+        <p><a href="workflows.md#scientific-analysis">Analysis methods and examples</a></p>
+      </div>
+      <figure>
+        <div class="screenshot">
+          <img src="media/estudio-v334-nyquist.png" alt="Three synthetic impedance spectra compared as a Nyquist plot in FaradaIQ eStudio Browser v334" width="1800" height="1138" loading="lazy">
+        </div>
+        <figcaption>Nyquist overlay of three synthetic spectra in eStudio Browser v334.</figcaption>
+      </figure>
+    </section>
+
+    <section class="section info" aria-label="Install and connect">
+      <article id="install-and-start">
+        <h2>Install v336</h2>
+        <p>Extract the ZIP before running <code>Install_FaradaIQ_eStudio_v336.bat</code> on Windows or <code>Install_FaradaIQ_eStudio_v336.command</code> on macOS. Setup checks DearEIS, pyDRTtools, and managed SciLink before opening eStudio Desktop, eStudio Browser, and SciLink Streamlit. All three shortcuts appear under <strong>Desktop → Holaris Apps</strong>.</p>
+        <p><a href="workflows.md#install-and-start">Installation and troubleshooting</a></p>
+      </article>
+      <article id="configure-integrations">
+        <h2>SciLink setup</h2>
+        <p>Choose <strong>SciLink → Make SciLink-ready bundle</strong>. Open the installed SciLink app from either eStudio interface, then attach the generated HDF5 and metadata JSON under <strong>Analyze</strong>. Review the selected files before sending a request to a configured service.</p>
+        <p><a href="workflows.md#send-a-bundle-to-scilink-streamlit">SciLink handoff</a> · <a href="workflows.md#configure-integrations">Integration settings</a></p>
+      </article>
+    </section>
+  </div>
 </main>
+<footer class="footer" id="cite-and-credit">
+  <div class="container">
+    <h2>Cite and credit</h2>
+    <p>Prabhakaran, V. (2026). <em>FaradaIQ eStudio</em> (Version v336) [Computer software]. <a href="../CITATION.cff">Citation file</a></p>
+    <p>Venkateshkumar Prabhakaran designed FaradaIQ eStudio. Benjamin A. Helfrecht (PNNL) designed the original SECCM parser. <a href="workflows.md#project-credits">Project credits and method citations</a></p>
+    <p>Development was supported by the Non-Equilibrium Transport Driven Separations Initiative (NETS) through PNNL’s Laboratory Directed Research and Development (LDRD) Program. <a href="https://www.pnnl.gov/projects/nets">NETS</a></p>
+  </div>
+</footer>
 </body>
 </html>

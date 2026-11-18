@@ -29,8 +29,8 @@ except Exception:  # pragma: no cover
     pd = None
 
 SCHEMA = "faradaiq-canonical-h5-bundle-v5"
-VERSION = "v331"
-TABLE_EXTS = {".csv", ".txt", ".tsv", ".asc", ".mpt"}
+VERSION = "v336"
+TABLE_EXTS = {".csv", ".txt", ".tsv", ".asc", ".mpt", ".xlsx", ".xls"}
 MEDIA_EXTS = {".gif", ".jpg", ".jpeg", ".png", ".tif", ".tiff", ".bmp", ".webp", ".mp4", ".avi", ".mov", ".mkv", ".wmv", ".mpeg", ".mpg", ".m4v", ".webm"}
 JSON_EXTS = {".json", ".jsonl"}
 DRT_IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".tif", ".tiff", ".svg", ".pdf"}
@@ -198,11 +198,42 @@ def _sequence_info(root: Path) -> Dict[str, Any]:
     }
 
 
-def _read_table_general(path: Path):
+def _desktop_axis_columns(record):
+    labels = []
+    for axis in ('x', 'y'):
+        label = str(record.get(f'{axis}_label') or '').strip()
+        unit = str(record.get(f'{axis}_unit') or '').strip()
+        if label and unit and not re.search(r'(?<![^\W_])' + re.escape(unit) + r'(?![^\W_])', label):
+            label += f' ({unit})'
+        labels.append(label)
+    return labels if all(labels) and labels[0] != labels[1] else []
+
+
+def _read_biologic_ascii(path: Path, *, max_rows=None):
+    with path.open(encoding='latin-1') as handle:
+        magic, line = handle.readline().strip(), handle.readline()
+    count = re.fullmatch(r'Nb header lines\s*:\s*(\d+)\s*', line)
+    if magic not in {'EC-Lab ASCII FILE', 'BT-Lab ASCII FILE'} or not count or int(count[1]) < 3:
+        return None
+    return pd.read_csv(path, sep='\t', skiprows=int(count[1]) - 1, decimal=',',
+                       encoding='latin-1', nrows=max_rows)
+
+
+def _read_table_general(path: Path, record=None):
     _check_bundle_cancel()
     if pd is None:
         return None, [], "pandas unavailable"
     try:
+        suffix = path.suffix.lower()
+        if suffix in {'.xlsx', '.xls'}:
+            frame = pd.read_excel(path).dropna(axis=1, how='all').dropna(axis=0, how='all')
+            if frame.empty or frame.shape[1] < 2:
+                return None, list(map(str, frame.columns)), 'first worksheet has fewer than two populated columns'
+            return frame, list(map(str, frame.columns)), ''
+        if _preserve_bundle_units() and suffix == '.mpt':
+            frame = _read_biologic_ascii(path)
+            if frame is not None and not frame.empty and frame.shape[1] >= 2:
+                return frame, list(frame.columns), ''
         # DRT simple_DRT.csv begins with metadata lines before tau,gamma.
         lines = path.read_text(encoding="utf-8-sig", errors="replace").splitlines()
         lower_lines = [x.strip().lower().replace(" ", "") for x in lines[:80]]
@@ -211,17 +242,28 @@ def _read_table_general(path: Path):
             if line.startswith("tau,gamma") or line.startswith("tau\tgamma") or line == "tau gamma":
                 skip = i
                 break
+        options = dict(sep=None, engine="python")
         if skip is not None:
-            df = pd.read_csv(path, skiprows=skip, sep=None, engine="python")
-        else:
-            df = pd.read_csv(path, sep=None, engine="python")
+            options['skiprows'] = skip
+        df = pd.read_csv(path, **options)
+        if skip is None:
             if df.shape[1] == 1:
                 try:
-                    df2 = pd.read_csv(path, sep=r"\s+", comment="#", engine="python")
+                    fallback = dict(sep=r"\s+", comment="#", engine="python")
+                    df2 = pd.read_csv(path, **fallback)
                     if df2.shape[1] > df.shape[1]:
-                        df = df2
+                        df, options = df2, fallback
                 except Exception:
                     pass
+            # Instrument exports may write bare x/y rows and put axis labels
+            # in the accompanying manifest. Keep the first observation.
+            if _preserve_bundle_units() and len(df.columns) >= 2 and _num(df.columns[0]) is not None:
+                head = pd.read_csv(path, header=None, nrows=1, **options)
+                numeric = pd.to_numeric(head.iloc[0], errors='coerce')
+                if numeric.notna().any() and (numeric.notna() | head.iloc[0].isna()).all():
+                    df = pd.read_csv(path, header=None, **options)
+                    axes = _desktop_axis_columns(record or {}) if len(df.columns) == 2 else []
+                    df.columns = axes or [f'col_{index + 1}' for index in range(len(df.columns))]
         df = df.dropna(axis=1, how="all").dropna(axis=0, how="all")
         if df.empty or df.shape[1] < 2:
             return None, [str(c) for c in df.columns], "table has fewer than two populated columns"
@@ -1022,7 +1064,7 @@ def _collect_heka_records(root: Path, log=None) -> Tuple[List[Dict[str, Any]], D
 #   3) EIS exports with two methods per point, where v136 de-duplicated method2.
 
 SCHEMA = "faradaiq-canonical-h5-bundle-v6"
-VERSION = "v331"
+VERSION = "v336"
 
 
 def _v138_parse_seq_order(path: Path) -> int:
@@ -1347,7 +1389,7 @@ if __name__ == "__main__":
 # the authoritative browser tables when they outnumber the compact fallback CV
 # records.
 
-VERSION = "v331"
+VERSION = "v336"
 
 
 def _v145_first_method_scan_rate_mVs(root: Path) -> Optional[float]:
@@ -1475,7 +1517,7 @@ def _collect_heka_records(root: Path, log=None) -> Tuple[List[Dict[str, Any]], D
 # manifest or method table so mixed scan-rate datasets no longer collapse to
 # one scan rate in the browser.
 
-VERSION = "v331"
+VERSION = "v336"
 
 
 def _v145_numeric_m_index(path: Path) -> int:
@@ -1718,7 +1760,7 @@ def _collect_heka_records(root: Path, log=None) -> Tuple[List[Dict[str, Any]], D
 # v145 fixes non-HEKA vendor exports where generic *_for_plotting_analysis folders
 # were sometimes mistaken for HEKA exports, and adds first-class technique cataloging
 # for PalmSens DPV, Solartron ConstV/Cond, BioLogic GCPL/charge-discharge, CA/CP/OCP.
-VERSION = "v331"
+VERSION = "v336"
 SCHEMA = "faradaiq-canonical-h5-bundle-v7"
 
 _V145_PREV_IS_HEKA_EXPORT_ROOT = is_heka_export_root
@@ -2107,11 +2149,11 @@ def _collect_nonheka_records(root: Path) -> Tuple[List[Dict[str, Any]], Dict[str
         if not _include_nonheka(p):
             continue
         if p.suffix.lower() in TABLE_EXTS:
-            df, cols, err = _read_table_general(p)
-            if df is None:
-                continue
             rel = relpath(p, root).replace("\\", "/")
             mentry = manifest_map.get(rel)
+            df, cols, err = _read_table_general(p, mentry)
+            if df is None:
+                continue
             if mentry:
                 tech, role = _v145_canonical_from_manifest_entry(mentry, p, cols)
             else:
@@ -2273,7 +2315,7 @@ def _v145_canonical_from_manifest_entry(entry: Dict[str, Any], path: Path, cols:
 # Corrects HEKA/SECCM CA/CP line scans that were historically cataloged as CV/LSV
 # merely because they contain current and potential columns. It also invalidates
 # stale pre-v208 browser caches and emits method/point-aware CA/CP cache paths.
-VERSION = "v331"
+VERSION = "v336"
 
 
 def _v206_exact_token(text: str, token: str) -> bool:
@@ -2514,7 +2556,7 @@ def extract_h5_tables_for_browser(bundle_dir_or_h5: str | Path, prefer_reuse: bo
 # ---- End FaradaIQ canonical bundle v216 chrono repair ----
 
 # ---- FaradaIQ canonical bundle v210 structured HEKA manifest support ----
-VERSION = "v331"
+VERSION = "v336"
 SCHEMA = "faradaiq-canonical-h5-bundle-v6"
 
 _V208_PREV_COLLECT_HEKA_RECORDS = _collect_heka_records
@@ -2708,7 +2750,7 @@ def is_heka_export_root(root: Path) -> bool:
 
 
 # ---- FaradaIQ canonical bundle v216 media and hierarchy support ----
-VERSION = "v331"
+VERSION = "v336"
 _V211_PREV_COLLECT_HEKA_RECORDS = _collect_heka_records
 _V211_PREV_EXTRACT_H5_TABLES = extract_h5_tables_for_browser
 _MEDIA_VIDEO_EXTS = {".mp4", ".avi", ".mov", ".mkv", ".wmv", ".mpeg", ".mpg", ".m4v", ".webm"}
@@ -2875,38 +2917,38 @@ def extract_h5_tables_for_browser(bundle_dir_or_h5: str | Path, prefer_reuse: bo
 # ---- FaradaIQ Studio v290 public release identity ----
 # Parser/schema implementation identifiers remain in their dedicated fields,
 # while the public application version written to new canonical bundles is v290.
-VERSION = "v331"
-FARADAIQ_PUBLIC_VERSION = "v331"
+VERSION = "v336"
+FARADAIQ_PUBLIC_VERSION = "v336"
 
 # ---- FaradaIQ Studio v292 public release identity ----
 # Historical parser/schema identifiers remain intact; newly generated bundles report v292.
-VERSION = "v331"
-FARADAIQ_PUBLIC_VERSION = "v331"
+VERSION = "v336"
+FARADAIQ_PUBLIC_VERSION = "v336"
 # ---- End FaradaIQ Studio v292 public release identity ----
 
 
 # ---- FaradaIQ Studio v293 public release identity ----
 # Historical parser/schema identifiers remain intact; newly generated bundles report v293.
-VERSION = "v331"
-FARADAIQ_PUBLIC_VERSION = "v331"
+VERSION = "v336"
+FARADAIQ_PUBLIC_VERSION = "v336"
 # ---- End FaradaIQ Studio v293 public release identity ----
 
 # ---- FaradaIQ Studio v294 public release identity ----
 # Historical parser/schema identifiers remain intact; newly generated bundles report v294.
-VERSION = "v331"
-FARADAIQ_PUBLIC_VERSION = "v331"
+VERSION = "v336"
+FARADAIQ_PUBLIC_VERSION = "v336"
 # ---- End FaradaIQ Studio v294 public release identity ----
 
 
 # ---- FaradaIQ Studio v296 public release identity ----
 # Historical parser/schema identifiers remain intact; newly generated bundles report v295.
-VERSION = "v331"
-FARADAIQ_PUBLIC_VERSION = "v331"
+VERSION = "v336"
+FARADAIQ_PUBLIC_VERSION = "v336"
 # ---- End FaradaIQ Studio v296 public release identity ----
 
 # ---- FaradaIQ Studio v297 public release identity ----
-VERSION = "v331"
-FARADAIQ_PUBLIC_VERSION = "v331"
+VERSION = "v336"
+FARADAIQ_PUBLIC_VERSION = "v336"
 # ---- End FaradaIQ Studio v297 public release identity ----
 
 # ---- FaradaIQ Studio v311 public release identity ----
@@ -2971,6 +3013,13 @@ def _include_nonheka(path: Path) -> bool:
     # DRT_input_csv/DRT/<run_id>/.
     if _v317_is_completed_drt_table(path):
         return True
+    # For SciLink handoff, this native export may be the only table with
+    # frequency and both signed impedance components in original units.
+    if (_preserve_bundle_units() and path.is_file()
+            and path.name.lower().endswith('_freq_zreal_zimag.csv')
+            and path.parent.name.lower() == 'drt_input_csv'
+            and not set(_parts_lower(path)).intersection(EXCLUDED_DIR_TOKENS)):
+        return True
     return _V317_PREV_INCLUDE_NONHEKA(path)
 
 
@@ -2984,8 +3033,8 @@ FARADAIQ_PUBLIC_VERSION = "v317"
 # ---- End FaradaIQ Studio v317 completed non-HEKA DRT inclusion ----
 
 # ---- FaradaIQ Studio v320 standalone public release identity ----
-VERSION = "v331"
-FARADAIQ_PUBLIC_VERSION = "v331"
+VERSION = "v336"
+FARADAIQ_PUBLIC_VERSION = "v336"
 # ---- End FaradaIQ Studio v320 standalone public release identity ----
 
 

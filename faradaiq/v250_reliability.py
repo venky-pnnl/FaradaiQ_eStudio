@@ -253,6 +253,9 @@ def _write_exact_edison_job(
     selected: list[dict[str, Any]],
     cfg: Mapping[str, Any],
     requested_filenames: Sequence[str],
+    *,
+    prepared_job_dir: Path | None = None,
+    cancel_event: threading.Event | None = None,
 ) -> dict[str, Any]:
     """Create an Edison job whose checked files are authoritative and auditable.
 
@@ -263,12 +266,21 @@ def _write_exact_edison_job(
     """
     import faradaiq.v239_scilink_edison as old
 
-    # Create the isolated job directory. The compatibility writer may create a
-    # preliminary ZIP; every handoff artifact below is rewritten authoritatively.
-    job = old._write_job(source, "edison", exact_prompt, selected, cfg)
+    if prepared_job_dir is None:
+        # Desktop calls also create the legacy job artifacts.
+        job = old._write_job(source, "edison", exact_prompt, selected, cfg)
+    else:
+        # The browser already has an isolated folder with immutable review copies.
+        job_dir = prepared_job_dir.resolve(strict=True)
+        settings = dict(cfg)
+        settings_path = job_dir / "service_settings.json"
+        settings_path.write_text(json.dumps(settings, ensure_ascii=False, indent=2), encoding="utf-8")
+        job = {"job_dir": job_dir, "job_id": job_dir.name, "settings_path": settings_path,
+               "settings": settings, "prompt_path": job_dir / "analysis_prompt.md",
+               "zip_path": job_dir / "reviewed_for_Edison.zip"}
     job_dir = Path(job["job_dir"]).resolve()
     prompt_path = Path(job["prompt_path"]).resolve()
-    prompt_path.write_text(exact_prompt, encoding="utf-8")
+    prompt_path.write_bytes(exact_prompt.encode("utf-8"))
     (job_dir / "AI_prompt_current.txt").write_text(exact_prompt, encoding="utf-8")
 
     manifest_items: list[dict[str, Any]] = []
@@ -344,29 +356,51 @@ def _write_exact_edison_job(
     zip_path = Path(job.get("zip_path") or (job_dir / f"{job_dir.name}_for_Edison.zip")).resolve()
     if zip_path.exists():
         zip_path.unlink()
+
+    def check_stop():
+        if cancel_event is not None and cancel_event.is_set():
+            zip_path.unlink(missing_ok=True)
+            raise InterruptedError("Edison review packaging stopped.")
+
+    def archive_file(archive, source, member):
+        if cancel_event is None:
+            archive.write(source, member)
+            return
+        with source.open("rb") as stream, archive.open(member, "w", force_zip64=True) as destination:
+            for block in iter(lambda: stream.read(8 * 1024 * 1024), b""):
+                if cancel_event.is_set():
+                    raise InterruptedError("Edison review packaging stopped.")
+                destination.write(block)
+
     packaged: list[dict[str, Any]] = []
     used: set[str] = set()
-    with zipfile.ZipFile(zip_path, "w", compression=zipfile.ZIP_DEFLATED, allowZip64=True) as zf:
-        zf.write(prompt_path, "analysis_prompt.md")
-        zf.write(request_path, "edison_request.json")
-        zf.write(manifest_path, "files_to_share_manifest.json")
-        for item in manifest_items:
-            shared = Path(item["path"])
-            role = old._safe_name(item.get("role"), "data")
-            arc = f"shared_files/{role}/{int(item['index']):04d}_{shared.name}"
-            base_arc = arc
-            counter = 2
-            while arc.lower() in used:
-                stem = Path(base_arc).with_suffix("").as_posix()
-                arc = f"{stem}_{counter}{shared.suffix}"
-                counter += 1
-            used.add(arc.lower())
-            zf.write(shared, arc)
-            packaged.append({**item, "archive_path": arc})
+    try:
+        with zipfile.ZipFile(zip_path, "w", compression=zipfile.ZIP_DEFLATED, allowZip64=True) as zf:
+            archive_file(zf, prompt_path, "analysis_prompt.md")
+            archive_file(zf, request_path, "edison_request.json")
+            archive_file(zf, manifest_path, "files_to_share_manifest.json")
+            for item in manifest_items:
+                shared = Path(item["path"])
+                role = old._safe_name(item.get("role"), "data")
+                arc = f"shared_files/{role}/{int(item['index']):04d}_{shared.name}"
+                base_arc = arc
+                counter = 2
+                while arc.lower() in used:
+                    stem = Path(base_arc).with_suffix("").as_posix()
+                    arc = f"{stem}_{counter}{shared.suffix}"
+                    counter += 1
+                used.add(arc.lower())
+                archive_file(zf, shared, arc)
+                packaged.append({**item, "archive_path": arc})
+    except InterruptedError:
+        zip_path.unlink(missing_ok=True)
+        raise
 
+    check_stop()
     with zipfile.ZipFile(zip_path, "r") as zf:
         zip_members = zf.namelist()
         bad_member = zf.testzip()
+    check_stop()
     audit = {
         "schema": "faradaiq-edison-zip-audit-v253",
         "version": VERSION,

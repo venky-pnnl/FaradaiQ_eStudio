@@ -50,7 +50,8 @@ def test_finder_shortcut_replaces_legacy_symlink(tmp_path, monkeypatch):
     assert local_launcher.is_file() and os.access(local_launcher, os.X_OK)
     args = next(a for a in calls if a[0] == '/usr/bin/osacompile')
     applescript = args[args.index('-e') + 1]
-    assert str(local_launcher) in applescript and 'com.apple.Terminal' in applescript
+    assert '.faradaiq_venv_macos/bin/python' in applescript and '/scripts/launch_estudio.pyw' in applescript
+    assert ' desktop' in applescript and 'com.apple.Terminal' not in applescript
     ids = []
     for bundle in (app, shortcut):
         data = plistlib.loads((bundle / 'Contents' / 'Info.plist').read_bytes())

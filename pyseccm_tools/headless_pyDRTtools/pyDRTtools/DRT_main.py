@@ -337,6 +337,9 @@ def Bayesian_run(entry, rbf_type = 'Gaussian', data_used = 'Combined Re-Im Data'
             NMC_sample: Number of samples for the HMC sampler
             **kwargs: Other arguments that are applicable for Simple_run
     """
+    burn_in = 501
+    if NMC_sample <= burn_in:
+        raise ValueError(f'Bayesian DRT needs more than {burn_in} samples for posterior estimates.')
     Simple_run(entry, rbf_type, data_used, induct_used, 
                der_used, lambda_value, shape_control, coeff)# check this out
     
@@ -355,9 +358,10 @@ def Bayesian_run(entry, rbf_type = 'Gaussian', data_used = 'Combined Re-Im Data'
     initial_X = entry.x
     # using generate_tmg from HMC_exact.py to sample the truncated Gaussian distribution
     entry.Xs = generate_tmg(F, g, entry.Sigma, entry.mu, initial_X, cov=True, L=NMC_sample)
-    entry.lower_bound = np.quantile(entry.Xs[:,501:],.005,axis=1)
-    entry.upper_bound = np.quantile(entry.Xs[:,501:],.995,axis=1)
-    entry.mean = np.mean(entry.Xs[:,501:],axis=1)    
+    posterior = entry.Xs[:, burn_in:]
+    entry.lower_bound = np.quantile(posterior, .005, axis=1)
+    entry.upper_bound = np.quantile(posterior, .995, axis=1)
+    entry.mean = np.mean(posterior, axis=1)
     
     # map array to gamma
     entry.out_tau_vec,entry.lower_bound = gf.x_to_gamma(entry.lower_bound, entry.tau_fine, entry.tau, entry.epsilon, rbf_type)
@@ -406,19 +410,22 @@ def BHT_run(entry, rbf_type = 'Gaussian', der_used = '1st order',
     entry.M = np.zeros((N_taus+1, N_taus+1))
     entry.M[1:,1:] = entry.M_temp
     
-    # Step 3 testing HT_single_est
-    # try until no error occur for for the HT_single_est
-    while True:
+    # Step 3 estimate real and imaginary hyperparameters. SciPy expects a one-dimensional x0.
+    last_error = None
+    for attempt in range(16):
         try:
-            theta_0 = 10**(6*np.random.rand(3, 1)-3)
+            theta_0 = 10 ** (6 * np.random.rand(3) - 3)
             # double check the following code because the orignial python code uses L matrix instead of M matrix
             out_dict_real = BHT.HT_single_est(theta_0, entry.Z_exp.real, entry.A_re, entry.A_H_im, entry.M, N_freqs, N_taus)
             theta_0 = out_dict_real['theta']
             out_dict_imag = BHT.HT_single_est(theta_0, entry.Z_exp.imag, entry.A_im, entry.A_H_re, entry.M, N_freqs, N_taus)
             
             break
-        except:
-            print('Error Occur, Try Another Inital Condition')
+        except (FloatingPointError, ValueError, np.linalg.LinAlgError) as error:
+            last_error = error
+            print(f'BHT initialization {attempt + 1}/16 failed: {error}', flush=True)
+    else:
+        raise RuntimeError('BHT could not estimate hyperparameters after 16 initializations.') from last_error
     
     # Step 4 EIS scoring
     entry.out_scores = BHT.EIS_score(theta_0, entry.freq, entry.Z_exp, out_dict_real, out_dict_imag, N_MC_samples=10000)

@@ -12,9 +12,9 @@ from pathlib import Path
 import tkinter as tk
 from tkinter import ttk
 
+from .release_identity import APP_NAME, APP_TITLE as TITLE, APP_VERSION, INSTALL_TARGET, SEMVER, VERSION_NUMBER
+
 ROOT = Path(__file__).resolve().parents[1]
-APP_NAME = 'FaradaIQ eStudio'
-TITLE = APP_NAME + ' v331'
 TAGLINE = 'Electrochemical Intelligence for Analyze, Control and Discover'
 AI_NOTICE = 'Scientific review required: AI-assisted analysis can be incorrect or unsupported. Verify data, units, model assumptions, fits, uncertainty, and cited sources before using results.' 
 DARK = dict(bg='#0b1220',card='#131f31',field='#0e1828',fg='#e5edf8',muted='#9fb0c8',line='#293b53',accent='#39d4b5',ink='#09251f',select='#244567')
@@ -329,7 +329,7 @@ def arrange(gui,core):
     source_box.columnconfigure(1,weight=1)
     data_actions=ttk.Frame(source_box);data_actions.grid(row=2,column=0,columnspan=5,sticky='ew',pady=(8,0))
     clone(next(w for w in original if _text(w)=='Open jobs'),data_actions).pack(side='left',padx=(0,6))
-    from .estudio_bundle_ui import start_bundle
+    from .estudio_bundle_ui import show_streamlit_handoff, start_bundle
     gui.estudio_make_scilink_bundle=lambda:start_bundle(gui,core)
     ttk.Button(data_actions,text='Make SciLink-ready bundle',command=gui.estudio_make_scilink_bundle).pack(side='left',padx=6)
     # Original live text widgets: no copies, so loading/restore/popouts retain state.
@@ -347,12 +347,45 @@ def arrange(gui,core):
     ttk.Label(b,text='Overlay curves • EIS and DRT • Mott–Schottky • Tafel • Multidimensional views • Plot popouts',style='Muted.TLabel',wraplength=900).pack(anchor='w',pady=(12,2))
     scilink=gui.estudio_pages['SciLink']
     heading(scilink,'Scientific reasoning','Review the exact prompt and selected files before submitting an analysis request.')
+    from . import managed_scilink
+    from .scilink_runtime_ui import runtime_identity, runtime_status, start_desktop_scilink
+
+    runtime_card=card(scilink,'SCILINK STREAMLIT')
+    installed=managed_scilink.current()
+    runtime_text=tk.StringVar(value=runtime_identity(installed) if installed else 'Install SciLink to open its local Streamlit workspace.')
+    runtime_actions=ttk.Frame(runtime_card);runtime_actions.pack(anchor='w')
+
+    def runtime_action(update=False):
+        def release_buttons():
+            update_button.state(['!disabled'])
+            open_button.state(['!disabled'])
+
+        def completed(receipt):
+            runtime_text.set(runtime_status(receipt))
+            release_buttons()
+
+        def failed(message):
+            runtime_text.set(f'SciLink: {message}')
+            release_buttons()
+
+        if start_desktop_scilink(gui,update=update,on_progress=runtime_text.set,on_done=completed,on_error=failed):
+            update_button.state(['disabled'])
+            open_button.state(['disabled'])
+            runtime_text.set('Checking for SciLink updates…' if update else 'Starting SciLink Streamlit…')
+
+    update_button=ttk.Button(runtime_actions,text='Update SciLink',command=lambda:runtime_action(update=True),style='E.Primary.TButton')
+    update_button.pack(side='left')
+    open_button=ttk.Button(runtime_actions,text='Open SciLink',command=runtime_action)
+    open_button.pack(side='left',padx=(8,0))
+    ttk.Label(runtime_card,textvariable=runtime_text,wraplength=860,style='Muted.TLabel').pack(anchor='w',pady=(8,0))
     for marker,title in (('Ask SciLink','SCILINK & SERVICES'),('LLM status','CONNECTION STATUS')):
         src=next((w for w in children if any(_text(x)==marker for x in walk(w))),None)
         if src:
             box=card(scilink,title);clone(src,box).pack(fill='x')
     handoff=card(scilink,'DATA HANDOFF')
-    ttk.Button(handoff,text='Make SciLink-ready bundle',command=gui.estudio_make_scilink_bundle,style='E.Primary.TButton').pack(anchor='w')
+    handoff_actions=ttk.Frame(handoff);handoff_actions.pack(anchor='w')
+    ttk.Button(handoff_actions,text='Make SciLink-ready bundle',command=gui.estudio_make_scilink_bundle,style='E.Primary.TButton').pack(side='left')
+    ttk.Button(handoff_actions,text='SciLink Streamlit handoff',command=lambda:show_streamlit_handoff(gui)).pack(side='left',padx=(8,0))
     ttk.Label(handoff,text=AI_NOTICE,wraplength=900,style='Muted.TLabel').pack(anchor='w',pady=(12,0))
     info=card(scilink,'EXPERIMENT CONTEXT')
     ttk.Label(info,text='Edit the experimental description in Data. SciLink review retains the existing file-selection, electrochemistry skill, job tracking, and report workflows.',wraplength=850,style='Muted.TLabel').pack(anchor='w')
@@ -443,13 +476,17 @@ def install(core):
     # Existing normalizers resolve their globals on each call, including delayed
     # labels, dialogs, popouts, HTML/PPT metadata and tracking events.
     for name,module in list(sys.modules.items()):
-        if not name.startswith('faradaiq'):continue
-        for attr,value in dict(VERSION='v331',APP_VERSION='0.331.0',SEMVER='0.331.0',VERSION_NUMBER=327,APP_NAME='FaradaIQ eStudio',APP_TITLE=TITLE,INSTALL_TARGET=r'C:\FaradaIQ\eStudio\V331').items():
-            if hasattr(module,attr):setattr(module,attr,'v331' if attr=='APP_VERSION' and name in ('faradaiq','faradaiq.release_identity') else value)
-        if name=='faradaiq.v290_portable_browser':module.SCHEMA='faradaiq-portable-browser-v331'
+        if not name.startswith('faradaiq') or name in ('faradaiq', 'faradaiq.release_identity', __name__):
+            continue
+        if name.startswith('faradaiq.browser_') or name.startswith('faradaiq_browser_'):
+            continue
+        for attr,value in dict(VERSION=APP_VERSION,APP_VERSION=SEMVER,SEMVER=SEMVER,VERSION_NUMBER=VERSION_NUMBER,
+                               APP_NAME=APP_NAME,APP_TITLE=TITLE,INSTALL_TARGET=INSTALL_TARGET).items():
+            if hasattr(module,attr):setattr(module,attr,value)
+        if name=='faradaiq.v290_portable_browser':module.SCHEMA='faradaiq-portable-browser-v336'
         if hasattr(module,'normalize_release_text'):module.normalize_release_text=brand_text
         if hasattr(module,'FRONT_SLIDE_FOOTER'):module.FRONT_SLIDE_FOOTER='Made by '+TITLE
-    for k,v in dict(APP_TITLE=TITLE,FARADAIQ_PUBLIC_VERSION='v331',FARADAIQ_APP_VERSION='v331',FARADAIQ_RELEASE_VERSION='v331',FARADAIQ_RELEASE_TITLE=TITLE,FARADAIQ_INSTALL_TARGET=r'C:\FaradaIQ\eStudio\V331').items():core[k]=v
+    for k,v in dict(APP_TITLE=TITLE,FARADAIQ_PUBLIC_VERSION='v336',FARADAIQ_APP_VERSION='v336',FARADAIQ_RELEASE_VERSION='v336',FARADAIQ_RELEASE_TITLE=TITLE,FARADAIQ_INSTALL_TARGET=r'C:\FaradaIQ\eStudio\V336').items():core[k]=v
     core['_v290_normalize_release_text']=brand_text
     old_theme=core.get('_v36_apply_theme')
     def themed(root,*args,**kwargs):
@@ -549,6 +586,11 @@ def install(core):
     previous_destroy=cls.destroy
     def final_destroy(window):
         if getattr(window,'_estudio_destroyed',False):return
+        scilink_thread=getattr(window,'_estudio_scilink_thread',None)
+        if scilink_thread is not None and scilink_thread.is_alive():
+            window.set_status('Finishing the SciLink runtime operation before closing…')
+            window.after(120,lambda:final_destroy(window))
+            return
         thread=getattr(window,'_estudio_bundle_thread',None)
         if thread is not None and thread.is_alive():
             window._estudio_closing=True

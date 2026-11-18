@@ -1,0 +1,5 @@
+# Keep the browser runtime compatible with the existing NumPy 1.26 analysis stack.
+streamlit==1.67.0
+# The 17.0.0 wheels cover macOS 10.15 Intel and macOS 11 Apple Silicon.
+pyarrow==17.0.0; sys_platform == 'darwin'
+pyarrow==19.0.1; sys_platform != 'darwin'

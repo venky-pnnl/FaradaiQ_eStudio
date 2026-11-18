@@ -135,7 +135,7 @@ def main() -> int:
         return 2
 
     zip_path = zip_candidates[-1]
-    prompt = prompt_path.read_text(encoding="utf-8", errors="replace")
+    prompt = prompt_path.read_bytes().decode("utf-8")
     if not prompt.strip():
         print("[ERROR] The exact Edison prompt is empty:", prompt_path)
         return 2
@@ -152,9 +152,29 @@ def main() -> int:
     reviewed_files = list(manifest.get("files") or [])
     log_path = job_dir / "edison_transaction.log"
     receipts_path = job_dir / "edison_upload_receipts.json"
+    api_key = (
+        os.environ.get("EDISON_PLATFORM_API_KEY")
+        or os.environ.get("EDISON_API_KEY")
+        or os.environ.get("EDISON_SCIENTIFIC_API_KEY")
+        or ""
+    )
+
+    def redact(message: Any) -> str:
+        text = str(message)
+        return text.replace(api_key, "[redacted]") if api_key else text
+
+    def safe_payload(value: Any) -> Any:
+        if isinstance(value, dict):
+            return {"[redacted]" if key == api_key else key: safe_payload(item) for key, item in value.items()}
+        if isinstance(value, (list, tuple)):
+            return [safe_payload(item) for item in value]
+        return redact(value) if isinstance(value, str) else value
+
+    def json_text(payload: Any) -> str:
+        return json.dumps(safe_payload(payload), ensure_ascii=False, indent=2, default=str)
 
     def log(message: Any = "") -> None:
-        text = str(message)
+        text = redact(message)
         print(text, flush=True)
         with log_path.open("a", encoding="utf-8") as handle:
             handle.write(text + "\n")
@@ -222,12 +242,6 @@ def main() -> int:
             log(f"[BLOCKED] Could not validate Edison ZIP audit: {exc}")
             return 2
 
-    api_key = (
-        os.environ.get("EDISON_PLATFORM_API_KEY")
-        or os.environ.get("EDISON_API_KEY")
-        or os.environ.get("EDISON_SCIENTIFIC_API_KEY")
-        or ""
-    )
     if not api_key:
         log("[ERROR] No Edison API key was found in Main Studio or the process environment.")
         log("Set it in LLM Settings -> Data Sharing and start a new Edison job.")
@@ -293,12 +307,12 @@ def main() -> int:
                 )
             except Exception as exc:
                 receipts["selected_files"].append({**item, "status": "failed", "error": str(exc)})
-                receipts_path.write_text(json.dumps(receipts, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
+                receipts_path.write_text(json_text(receipts), encoding="utf-8")
                 raise RuntimeError(f"Checked file upload failed for {path}: {exc}") from exc
             selected_storage_ids.append(storage_id)
             receipt = {**item, "status": "uploaded", "data_storage_id": storage_id, "upload_response": upload_json}
             receipts["selected_files"].append(receipt)
-            receipts_path.write_text(json.dumps(receipts, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
+            receipts_path.write_text(json_text(receipts), encoding="utf-8")
             log(f"[FILE UPLOAD OK] data_storage_id={storage_id} | {path}")
 
         # Preserve one reviewed ZIP as an audit artifact. When no data files are
@@ -315,7 +329,7 @@ def main() -> int:
             "data_storage_id": audit_storage_id,
             "upload_response": audit_upload_json,
         }
-        receipts_path.write_text(json.dumps(receipts, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
+        receipts_path.write_text(json_text(receipts), encoding="utf-8")
         log(f"[AUDIT UPLOAD OK] data_storage_id={audit_storage_id}")
 
         if reviewed_files and len(selected_storage_ids) != len(reviewed_files):
@@ -342,6 +356,8 @@ def main() -> int:
         log("[TASK] Creating Edison Analysis task with the exact reviewed prompt and verified attachments...")
         task_id = client.create_task(task_request)
         live_url = f"https://platform.edisonscientific.com/trajectories/{task_id}"
+        task_receipt = job_dir / "edison_task_receipt.json"
+        task_receipt.write_text(json_text({"trajectory_id": str(task_id), "live_url": live_url}), encoding="utf-8")
         log(f"[TASK CREATED] {task_id}")
         log(f"[LIVE URL] {live_url}")
 
@@ -358,7 +374,7 @@ def main() -> int:
             status_json = _jsonable(task_status)
             status = status_json.get("status", getattr(task_status, "status", "unknown")) if isinstance(status_json, dict) else "unknown"
             log(f"[{datetime.now().isoformat(timespec='seconds')}] [STATUS] {status}")
-            log(json.dumps(status_json, ensure_ascii=False, indent=2))
+            log(json_text(status_json))
             if str(status).lower() not in active:
                 break
             time.sleep(poll_seconds)
@@ -406,7 +422,7 @@ def main() -> int:
 
     response_json = job_dir / "edison_job_response.json"
     response_txt = job_dir / "edison_job_response.txt"
-    response_json.write_text(json.dumps(result, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
+    response_json.write_text(json_text(result), encoding="utf-8")
     lines = [
         "FaradaIQ Edison Scientific response",
         "===================================",
@@ -424,8 +440,8 @@ def main() -> int:
         lines += ["Edison answer", "-------------", str(result["answer"]), ""]
     if result.get("failure_reason") or result.get("error"):
         lines += ["Failure details", "---------------", str(result.get("failure_reason") or result.get("error")), ""]
-    lines += ["Raw response JSON", "-----------------", json.dumps(result, ensure_ascii=False, indent=2, default=str)]
-    response_txt.write_text("\n".join(lines), encoding="utf-8")
+    lines += ["Raw response JSON", "-----------------", json_text(result)]
+    response_txt.write_text(redact("\n".join(lines)), encoding="utf-8")
     log("")
     log("=" * 76)
     log("FINAL EDISON RESPONSE")

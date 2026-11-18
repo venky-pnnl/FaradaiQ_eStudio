@@ -3,6 +3,9 @@ set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$HERE/../.." && pwd)"
 PY="$ROOT/.faradaiq_venv/bin/python"
+if [[ -x "$ROOT/.faradaiq_venv_macos/bin/python" ]]; then
+  PY="$ROOT/.faradaiq_venv_macos/bin/python"
+fi
 : "${LABRIC_MCP_URL:=https://mcp.labric.co/mcp}"
 export LABRIC_MCP_URL
 if [[ -z "${LABRIC_API_KEY:-}" ]]; then

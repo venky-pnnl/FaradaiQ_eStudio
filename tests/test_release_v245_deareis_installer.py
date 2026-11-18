@@ -46,10 +46,15 @@ def test_deareis_installer_reuses_base_python_and_prefers_stable_versions():
     assert "Python.Python.3.12" in helper
 
 
-def test_main_installer_excludes_optional_env_and_backup():
-    text = (ROOT / "Install_FaradaIQ_Studio_v320.bat").read_text(encoding="utf-8")
-    assert '".deareis_venv"' in text
-    assert '".deareis_venv.__backup_v292"' in text
+def test_release_excludes_optional_env_and_backup(tmp_path, monkeypatch):
+    from scripts import build_release
+
+    monkeypatch.setattr(build_release, "ROOT", tmp_path)
+    for folder in (".deareis_venv", ".deareis_venv.__backup_v292"):
+        (tmp_path / folder).mkdir()
+        (tmp_path / folder / "sentinel").touch()
+    (tmp_path / "install_deareis_optional.bat").touch()
+    assert build_release.payload_files() == [tmp_path / "install_deareis_optional.bat"]
 
 
 def test_transactional_installer_rebuilds_a_broken_environment(tmp_path):

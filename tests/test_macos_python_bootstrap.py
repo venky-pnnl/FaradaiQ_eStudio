@@ -7,7 +7,7 @@ import subprocess
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
-LAUNCHER = ROOT / 'Install_FaradaIQ_eStudio_v331.sh'
+LAUNCHER = ROOT / 'Install_FaradaIQ_eStudio_v336.sh'
 PYTHON_SHA = '8373e58da4ea146b3eb1c1f9834f19a319440b6b679b06050b1f9ee3237aa8e4'
 PYTHON_URL = 'https://www.python.org/ftp/python/3.12.10/python-3.12.10-macos11.pkg'
 
@@ -71,7 +71,7 @@ printf 'app:%s\\n' "$*" >> "$TRACE"''',
             framework_python.write_bytes(fake_python.read_bytes())
             framework_python.chmod(0o755)
         elif existing == 'path':
-            (tools / 'python3.11').symlink_to(fake_python)
+            (tools / 'python3.12').symlink_to(fake_python)
         elif existing == 'apple_shim':
             apple_shim.write_text('#!/bin/bash\nprintf "apple-shim\\n" >> "$TRACE"\nexit 1\n')
             apple_shim.chmod(0o755)

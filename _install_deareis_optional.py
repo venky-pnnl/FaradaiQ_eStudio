@@ -13,7 +13,6 @@ import shutil
 import stat
 import subprocess
 import sys
-import tempfile
 import time
 from pathlib import Path
 from typing import Iterable, List, Optional, Sequence, Tuple
@@ -260,11 +259,11 @@ def transactional_install(
     backup = root / ".deareis_venv.__backup_v292"
     python = env_python(env_dir)
     if log_path is None:
-        log_path = Path(tempfile.gettempdir()) / "FaradaIQ_Studio_v292_DearEIS_install.log"
+        log_path = root / "logs" / "deareis_install_v336.log"
     log = InstallLog(log_path)
     old_moved = False
     try:
-        log.write("FaradaIQ DearEIS transactional installer v292")
+        log.write("FaradaIQ eStudio DearEIS transactional installer v336")
         log.write(f"Root: {root}")
         log.write(f"Log:  {log_path}")
 
@@ -378,6 +377,8 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     parser.add_argument("--requirements", type=Path, default=None)
     parser.add_argument("--verify-module", default="deareis")
     parser.add_argument("--log", type=Path, default=None)
+    parser.add_argument("--seed-python", type=Path, help="Use this interpreter to seed the private DearEIS environment.")
+    parser.add_argument("--auto", action="store_true", help=argparse.SUPPRESS)
     return parser.parse_args(argv)
 
 
@@ -385,10 +386,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     args = parse_args(argv)
     root = args.root.resolve()
     requirements = args.requirements or (root / "requirements_deareis_optional.txt")
+    seed = [str(args.seed_python.absolute())] if args.seed_python else None
+    if seed and not _valid_seed(seed):
+        print(f"The selected eStudio Python could not create an isolated DearEIS runtime: {args.seed_python}", file=sys.stderr)
+        return 1
     return transactional_install(
         root=root,
         requirements=requirements.resolve(),
         verify_module=args.verify_module,
+        seed_command=seed,
         log_path=args.log,
     )
 

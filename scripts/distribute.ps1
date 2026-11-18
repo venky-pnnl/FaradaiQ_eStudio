@@ -171,54 +171,51 @@ if ($Action -eq 'Update') {
     } finally { Remove-Item Env:\FARADAIQ_SOURCE_PACKAGE_ZIP -ErrorAction SilentlyContinue; Remove-Item -LiteralPath $temp -Recurse -Force -ErrorAction SilentlyContinue }
     exit 0
 }
-# Explicit maintainer operation: upload a new, immutable numeric release.
+# Publish the exact build payload on the current remote main history.
 Configure-Repository
 Push-Location $root
 try {
-    if (-not (Test-Path -LiteralPath (Join-Path $root '.git'))) {
-        & $script:git init -b main
-        if ($LASTEXITCODE -ne 0) { throw 'git init failed.' }
-    }
-    $repoRoot=(& $script:git rev-parse --show-toplevel | Out-String).Trim()
-    if ([IO.Path]::GetFullPath($repoRoot) -ne [IO.Path]::GetFullPath($root)) { throw 'Upload must run at the eStudio repository root.' }
-    if (-not (Test-NativeCommand $script:git @('remote','get-url','origin'))) {
-        & $script:git remote add origin "https://github.com/$Repository.git"
-        if ($LASTEXITCODE -ne 0) { throw 'Could not add the GitHub origin.' }
-    }
-    $origin=(& $script:git remote get-url origin | Out-String).Trim()
-    if ($origin -notin @("https://github.com/$Repository.git","https://github.com/$Repository","git@github.com:$Repository.git")) { throw "origin points to $origin instead of $Repository. Resolve the repository configuration before uploading." }
     $metadata=Get-Content -LiteralPath 'release.json' -Raw | ConvertFrom-Json
     if (Test-NativeCommand $script:gh @('release','view',$metadata.version,'--repo',$Repository)) {
         throw "Release $($metadata.version) already exists. Increment the version; existing releases are never overwritten."
     }
+    if (Test-Path -LiteralPath (Join-Path $root '.git')) {
+        if (Test-NativeCommand $script:git @('remote','get-url','origin')) {
+            $origin=(& $script:git remote get-url origin | Out-String).Trim()
+            if ($origin -notin @("https://github.com/$Repository.git","https://github.com/$Repository","git@github.com:$Repository.git")) {
+                throw "The source folder has a different GitHub origin. Verify the configured repository before uploading."
+            }
+        }
+    }
     $python=Join-Path $root '.faradaiq_venv\Scripts\python.exe'
     if (-not (Test-Path -LiteralPath $python)) { $python='python' }
-    & $python (Join-Path $PSScriptRoot 'build_release.py') --scan-only
-    if ($LASTEXITCODE -ne 0) { throw 'Source screening failed.' }
-    if (-not (Test-NativeCommand $script:git @('config','user.name'))) {
+    $authorName=''
+    $authorEmail=''
+    if (Test-NativeCommand $script:git @('config','--get','user.name')) {
+        $authorName=(& $script:git config --get user.name | Out-String).Trim()
+    }
+    if (Test-NativeCommand $script:git @('config','--get','user.email')) {
+        $authorEmail=(& $script:git config --get user.email | Out-String).Trim()
+    }
+    if (-not $authorName -or -not $authorEmail) {
         $user=(Invoke-Gh -Arguments @('api','user') | Out-String | ConvertFrom-Json)
-        & $script:git config user.name $user.login
-        & $script:git config user.email "$($user.id)+$($user.login)@users.noreply.github.com"
+        $authorName=$user.login
+        $authorEmail="$($user.id)+$($user.login)@users.noreply.github.com"
     }
     & $python (Join-Path $PSScriptRoot 'build_release.py')
     if ($LASTEXITCODE -ne 0) { throw 'Release build failed.' }
-    $allowed=@(& $python (Join-Path $PSScriptRoot 'build_release.py') --list-files)
-    if ($LASTEXITCODE -ne 0) { throw 'Payload allowlist generation failed.' }
-    # Stage only files approved by the same filter used for the release ZIP.
-    foreach ($relative in $allowed) {
-        & $script:git add -- $relative
-        if ($LASTEXITCODE -ne 0) { throw "Could not stage $relative" }
-    }
-    $staged=@(& $script:git diff --cached --name-only --diff-filter=ACMR)
-    foreach ($relative in $staged) {
-        if ($relative -notin $allowed) { throw "Unscreened staged file: $relative . Unstage it before publishing." }
-    }
-    & $script:git diff --cached --quiet
-    if ($LASTEXITCODE -eq 1) { & $script:git commit -m "Release FaradaIQ eStudio $($metadata.version)"; if ($LASTEXITCODE -ne 0) { throw 'Commit failed.' } }
-    & $script:git push -u origin HEAD:main
-    if ($LASTEXITCODE -ne 0) { throw 'Push failed. No history is force-pushed; reconcile the remote before retrying.' }
-    $sha=(& $script:git rev-parse HEAD | Out-String).Trim()
     $package=Join-Path $root ('dist\'+$metadata.package_asset)
+    Write-Host "Fetching GitHub main and publishing the verified $($metadata.version) source files."
+    $publisher=@((Join-Path $PSScriptRoot 'publish_payload.py'), '--zip', $package,
+        '--git', $script:git, '--remote', "https://github.com/$Repository.git",
+        '--author-name', $authorName, '--author-email', $authorEmail)
+    $ErrorActionPreference = 'Continue'
+    $PSNativeCommandUseErrorActionPreference = $false
+    try {
+        $sha=(& $python @publisher | Out-String).Trim()
+        $publishExit=$LASTEXITCODE
+    } finally { $ErrorActionPreference='Stop' }
+    if ($publishExit -ne 0 -or $sha -notmatch '^[a-f0-9]{40}$') { throw 'Source upload failed. Review the Git diagnostic above.' }
     Invoke-Gh -Arguments @('release','create',$metadata.version,$package,($package+'.sha256'),'--repo',$Repository,'--target',$sha,'--title',"FaradaIQ eStudio $($metadata.version)",'--notes-file',(Join-Path $root "RELEASE_NOTES_$($metadata.version).md")) | Out-Host
     Write-Output "Published https://github.com/$Repository/releases/tag/$($metadata.version)"
 } finally { Pop-Location }
