@@ -367,15 +367,38 @@ def _mott_diagnostic(pot: np.ndarray, cap: np.ndarray, freq: float) -> dict[str,
     ok=np.isfinite(pot)&np.isfinite(cap)&(cap>0); x=np.asarray(pot[ok],float); c=np.asarray(cap[ok],float)
     if len(x)<15:return {"frequency_Hz":freq,"status":"REJECT","reason":"insufficient_positive_capacitance"}
     order=np.argsort(x); x=x[order]; y=1/(c[order]**2)
-    best=None; min_n=max(12,int(math.ceil(len(x)*0.22)))
-    for n in range(min_n,min(len(x),40)+1):
-        for s in range(len(x)-n+1):
-            xs=x[s:s+n]; ys=y[s:s+n]; span=float(xs[-1]-xs[0])
-            if span<QUALITY["mott_min_window_span_V"]: continue
-            p=np.polyfit(xs,ys,1); yh=np.polyval(p,xs)
-            ssr=float(np.sum((ys-yh)**2)); sst=float(np.sum((ys-np.mean(ys))**2)); r2=1-ssr/sst if sst>0 else 0
-            score=r2+0.001*n
-            if best is None or score>best[0]: best=(score,r2,p[0],p[1],xs[0],xs[-1],n)
+    best = None
+    min_n = max(12, math.ceil(len(x) * 0.22))
+    min_span = QUALITY["mott_min_window_span_V"]
+
+    def evaluate(start, end):
+        nonlocal best
+        xs, ys = x[start:end + 1], y[start:end + 1]
+        slope, intercept = np.polyfit(xs, ys, 1)
+        residual = ys - (slope * xs + intercept)
+        ssr = float(np.sum(residual ** 2))
+        sst = float(np.sum((ys - np.mean(ys)) ** 2))
+        r2 = 1 - ssr / sst if sst > 0 else 0
+        score = r2 + 0.001 * len(xs)
+        if best is None or score > best[0]:
+            best = (score, r2, slope, intercept, xs[0], xs[-1], len(xs))
+
+    # Retain the existing search for smaller grids and bound the number of
+    # window lengths on dense grids whose minimum already exceeds 40 points.
+    max_n = min(len(x), 40 if min_n <= 40 else min_n + 12)
+    for n in range(min_n, max_n + 1):
+        starts = np.flatnonzero(x[n - 1:] - x[:len(x) - n + 1] >= min_span)
+        for start in starts:
+            evaluate(start, start + n - 1)
+
+    if best is None:
+        # A densely sampled narrow range can require a longer window even when
+        # the minimum point count is small. Test the first legal end per start.
+        starts = np.arange(len(x) - min_n + 1)
+        ends = np.maximum(starts + min_n - 1, np.searchsorted(x, x[starts] + min_span))
+        for start, end in zip(starts, ends):
+            if end < len(x) and x[end] - x[start] >= min_span:
+                evaluate(start, end)
     if best is None:return {"frequency_Hz":freq,"status":"REJECT","reason":"no_window_with_required_span"}
     _,r2,slope,intercept,vmin,vmax,n=best; vfb=(-intercept/slope) if slope else np.nan
     reasons=[]

@@ -45,7 +45,7 @@ def build(output=None, *, from_manifest=False):
         # Installer and update BAT files appear first at the root of the ZIP.
         for f in sorted(files+[manifest],key=lambda f:(f.suffix!='.bat',str(f))):
             rel=f.relative_to(ROOT).as_posix()
-            info=zipfile.ZipInfo(rel,date_time=(2026,11,17,0,0,0));info.compress_type=zipfile.ZIP_DEFLATED
+            info=zipfile.ZipInfo(rel,date_time=(2026,11,18,0,0,0));info.compress_type=zipfile.ZIP_DEFLATED
             info.external_attr=((0o100755 if f.suffix in {'.sh','.command'} else 0o100644)<<16)
             z.writestr(info,f.read_bytes())
     digest=hashlib.sha256(dest.read_bytes()).hexdigest()

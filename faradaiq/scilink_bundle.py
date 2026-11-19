@@ -31,15 +31,22 @@ def _snapshot(path,event):
     if (before.st_size,before.st_mtime_ns)!=(after.st_size,after.st_mtime_ns):raise RuntimeError(f'Source changed while reading: {path}')
     return {'path':str(path),'name':path.name,'size':after.st_size,'mtime_ns':after.st_mtime_ns,'sha256':h.hexdigest()}
 
-def make_scilink_ready_bundle(analysis_root,sample_name=None,metadata=None,progress_callback=None,cancel_event=None):
+def make_scilink_ready_bundle(analysis_root,sample_name=None,metadata=None,progress_callback=None,cancel_event=None,*,output_dir=None):
     import h5py
     import faradaiq_canonical_bundle as canonical
     metadata=canonical.safe_json(metadata or {})
     root=Path(analysis_root).resolve()
     if not root.is_dir():raise ValueError('Choose an exported analysis folder.')
     data_root,container,base,_=canonical.resolve_bundle_locations(root)
+    imported=canonical._json_load(data_root/'analysis_ready_manifest.json')
+    if isinstance(imported,dict) and imported.get('browser_import'):
+        base=imported.get('canonical_identity_base_name') or base
     sample_name=sample_name or base or root.name
-    output=new_folder(root/'SciLink_ready',sample_name,reserve=64)
+    output_root=Path(output_dir).expanduser().resolve() if output_dir is not None else root/'SciLink_ready'
+    if output_dir is not None and output_root.is_relative_to(data_root):
+        raise ValueError('Choose a SciLink output folder outside the selected analysis data folder.')
+    reserve=len('experiment_faradaiq_bundle.json')+1 if output_dir is not None else 64
+    output=new_folder(output_root,sample_name,reserve=reserve)
     try:
         files=[]
         allowed=canonical.TABLE_EXTS|canonical.MEDIA_EXTS|canonical.JSON_EXTS
@@ -57,7 +64,7 @@ def make_scilink_ready_bundle(analysis_root,sample_name=None,metadata=None,progr
             if _snapshot(Path(p),cancel_event)!=original:raise RuntimeError(f'Source changed during bundle creation: {p}')
         skill=Path(__file__).resolve().parents[1]/'skills/electrochemistry_skill.md'
         skill_copy=output/skill.name;shutil.copy2(skill,skill_copy)
-        ready={'schema':'faradaiq-scilink-ready-v1','created_utc':datetime.now(timezone.utc).isoformat(),'application':'FaradaIQ eStudio','version':'v338','sample_name':sample_name,'session_id':(metadata or {}).get('session_id',''),'experimental_metadata':metadata or {},'approved':False,'analysis_only':True,'submission':'not_submitted','data_format':'HDF5','source_files':list(snapshots.values()),'datasets':[],'analysis_skill':{'file':skill.name,'sha256':hashlib.sha256(skill.read_bytes()).hexdigest()},'metadata_policy':'Original column labels and values retained; explicit units only, unknown units null; source snapshots verified.'}
+        ready={'schema':'faradaiq-scilink-ready-v1','created_utc':datetime.now(timezone.utc).isoformat(),'application':'FaradaIQ eStudio','version':'v341','sample_name':sample_name,'session_id':(metadata or {}).get('session_id',''),'experimental_metadata':metadata or {},'approved':False,'analysis_only':True,'submission':'not_submitted','data_format':'HDF5','source_files':list(snapshots.values()),'datasets':[],'analysis_skill':{'file':skill.name,'sha256':hashlib.sha256(skill.read_bytes()).hexdigest()},'metadata_policy':'Original column labels and values retained; explicit units only, unknown units null; source snapshots verified.'}
         with h5py.File(receipt['h5_path'],'r+') as h5:
             if not len(h5['tables']):raise ValueError('No curated numeric tables found. Export or select an analysis-ready data folder first.')
             for group in ('tables','media','metadata'):
@@ -91,11 +98,11 @@ def make_scilink_ready_bundle(analysis_root,sample_name=None,metadata=None,progr
                 ds.attrs['role']='exact original table or metadata bytes'
             ready['source_documents_group']='/source_documents'
             manifest=json.loads(h5['manifest_json'][()].decode())
-            manifest.update(app='FaradaIQ eStudio',version='v338',scilink_ready=ready)
+            manifest.update(app='FaradaIQ eStudio',version='v341',scilink_ready=ready)
             manifest['h5_counts']['metadata']=len(h5['metadata'])+1
             manifest['metadata_count']=len(h5['metadata'])+1
             h5.attrs['n_metadata']=len(h5['metadata'])+1
-            for key,value in {'app':'FaradaIQ eStudio','version':'v338','bundle_schema':ready['schema'],'sample_name':sample_name,'session_id':ready['session_id']}.items():h5.attrs[key]=value
+            for key,value in {'app':'FaradaIQ eStudio','version':'v341','bundle_schema':ready['schema'],'sample_name':sample_name,'session_id':ready['session_id']}.items():h5.attrs[key]=value
             del h5['manifest_json'];h5.create_dataset('manifest_json',data=json.dumps(manifest,ensure_ascii=False),dtype=h5py.string_dtype())
             h5['metadata'].create_dataset('scilink_ready_json',data=json.dumps(ready,ensure_ascii=False),dtype=h5py.string_dtype())
         Path(receipt['json_path']).write_text(json.dumps(manifest,indent=2,ensure_ascii=False),encoding='utf-8')

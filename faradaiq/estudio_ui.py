@@ -181,6 +181,19 @@ def arrange(gui,core):
     gui.estudio_stop.pack(side='right',padx=(14,0))
     gui.estudio_credits=ttk.Button(header,text='Credits',command=gui.show_about_credits)
     gui.estudio_credits.pack(side='right')
+    gui.estudio_guide=ttk.Button(header,text='Quick guide',command=lambda:show_quick_guide(gui))
+    gui.estudio_guide.pack(side='right',padx=(8,0))
+    def launch_workbench():
+        from .workbench_launcher import launch
+        try:
+            launch(gui.file_var.get())
+        except OSError as error:
+            from tkinter import messagebox
+            messagebox.showerror('Advanced workbench',str(error),parent=gui)
+        else:
+            gui.set_status('Opening advanced workbench with the selected data source.')
+    gui.estudio_workbench=ttk.Button(header,text='Advanced workbench',command=launch_workbench)
+    gui.estudio_workbench.pack(side='right',padx=(8,0))
     ttk.Separator(shell).pack(fill='x')
     # Footer is managed before the expandable body, guaranteeing reserved space.
     footer=ttk.Frame(shell,padding=(18,9));footer.pack(side='bottom',fill='x')
@@ -260,6 +273,22 @@ def arrange(gui,core):
         gui.estudio_control_clones.append((source,w));return w
     gui._estudio_clone=clone
     browser=next(w for w in original if _text(w)=='Data browser + analysis')
+    shortcuts={
+        '<Control-o>':gui.browse_file,
+        '<Control-Return>':gui.load_and_inspect,
+        '<Control-s>':next(w for w in original if _text(w)=='Save Session').invoke,
+        '<Control-Shift-O>':next(w for w in original if _text(w)=='Load Session').invoke,
+        '<Control-b>':browser.invoke,
+        '<F1>':lambda:show_quick_guide(gui),
+    }
+    for sequence,action in shortcuts.items():
+        def invoke_shortcut(event,callback=action):
+            if event.widget.winfo_toplevel() is gui:
+                callback()
+                return 'break'
+        gui.bind(sequence,invoke_shortcut,add='+')
+        if sys.platform=='darwin' and 'Control-' in sequence:
+            gui.bind(sequence.replace('Control-','Command-'),invoke_shortcut,add='+')
     from .estudio_sidebar import ResultsNavigator
 
     ttk.Separator(nav).pack(fill='x',pady=(7,6))
@@ -465,6 +494,40 @@ def show_advanced(gui,original,clone,theme):
     theme(win,gui.estudio_theme_var.get())
 
 
+def show_quick_guide(gui):
+    """Keep the everyday workflow and shortcuts available without opening a web page."""
+    existing=getattr(gui,'_estudio_guide_window',None)
+    if existing is not None and existing.winfo_exists():
+        existing.lift()
+        return existing
+    win=tk.Toplevel(gui)
+    gui._estudio_guide_window=win
+    win.title(f'{TITLE} — Quick guide')
+    win.geometry('680x520')
+    win.minsize(540,420)
+    set_icon(win)
+    box=ttk.Frame(win,padding=22)
+    box.pack(fill='both',expand=True)
+    ttk.Label(box,text='From data to results',style='Section.TLabel').pack(anchor='w')
+    steps=(
+        ('1. Open and inspect','In Data, choose File or Folder, keep instrument companion files together, and click Inspect.'),
+        ('2. Export and compare','Choose an output folder and Export. Open Data Browser to overlay measurements and use the analysis tools.'),
+        ('3. Save your work','Save Session keeps the source paths, experimental description, and open browser views. Auto-save can keep session checkpoints.'),
+        ('4. Share results','Use Reports for PowerPoint or portable HTML. Use SciLink to prepare the HDF5 bundle and review the analysis request.'),
+    )
+    for title,detail in steps:
+        ttk.Label(box,text=title,style='Section.TLabel').pack(anchor='w',pady=(14,3))
+        ttk.Label(box,text=detail,wraplength=610,justify='left').pack(anchor='w')
+    modifier='Cmd' if sys.platform=='darwin' else 'Ctrl'
+    ttk.Label(box,text=f'{modifier}+O  Open file    ·    {modifier}+Enter  Inspect    ·    {modifier}+S  Save session\n'
+              f'{modifier}+Shift+O  Load session    ·    {modifier}+B  Data Browser    ·    F1  Quick guide',
+              wraplength=610,justify='left',style='Muted.TLabel').pack(anchor='w',pady=(20,12))
+    ttk.Button(box,text='Close',command=win.destroy).pack(anchor='e',side='bottom')
+    win.bind('<Escape>',lambda _event:win.destroy())
+    apply_theme(win,gui.estudio_theme_var.get())
+    return win
+
+
 def install(core):
     from .portable_jobs import install as install_portable_jobs
     install_portable_jobs(core)
@@ -478,15 +541,15 @@ def install(core):
     for name,module in list(sys.modules.items()):
         if not name.startswith('faradaiq') or name in ('faradaiq', 'faradaiq.release_identity', __name__):
             continue
-        if name.startswith('faradaiq.browser_') or name.startswith('faradaiq_browser_'):
+        if name.startswith(('faradaiq.browser_', 'faradaiq_browser_', 'faradaiq.workbench_')):
             continue
         for attr,value in dict(VERSION=APP_VERSION,APP_VERSION=SEMVER,SEMVER=SEMVER,VERSION_NUMBER=VERSION_NUMBER,
                                APP_NAME=APP_NAME,APP_TITLE=TITLE,INSTALL_TARGET=INSTALL_TARGET).items():
             if hasattr(module,attr):setattr(module,attr,value)
-        if name=='faradaiq.v290_portable_browser':module.SCHEMA='faradaiq-portable-browser-v338'
+        if name=='faradaiq.v290_portable_browser':module.SCHEMA='faradaiq-portable-browser-v341'
         if hasattr(module,'normalize_release_text'):module.normalize_release_text=brand_text
         if hasattr(module,'FRONT_SLIDE_FOOTER'):module.FRONT_SLIDE_FOOTER='Made by '+TITLE
-    for k,v in dict(APP_TITLE=TITLE,FARADAIQ_PUBLIC_VERSION='v338',FARADAIQ_APP_VERSION='v338',FARADAIQ_RELEASE_VERSION='v338',FARADAIQ_RELEASE_TITLE=TITLE,FARADAIQ_INSTALL_TARGET=r'C:\FaradaIQ\eStudio\V338').items():core[k]=v
+    for k,v in dict(APP_TITLE=TITLE,FARADAIQ_PUBLIC_VERSION='v341',FARADAIQ_APP_VERSION='v341',FARADAIQ_RELEASE_VERSION='v341',FARADAIQ_RELEASE_TITLE=TITLE,FARADAIQ_INSTALL_TARGET=r'C:\FaradaIQ\eStudio\V341').items():core[k]=v
     core['_v290_normalize_release_text']=brand_text
     old_theme=core.get('_v36_apply_theme')
     def themed(root,*args,**kwargs):

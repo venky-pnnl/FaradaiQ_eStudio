@@ -1,10 +1,16 @@
 {
-  "release": "v338",
-  "archive_and_manifest": "PASS",
-  "local_mirror_release_cleanup": "PASS",
-  "homepage_logo_rendering_and_content": "PASS",
-  "pages_configuration_fixture": "PASS",
-  "platform_install_fixtures_and_macos_plan": "PASS",
+  "release": "v341",
+  "baseline": "v340",
+  "current_release_tests": 319,
+  "test_files": 32,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "browser_automated_workflows": "PASS (Streamlit AppTest)",
+  "analysis_layout_hierarchy": "PASS: separate chart and control columns",
+  "small_signal_exact_exports": "PASS: nA/pA/fA cases",
+  "pixel_browser_check": "not run: Chromium process-singleton socket unavailable",
   "native_macos_windows_installs": "not run",
-  "live_github_pages_deploy": "not run"
+  "live_provider_requests": "not run",
+  "scope": "See QA_v341.md"
 }

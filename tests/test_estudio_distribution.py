@@ -11,12 +11,12 @@ def test_release_filter_excludes_environments_state_and_archives():
     assert not any(f.name in {'github.json','installation_complete.json','current.json'} for f in files)
 
 def test_zip_payload_matches_checksums(tmp_path):
-    dest=builder.build(tmp_path/'FaradaIQ_eStudio_v338_package.zip')
+    dest=builder.build(tmp_path/'FaradaIQ_eStudio_v341_package.zip')
     with zipfile.ZipFile(dest) as z:
         names=z.namelist()
-        assert 'Install_FaradaIQ_eStudio_v338.bat' in names
+        assert 'Install_FaradaIQ_eStudio_v341.bat' in names
         assert not any(n.endswith('.zip') or '..' in Path(n).parts for n in names)
-        lines=z.read('PACKAGE_MANIFEST_SHA256_v338.txt').decode().splitlines()
+        lines=z.read('PACKAGE_MANIFEST_SHA256_v341.txt').decode().splitlines()
         assert len(lines)>100
         for line in lines:
             digest,name=line.split('  ',1)
@@ -32,7 +32,7 @@ def test_required_skill_is_unchanged():
 def test_runtime_keys_and_job_queues_are_excluded():
     created=[]
     try:
-        for directory,name in [('FaradaIQ_export_jobs','qa_exclusion_probe.json'),('llm_env_helpers','qa_exclusion_probe.bat'),('FaradaIQ_runtime_settings','qa_exclusion_probe.json'),('.', 'analysis_tools_status_v338.json')]:
+        for directory,name in [('FaradaIQ_export_jobs','qa_exclusion_probe.json'),('llm_env_helpers','qa_exclusion_probe.bat'),('FaradaIQ_runtime_settings','qa_exclusion_probe.json'),('.', 'analysis_tools_status_v341.json')]:
             path=ROOT/directory/name;path.parent.mkdir(exist_ok=True);path.write_text('private-runtime-probe');created.append(path)
         files=builder.payload_files()
         assert all(path not in files for path in created)

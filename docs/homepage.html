@@ -141,7 +141,7 @@ pre code { padding: 0; background: transparent; }
       </div>
       <figure>
         <div class="screenshot">
-          <img src="media/estudio-browser-nyquist.png" alt="Three synthetic impedance spectra compared as a Nyquist plot in FaradaIQ eStudio Browser v338" width="1800" height="1138" loading="lazy">
+          <img src="media/estudio-browser-nyquist.png" alt="Three synthetic impedance spectra compared as a Nyquist plot in FaradaIQ eStudio Browser v337" width="1800" height="1138" loading="lazy">
         </div>
         <figcaption>Nyquist overlay of three synthetic spectra in eStudio Browser v337.</figcaption>
       </figure>
@@ -149,8 +149,8 @@ pre code { padding: 0; background: transparent; }
 
     <section class="section info" aria-label="Install and connect">
       <article id="install-and-start">
-        <h2>Install v338</h2>
-        <p>Extract the ZIP before running <code>Install_FaradaIQ_eStudio_v338.bat</code> on Windows or <code>Install_FaradaIQ_eStudio_v338.command</code> on macOS. Setup checks DearEIS, pyDRTtools, and managed SciLink before opening eStudio Desktop, eStudio Browser, and SciLink Streamlit. All three shortcuts appear under <strong>Desktop → Holaris Apps</strong>.</p>
+        <h2>Install v341</h2>
+        <p>Extract the ZIP before running <code>Install_FaradaIQ_eStudio_v341.bat</code> on Windows or <code>Install_FaradaIQ_eStudio_v341.command</code> on macOS. Setup checks DearEIS, pyDRTtools, and managed SciLink before opening eStudio Desktop, eStudio Browser, and SciLink Streamlit. All three shortcuts appear under <strong>Desktop → Holaris Apps</strong>.</p>
         <p><a href="#installation-details">Installation and troubleshooting</a></p>
       </article>
       <article id="configure-integrations">
@@ -249,7 +249,7 @@ pre code { padding: 0; background: transparent; }
 </tbody>
 </table></div>
 <h2 id="scientific-analysis">Scientific analysis</h2>
-<p>Choose the relevant <strong>Analysis tool</strong> in the v338 local browser. The table also shows where to find the corresponding desktop workflows.</p>
+<p>Choose the relevant <strong>Analysis tool</strong> in the v341 local browser. The table also shows where to find the corresponding desktop workflows.</p>
 <div class="table-scroll" tabindex="0"><table>
 <thead>
 <tr class="header">
@@ -321,19 +321,19 @@ pre code { padding: 0; background: transparent; }
 </details>
 
 <h2 id="installation-details">Installation details</h2>
-<p>Download the full <code>FaradaIQ_eStudio_v338_package.zip</code> from <a href="https://github.com/venky-pnnl/FaradaiQ_eStudio/releases">GitHub Releases</a>. The matching <code>.zip.sha256</code> file contains the archive checksum. Keep the extracted files together and stay online while the installer sets up the runtime. The main installer checks DearEIS, official pyDRTtools, and managed SciLink before opening the apps. Run the same installer again to repair an incomplete tool setup.</p>
+<p>Download the full <code>FaradaIQ_eStudio_v341_package.zip</code> from <a href="https://github.com/venky-pnnl/FaradaiQ_eStudio/releases">GitHub Releases</a>. The matching <code>.zip.sha256</code> file contains the archive checksum. Keep the extracted files together and stay online while the installer sets up the runtime. The main installer checks DearEIS, official pyDRTtools, and managed SciLink before opening the apps. Run the same installer again to repair an incomplete tool setup.</p>
 <h3 id="windows">Windows</h3>
 <ol type="1">
 <li>In File Explorer, right-click the ZIP, choose <strong>Extract All</strong>, and open the extracted folder.</li>
-<li>Double-click <strong><code>Install_FaradaIQ_eStudio_v338.bat</code></strong>. Keep the console open while setup verifies the package and prepares the Python environment. If a compatible Python is missing, setup uses WinGet to install Python 3.12.</li>
-<li>Setup opens <strong>FaradaIQ eStudio</strong>, <strong>FaradaIQ eStudio Browser</strong>, and <strong>SciLink</strong>. Reopen any app from <strong>Desktop → Holaris Apps</strong>. The default eStudio install folder is <code>C:\FaradaIQ\eStudio\V338</code>.</li>
+<li>Double-click <strong><code>Install_FaradaIQ_eStudio_v341.bat</code></strong>. Keep the console open while setup verifies the package and prepares the Python environment. If a compatible Python is missing, setup uses WinGet to install Python 3.12.</li>
+<li>Setup opens <strong>FaradaIQ eStudio</strong>, <strong>FaradaIQ eStudio Browser</strong>, and <strong>SciLink</strong>. Reopen any app from <strong>Desktop → Holaris Apps</strong>. The default eStudio install folder is <code>C:\FaradaIQ\eStudio\V341</code>.</li>
 </ol>
 <h3 id="macos">macOS</h3>
 <ol type="1">
 <li>In Finder, double-click the ZIP and open the extracted folder.</li>
-<li>Double-click <strong><code>Install_FaradaIQ_eStudio_v338.command</code></strong>.</li>
+<li>Double-click <strong><code>Install_FaradaIQ_eStudio_v341.command</code></strong>.</li>
 <li>Keep Terminal open. The installer reuses Python 3.12 with Tk if available. Otherwise, it downloads and verifies the official Python 3.12 package, then installs it. Enter your Mac administrator password if Terminal prompts for it.</li>
-<li>Setup opens <strong>FaradaIQ eStudio</strong>, <strong>FaradaIQ eStudio Browser</strong>, and <strong>SciLink</strong>. Reopen any app from <strong>Desktop → Holaris Apps</strong>. The default eStudio install folder is <code>~/Applications/FaradaIQ eStudio/V338</code>.</li>
+<li>Setup opens <strong>FaradaIQ eStudio</strong>, <strong>FaradaIQ eStudio Browser</strong>, and <strong>SciLink</strong>. Reopen any app from <strong>Desktop → Holaris Apps</strong>. The default eStudio install folder is <code>~/Applications/FaradaIQ eStudio/V341</code>.</li>
 </ol>
 <h4 id="if-macos-blocks-the-installer">If macOS blocks the installer</h4>
 <ol type="1">
@@ -346,13 +346,13 @@ pre code { padding: 0; background: transparent; }
 </blockquote>
 <h4 id="if-the-icon-closes-immediately">If the icon closes immediately</h4>
 <p>Open <strong>Terminal</strong>, paste the following command, and press <strong>Return</strong>.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">/bin/bash</span> <span class="st">&quot;</span><span class="va">$HOME</span><span class="st">/Applications/FaradaIQ eStudio/V338/Start_FaradaIQ_eStudio_v338.command&quot;</span></span></code></pre></div>
-<p>For another installed release, use that release’s folder and launcher version. For v338, startup messages are also saved in <code>~/Library/Logs/FaradaIQ eStudio/startup_v338.log</code>. If the app still closes, include the last lines of that log when reporting the issue.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">/bin/bash</span> <span class="st">&quot;</span><span class="va">$HOME</span><span class="st">/Applications/FaradaIQ eStudio/V341/Start_FaradaIQ_eStudio_v341.command&quot;</span></span></code></pre></div>
+<p>For another installed release, use that release’s folder and launcher version. For v341, startup messages are also saved in <code>~/Library/Logs/FaradaIQ eStudio/startup_v341.log</code>. If the app still closes, include the last lines of that log when reporting the issue.</p>
 <h3 id="local-browser">Local browser</h3>
 <p>Open <strong>FaradaIQ eStudio Browser</strong> under <strong>Desktop → Holaris Apps</strong>. Its local server runs in the background. It uses <code>http://127.0.0.1:8512</code> when available. The versioned BAT or COMMAND launcher in the installation folder can also run the server in a terminal for diagnostics.</p>
 <p>Use a local folder path for large datasets or a mounted network share. The file and folder pickers send selected files to eStudio on the same computer. Keep instrument companions together. When a folder contains both raw instrument files and curated tables, open the curated folder separately to analyze those tables. Imports, plots, deterministic calculations, and reports run on your computer. A reviewed SciLink or Edison request can send selected data to the provider you configure.</p>
-<p>The browser launcher records the actual loopback address in the versioned startup log. The desktop app provides its saved native layouts and optional Qt tool windows. The browser provides method-specific controls, interactive charts, and downloadable outputs for the workflows listed under <strong>Scientific analysis</strong>. See the <a href="https://github.com/venky-pnnl/FaradaiQ_eStudio/blob/main/QA_v338.md">verification report</a> for platform and service coverage.</p>
-<p>If the browser does not start, check <code>%LOCALAPPDATA%\FaradaIQ\eStudio\logs\browser_v338.log</code> on Windows or <code>~/Library/Logs/FaradaIQ eStudio/browser_v338.log</code> on macOS.</p>
+<p>The browser launcher records the actual loopback address in the versioned startup log. The desktop app provides its saved native layouts and optional Qt tool windows. The browser provides method-specific controls, interactive charts, and downloadable outputs for the workflows listed under <strong>Scientific analysis</strong>. See the <a href="https://github.com/venky-pnnl/FaradaiQ_eStudio/blob/main/QA_v341.md">verification report</a> for platform and service coverage.</p>
+<p>If the browser does not start, check <code>%LOCALAPPDATA%\FaradaIQ\eStudio\logs\browser_v341.log</code> on Windows or <code>~/Library/Logs/FaradaIQ eStudio/browser_v341.log</code> on macOS.</p>
 <h2 id="configure-tools-and-services">Configure tools and services</h2>
 <h3 id="local-analysis-tools">Local analysis tools</h3>
 <div class="table-scroll" tabindex="0"><table>
@@ -432,7 +432,7 @@ pre code { padding: 0; background: transparent; }
 <footer class="footer" id="cite-and-credit">
   <div class="container">
     <h2>Cite and credit</h2>
-    <p>Prabhakaran, V. (2026). <em>FaradaIQ eStudio</em> (Version v338) [Computer software]. <a href="https://github.com/venky-pnnl/FaradaiQ_eStudio/blob/main/CITATION.cff">Citation file</a></p>
+    <p>Prabhakaran, V. (2026). <em>FaradaIQ eStudio</em> (Version v341) [Computer software]. <a href="https://github.com/venky-pnnl/FaradaiQ_eStudio/blob/main/CITATION.cff">Citation file</a></p>
     <p>Venkateshkumar Prabhakaran designed FaradaIQ eStudio. Benjamin A. Helfrecht (PNNL) designed the original SECCM parser. <a href="#project-credits">Project credits and method citations</a></p>
     <h3 id="funding-acknowledgment">Funding acknowledgment</h3>
     <p>Development was supported by the Non-Equilibrium Transport Driven Separations Initiative (NETS) through PNNL’s Laboratory Directed Research and Development (LDRD) Program. <a href="https://www.pnnl.gov/projects/nets">NETS</a></p>

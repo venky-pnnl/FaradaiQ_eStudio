@@ -130,9 +130,12 @@ def fit_circuit(eis, circuit='R-RC', source=''):
     return intelligence._fit_circuit(circuit, frequency, impedance, source)
 
 
-def validate_impedance(eis):
+def validate_impedance(eis, *, max_m=None):
     """Run native eStudio's optional impedance.py lin-KK validation."""
-    return intelligence._lin_kk(*_impedance(eis))
+    measurements = _impedance(eis)
+    if max_m is None:
+        return intelligence._lin_kk(*measurements)
+    return intelligence._lin_kk(*measurements, max_m=max_m)
 
 
 def circuit_trace(eis, result):

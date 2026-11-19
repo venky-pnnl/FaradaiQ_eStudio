@@ -27,13 +27,33 @@ def _style(figure, *, title="", height=480, theme="Light", legend=True):
         height=height,
         margin={"l": 45, "r": 24, "t": 48 if title else 20, "b": 36},
         showlegend=legend,
-        legend={"x": 1.01, "y": 1},
+        font={"family": "Arial, sans-serif", "size": 13},
+        colorway=["#236a9c", "#c64d38", "#17826d", "#8055a0", "#ba811d", "#33858c"],
+        legend={"x": 1.01, "y": 1, "font": {"size": 11}, "itemsizing": "constant"},
+        hoverlabel={"namelength": -1},
     )
+
+
+def _fit_axis(figure, values, axis, *, logarithmic=False):
+    """Fit the real numeric span, including nano/pico-scale and constant signals."""
+    parts = [np.asarray(part, dtype=float) for part in values]
+    finite = np.concatenate(parts) if parts else np.array([])
+    finite = finite[np.isfinite(finite) & ((finite > 0) if logarithmic else True)]
+    if not len(finite):
+        return
+    if logarithmic:
+        finite = np.log10(finite)
+    lo, hi = float(finite.min()), float(finite.max())
+    padding = (hi - lo) * .065
+    if padding == 0:
+        padding = .05 if logarithmic else abs(lo) * .05 or 1.
+    getattr(figure, 'update_' + axis + 'axes')(range=[lo - padding, hi + padding], autorange=False,
+                                             exponentformat='SI', showexponent='all', automargin=True)
 
 
 def build_xy_figure(series, x, y, *, invert=False, log_x=False, log_y=False,
                     title="", x_title="", y_title="", height=480, theme="Light", legend=True,
-                    trace_style="Lines and points"):
+                    trace_style="Lines and points", names=None):
     import plotly.graph_objects as go
 
     figure = go.Figure()
@@ -44,14 +64,26 @@ def build_xy_figure(series, x, y, *, invert=False, log_x=False, log_y=False,
         x_values = pd.to_numeric(frame[x], errors="coerce").to_numpy(dtype=float)
         y_values = pd.to_numeric(frame[y], errors="coerce").to_numpy(dtype=float)
         figure.add_scatter(x=x_values, y=-y_values if invert else y_values,
-                           name=Path(path).stem, mode=mode, marker={"size": 4})
+                           name=(names or {}).get(path, Path(path).stem), mode=mode, marker={"size": 4},
+                           line={"width": 2}, hovertemplate="%{x:.7g}<br>%{y:.7g}<extra>%{fullData.name}</extra>")
     _style(figure, title=title, height=height, theme=theme, legend=legend)
     figure.update_xaxes(title=x_title or str(x), type="log" if log_x else "linear")
     figure.update_yaxes(title=y_title or (f"−{y}" if invert else str(y)), type="log" if log_y else "linear")
+    # Plotly's default tiny/constant-signal padding can otherwise obscure real
+    # electrochemical signals with a +/-1 axis. Values and exports stay exact.
+    paired = []
+    for trace in figure.data:
+        xv, yv = np.asarray(trace.x,dtype=float), np.asarray(trace.y,dtype=float)
+        mask = np.isfinite(xv) & np.isfinite(yv)
+        if log_x: mask &= xv > 0
+        if log_y: mask &= yv > 0
+        paired.append((xv[mask],yv[mask]))
+    _fit_axis(figure, [xv for xv,_ in paired], 'x', logarithmic=log_x)
+    _fit_axis(figure, [yv for _,yv in paired], 'y', logarithmic=log_y)
     return figure
 
 
-def build_impedance_figure(series, *, representation, title="", height=600, theme="Light", legend=True):
+def build_impedance_figure(series, *, representation, title="", height=600, theme="Light", legend=True, names=None):
     """Normalize supported spectra with the shared EIS reader before plotting."""
     import plotly.graph_objects as go
     from plotly.subplots import make_subplots
@@ -74,7 +106,7 @@ def build_impedance_figure(series, *, representation, title="", height=600, them
         frequency = spectrum["frequency_Hz"].to_numpy()
         real = spectrum["Zreal_ohm"].to_numpy()
         imaginary = spectrum["Zimag_ohm"].to_numpy()
-        name = Path(path).stem
+        name = (names or {}).get(path, Path(path).stem)
         trace = dict(name=name, legendgroup=str(index), mode="lines+markers", marker={"size": 4},
                      line={"color": colors[index % len(colors)]})
         if bode:
@@ -104,7 +136,9 @@ def _trace_values(figure):
         y_label = getattr(figure.layout[f"yaxis{y_ref[1:]}"].title, "text", None) or ""
         panel = int(y_ref[1:] or 1)
         values = np.column_stack((np.asarray(trace.x, dtype=float), np.asarray(trace.y, dtype=float)))
-        yield index, str(trace.name or f"Trace {index}"), panel, x_label, y_label, values
+        metadata = trace.meta if isinstance(trace.meta, dict) else {}
+        identity = metadata.get('measurement') or trace.name or f"Trace {index}"
+        yield index, str(identity), panel, x_label, y_label, values
 
 
 def displayed_plot_csv(figure):

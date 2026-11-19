@@ -23,7 +23,7 @@ def _table_rows(data: BrowserData) -> list[dict]:
         name = path.relative_to(data.analysis_root).as_posix()
         rows.append({
             'Table': name,
-            'Measurement': str(record.get('measurement_title') or record.get('curve_title')
+            'Measurement': str(record.get('display_name') or record.get('measurement_title') or record.get('curve_title')
                                or record.get('series_title') or record.get('name') or path.stem),
             'Technique': native['technique_key'],
             'Method': str(record.get('method_id') or record.get('eis_method') or record.get('method_entry')
@@ -37,6 +37,9 @@ def _table_rows(data: BrowserData) -> list[dict]:
             'Columns': ', '.join(native['columns']),
             'Source': str(record.get('relative_source_path') or record.get('source_path')
                           or native['source_file'] or data.source),
+            'Instrument': str(record.get('instrument') or ''),
+            'Handle': str(record.get('handle_id') or ''),
+            'Tags': str(record.get('tags') or ''),
         })
     return rows
 
@@ -54,7 +57,7 @@ def catalog_entries(data: BrowserData, *, query: str = '', techniques: Iterable[
     return _filter_rows(_table_rows(data), query, techniques)
 
 
-def render_catalog(data: BrowserData) -> None:
+def render_catalog(data: BrowserData) -> bool:
     """Render the local catalog, scientific metadata, and embedded bundle assets."""
     import pandas as pd
     import streamlit as st
@@ -82,7 +85,7 @@ def render_catalog(data: BrowserData) -> None:
             if st.button('Use this measurement in Analysis'):
                 st.session_state['selected_table'] = choice
                 st.session_state.pop('table', None)
-                st.success(f'Selected {Path(choice).name}. Open Analysis to continue.')
+                return True
         else:
             st.info('No measurements match the current filters.')
     if data.bundle_manifest or data.metadata:

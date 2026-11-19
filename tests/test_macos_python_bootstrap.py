@@ -7,7 +7,7 @@ import subprocess
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
-LAUNCHER = ROOT / 'Install_FaradaIQ_eStudio_v338.sh'
+LAUNCHER = ROOT / 'Install_FaradaIQ_eStudio_v341.sh'
 PYTHON_SHA = '8373e58da4ea146b3eb1c1f9834f19a319440b6b679b06050b1f9ee3237aa8e4'
 PYTHON_URL = 'https://www.python.org/ftp/python/3.12.10/python-3.12.10-macos11.pkg'
 

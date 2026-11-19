@@ -13,7 +13,7 @@ import pytest
 
 
 ROOT = Path(__file__).resolve().parents[1]
-BROWSER_START = 'Start_FaradaIQ_eStudio_Browser_v338'
+BROWSER_START = 'Start_FaradaIQ_eStudio_Browser_v341'
 
 
 def test_windows_installs_a_second_shortcut_and_checks_browser_dependencies():
@@ -23,7 +23,7 @@ def test_windows_installs_a_second_shortcut_and_checks_browser_dependencies():
     assert '$browserShortcut.Save()' in installer
     launcher = (ROOT / f'{BROWSER_START}.bat').read_text()
     assert '.faradaiq_venv\\Scripts\\python.exe' in launcher
-    assert 'faradaiq_browser_v338.py' in launcher
+    assert 'faradaiq_browser_v341.py' in launcher
     for requirements in ('requirements_all.txt', 'requirements_macos.txt'):
         assert '-r requirements_browser.txt' in (ROOT / requirements).read_text()
 
@@ -43,8 +43,8 @@ def test_browser_terminal_launcher_uses_private_python_and_logs_exit(tmp_path):
         env={**os.environ, 'HOME': str(tmp_path)}, timeout=10,
     )
     assert result.returncode == 17
-    log = tmp_path / 'Library' / 'Logs' / 'FaradaIQ eStudio' / 'browser_v338.log'
-    assert str(target / 'faradaiq_browser_v338.py') in log.read_text()
+    log = tmp_path / 'Library' / 'Logs' / 'FaradaIQ eStudio' / 'browser_v341.log'
+    assert str(target / 'faradaiq_browser_v341.py') in log.read_text()
     assert '--test-argument' in log.read_text()
     assert str(log) in result.stderr
 
@@ -76,7 +76,7 @@ def fake_finder_tools(monkeypatch):
 def test_browser_finder_bundle_is_separate_from_desktop_bundle(tmp_path, fake_finder_tools):
     from macos_shortcut import install_browser_launchers
 
-    target = tmp_path / 'V338'
+    target = tmp_path / 'V341'
     target.mkdir()
     folder = tmp_path / 'Desktop' / 'Holaris Apps'
     folder.mkdir(parents=True)
@@ -95,7 +95,7 @@ def test_browser_finder_bundle_is_separate_from_desktop_bundle(tmp_path, fake_fi
         ids.append(info['CFBundleIdentifier'])
     assert len(set(ids)) == 2
     assert all('browser' in identifier for identifier in ids)
-    launch_command = target / 'Launch_FaradaIQ_eStudio_Browser_v338.command'
+    launch_command = target / 'Launch_FaradaIQ_eStudio_Browser_v341.command'
     assert BROWSER_START in launch_command.read_text()
     script = next(argv[-1] for argv in fake_finder_tools if argv[0] == '/usr/bin/osacompile')
     assert '/scripts/launch_estudio.pyw' in script and ' browser' in script
@@ -129,7 +129,7 @@ def test_finder_preserves_both_shortcuts_when_browser_setup_fails(tmp_path, monk
     from macos_shortcut import BROWSER_ID, MANAGED_KEY, install_application_launchers
 
     meta = json.loads((ROOT / 'release.json').read_text())
-    target = tmp_path / 'V338'
+    target = tmp_path / 'V341'
     target.mkdir()
     folder = tmp_path / 'Desktop' / 'Holaris Apps'
     folder.mkdir(parents=True)

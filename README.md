@@ -6,6 +6,12 @@ Bring data from HEKA, PalmSens, BioLogic, VersaStudio, and Solartron into one lo
 
 [**Project website**](https://venky-pnnl.github.io/FaradaiQ_eStudio/) · [**Download the latest release**](https://github.com/venky-pnnl/FaradaiQ_eStudio/releases/latest) · [Windows and macOS setup](#install-and-start) · [Supported formats](#supported-instrument-files) · [Analysis methods](#scientific-analysis) · [SciLink](#send-a-bundle-to-scilink-streamlit) · [Cite and credit](#how-to-cite)
 
+## New in v341: a plot-centered Analysis workspace
+
+The browser **Analysis** page now places a compact measurement browser on the left, the graph in the center and scrollable controls on the right. **Focus plot** expands the graph; short legends and explicit small-signal axis ranges improve readability. Full identities remain in exports.
+
+Read the [Analysis guide](docs/analysis_workspace_v341.md) and [release notes](RELEASE_NOTES_v341.md). All [80 advanced workbench functions](docs/workbench_features_v341.md), multi-instrument projects and existing analysis workflows remain available. [Verification](QA_v341.md) records tested behavior and platform limits.
+
 ## From source files to results
 
 <img src="docs/media/estudio-workflow.png" alt="Import instrument exports and analysis-ready files, inspect and analyze measurements, and export research outputs or a SciLink bundle" width="960">
@@ -43,6 +49,14 @@ Overlay impedance spectra in Nyquist or Bode views, then fit a circuit, run line
 2. In **Analysis**, choose a measurement. Use **Plots and table** to set axes, display Nyquist or Bode plots, overlay traces, or export the plotted values. Open **Analysis tools** for method-specific settings and **Interactive views** for 2D, 3D, and hyperspectral views when the data include the required coordinates.
 3. Use **Data → Open or save a session** to keep the experiment context and plot choices. Use **Batch jobs** to configure, save, and resume an export queue. In **Reports**, export canonical HDF5, portable HTML, or a PowerPoint summary.
 
+### Everyday shortcuts in v341
+
+- **Recent work** in Data reopens saved sessions and data sources. **Quick save session** in the browser sidebar creates a readable session filename automatically; later quick saves update it.
+- Use the catalog's **Use this measurement in Analysis**, then **Previous measurement**, **Next measurement**, or **Filter measurements** to move through a dataset.
+- **Overlay measurements** matches recognized columns with explicit compatible units. Check **Data quality and detected columns** to review missing values, frequency repeats, and time-order issues.
+- Open **Analysis → Compare trace metrics**, select measurements or the filtered set, and download one CSV with technique metrics and a status for every selection.
+- To reopen a moved session, use **Data → Open or save a session → Replacement data path (if moved)**. In the desktop app, open **Quick guide** or press **F1** for workflow steps and keyboard shortcuts.
+
 To continue in SciLink, prepare a local HDF5 bundle in either mode. [Follow the SciLink handoff](#send-a-bundle-to-scilink-streamlit).
 
 ## Supported instrument files
@@ -60,7 +74,7 @@ To continue in SciLink, prepare a local HDF5 bundle in either mode. [Follow the 
 
 ## Scientific analysis
 
-Choose the relevant **Analysis tool** in the v338 local browser. The table also shows where to find the corresponding desktop workflows.
+Choose the relevant **Analysis tool** in the v341 local browser. The table also shows where to find the corresponding desktop workflows.
 
 | Measurement | Local browser | Desktop app |
 |---|---|---|
@@ -99,20 +113,20 @@ The recordings below use synthetic measurements and were captured in the v337 lo
 
 ## Install and start
 
-Download the full `FaradaIQ_eStudio_v338_package.zip` from [GitHub Releases](https://github.com/venky-pnnl/FaradaiQ_eStudio/releases). The matching `.zip.sha256` file contains the archive checksum. Keep the extracted files together and stay online while the installer sets up the runtime. The main installer checks DearEIS, official pyDRTtools, and managed SciLink before opening the apps. Run the same installer again to repair an incomplete tool setup.
+Download the full `FaradaIQ_eStudio_v341_package.zip` from [GitHub Releases](https://github.com/venky-pnnl/FaradaiQ_eStudio/releases). The matching `.zip.sha256` file contains the archive checksum. Keep the extracted files together and stay online while the installer sets up the runtime. The main installer checks DearEIS, official pyDRTtools, and managed SciLink before opening the apps. Run the same installer again to repair an incomplete tool setup.
 
 ### Windows
 
 1. In File Explorer, right-click the ZIP, choose **Extract All**, and open the extracted folder.
-2. Double-click **`Install_FaradaIQ_eStudio_v338.bat`**. Keep the console open while setup verifies the package and prepares the Python environment. If a compatible Python is missing, setup uses WinGet to install Python 3.12.
-3. Setup opens **FaradaIQ eStudio**, **FaradaIQ eStudio Browser**, and **SciLink**. Reopen any app from **Desktop → Holaris Apps**. The default eStudio install folder is `C:\FaradaIQ\eStudio\V338`.
+2. Double-click **`Install_FaradaIQ_eStudio_v341.bat`**. Keep the console open while setup verifies the package and prepares the Python environment. If a compatible Python is missing, setup uses WinGet to install Python 3.12.
+3. Setup opens **FaradaIQ eStudio**, **FaradaIQ eStudio Browser**, and **SciLink**. Reopen any app from **Desktop → Holaris Apps**. The default eStudio install folder is `C:\FaradaIQ\eStudio\V341`.
 
 ### macOS
 
 1. In Finder, double-click the ZIP and open the extracted folder.
-2. Double-click **`Install_FaradaIQ_eStudio_v338.command`**.
+2. Double-click **`Install_FaradaIQ_eStudio_v341.command`**.
 3. Keep Terminal open. The installer reuses Python 3.12 with Tk if available. Otherwise, it downloads and verifies the official Python 3.12 package, then installs it. Enter your Mac administrator password if Terminal prompts for it.
-4. Setup opens **FaradaIQ eStudio**, **FaradaIQ eStudio Browser**, and **SciLink**. Reopen any app from **Desktop → Holaris Apps**. The default eStudio install folder is `~/Applications/FaradaIQ eStudio/V338`.
+4. Setup opens **FaradaIQ eStudio**, **FaradaIQ eStudio Browser**, and **SciLink**. Reopen any app from **Desktop → Holaris Apps**. The default eStudio install folder is `~/Applications/FaradaIQ eStudio/V341`.
 
 #### If macOS blocks the installer
 
@@ -127,10 +141,10 @@ Download the full `FaradaIQ_eStudio_v338_package.zip` from [GitHub Releases](htt
 Open **Terminal**, paste the following command, and press **Return**.
 
 ```bash
-/bin/bash "$HOME/Applications/FaradaIQ eStudio/V338/Start_FaradaIQ_eStudio_v338.command"
+/bin/bash "$HOME/Applications/FaradaIQ eStudio/V341/Start_FaradaIQ_eStudio_v341.command"
 ```
 
-For another installed release, use that release’s folder and launcher version. For v338, startup messages are also saved in `~/Library/Logs/FaradaIQ eStudio/startup_v338.log`. If the app still closes, include the last lines of that log when reporting the issue.
+For another installed release, use that release’s folder and launcher version. For v341, startup messages are also saved in `~/Library/Logs/FaradaIQ eStudio/startup_v341.log`. If the app still closes, include the last lines of that log when reporting the issue.
 
 ### Local browser
 
@@ -138,9 +152,9 @@ Open **FaradaIQ eStudio Browser** under **Desktop → Holaris Apps**. Its local 
 
 Use a local folder path for large datasets or a mounted network share. The file and folder pickers send selected files to eStudio on the same computer. Keep instrument companions together. When a folder contains both raw instrument files and curated tables, open the curated folder separately to analyze those tables. Imports, plots, deterministic calculations, and reports run on your computer. A reviewed SciLink or Edison request can send selected data to the provider you configure.
 
-The browser launcher records the actual loopback address in the versioned startup log. The desktop app provides its saved native layouts and optional Qt tool windows. The browser provides method-specific controls, interactive charts, and downloadable outputs for the workflows listed under **Scientific analysis**. See the [verification report](QA_v338.md) for platform and service coverage.
+The browser launcher records the actual loopback address in the versioned startup log. The desktop app provides its saved native layouts and optional Qt tool windows. The browser provides method-specific controls, interactive charts, and downloadable outputs for the workflows listed under **Scientific analysis**. See the [verification report](QA_v341.md) for platform and service coverage.
 
-If the browser does not start, check `%LOCALAPPDATA%\FaradaIQ\eStudio\logs\browser_v338.log` on Windows or `~/Library/Logs/FaradaIQ eStudio/browser_v338.log` on macOS.
+If the browser does not start, check `%LOCALAPPDATA%\FaradaIQ\eStudio\logs\browser_v341.log` on Windows or `~/Library/Logs/FaradaIQ eStudio/browser_v341.log` on macOS.
 
 ## Configure integrations
 
@@ -200,11 +214,11 @@ Enter your [LabRIC](https://docs.labric.co/welcome) MCP endpoint and session-onl
 
 ## How to cite
 
-Use the version that produced the results reported in your article. The APA reference for v338 is below.
+Use the version that produced the results reported in your article. The APA reference for v341 is below.
 
-> Prabhakaran, V. (2026). *FaradaIQ eStudio* (Version v338) [Computer software]. <https://github.com/venky-pnnl/FaradaiQ_eStudio>
+> Prabhakaran, V. (2026). *FaradaIQ eStudio* (Version v341) [Computer software]. <https://github.com/venky-pnnl/FaradaiQ_eStudio>
 
-**Methods example.** “Electrochemical data were processed using FaradaIQ eStudio v338 (Prabhakaran, 2026).”
+**Methods example.** “Electrochemical data were processed using FaradaIQ eStudio v341 (Prabhakaran, 2026).”
 
 Add the versions of any third-party tools used and cite the applicable methods below. The repository’s [citation file](CITATION.cff) contains the software metadata that GitHub uses to provide APA and BibTeX export.
 

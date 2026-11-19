@@ -929,7 +929,7 @@ def _fit_circuit(name: str, freq: np.ndarray, z: np.ndarray, source: str) -> Cir
         return CircuitFit(source, name, False, n, {}, None, None, None, None, False, str(exc))
 
 
-def _lin_kk(freq: np.ndarray, z: np.ndarray) -> Dict[str, Any]:
+def _lin_kk(freq: np.ndarray, z: np.ndarray, *, max_m: int = 100) -> Dict[str, Any]:
     """Run optional impedance.py lin-KK when available; otherwise readiness only."""
     readiness = {
         "available": False,
@@ -941,7 +941,7 @@ def _lin_kk(freq: np.ndarray, z: np.ndarray) -> Dict[str, Any]:
         from impedance.validation import linKK
         order = np.argsort(freq)[::-1]
         f = freq[order]; zz = z[order]
-        result = linKK(f, zz, c=0.85, max_M=100, fit_type="complex", add_cap=True)
+        result = linKK(f, zz, c=0.85, max_M=max_m, fit_type="complex", add_cap=True)
         if len(result) >= 5:
             M, mu, zfit, res_r, res_i = result[:5]
             readiness.update({

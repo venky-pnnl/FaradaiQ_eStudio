@@ -23,7 +23,7 @@ DEFAULT_WORKSPACE = (
     else Path.home() / "Data" / "ANALYSIS" / "FaradaIQ"
 ) / "eStudio" / "Browser"
 PREFERENCES = Path.home() / ".faradaiq" / "estudio-browser.json"
-PAGES = ("Data", "Analysis", "Batch jobs", "Reports", "SciLink", "Settings")
+PAGES = ("Data", "Analysis", "Workbench", "Batch jobs", "Reports", "SciLink", "Settings")
 MAX_DOWNLOAD = 50 * 1024 * 1024
 TECHNIQUES = ("CV", "LSV", "CA", "CP", "OCP", "FSCV", "DPV", "SWV", "NPV", "Stripping", "Deposition")
 SCILINK_UPDATE = "Update SciLink"
@@ -121,13 +121,16 @@ def _workspace():
 
 
 def _load_preferences():
+    from faradaiq.browser_productivity import recent_items
     try:
         payload = json.loads(PREFERENCES.read_text(encoding="utf-8"))
     except (OSError, ValueError):
         return {}
     if not isinstance(payload, dict):
         return {}
-    return {key: payload[key] for key in ("workspace", "scilink_url") if isinstance(payload.get(key), str)}
+    clean = {key: payload[key] for key in ("workspace", "scilink_url") if isinstance(payload.get(key), str)}
+    clean["recent"] = recent_items(payload.get("recent"))
+    return clean
 
 
 def _save_preferences(payload):
@@ -162,17 +165,153 @@ def _open_data(source, *, metadata=None, restored=None):
         data = open_data(input_path, _workspace() / "Imports", description=description)
     if source_path is not None:
         data = replace(data, source=source_path)
+    return _accept_data(data, metadata=metadata, restored=restored, recent=source_path or input_path)
+
+
+def _accept_data(data, *, metadata=None, restored=None, recent=None, clear_project=True):
+    # Clear every data-dependent widget before rendering the newly opened source.
+    # This also makes a saved recipe authoritative when reopening the same table.
+    for key in list(st.session_state):
+        if key.startswith(("plot:", "analysis-tool:", "analysis-measurement-list-", "native-view:", "catalog-", "w340_")) or key in {
+            "measurement_catalog", "measurement_search", "measurement_techniques", "analysis_filter",
+            "comparison_selection", "Trace comparison", "session_file", "session_path", "metric-technique",
+            "pending_session_path", "analysis_include_support",
+        }:
+            del st.session_state[key]
+    if clear_project:
+        st.session_state.pop("multi_project", None)
+        st.session_state.pop("project_changed", None)
+    st.session_state.pop("plot_history", None)
     st.session_state["dataset"] = data
     st.session_state["metadata"] = dict(data.metadata) | (metadata or {})
     st.session_state["restored_session"] = restored
     for key in ("table", "analysis_result", "DRT", "PowerPoint", "Portable HTML", "SciLink bundle",
-                "Interactive view", "Canonical HDF5", "plot_recipe", "prepared_plot", "analysis-tabs"):
+                "Interactive view", "Canonical HDF5", "plot_recipe", "prepared_plot", "displayed_plot", "analysis-tabs"):
         st.session_state.pop(key, None)
     selections = (restored or {}).get("state") or {}
     st.session_state["selected_table"] = selections.get("active_table")
     if isinstance(selections.get("plot_recipe"), dict):
         st.session_state["plot_recipe"] = selections["plot_recipe"]
+    from faradaiq.workbench_state import restore_settings
+    restore_settings(st.session_state, selections.get("workbench_settings"))
+    if recent is not None:
+        _remember(recent, "data")
     return data
+
+
+def _remember(path, kind):
+    from faradaiq.browser_productivity import remember_recent
+
+    preferences = remember_recent(st.session_state["preferences"], path, kind)
+    st.session_state["preferences"] = preferences
+    try:
+        _save_preferences(preferences)
+    except OSError as error:
+        st.warning(f"The data are open, but recent work could not be remembered: {error}")
+
+
+def _navigate(page):
+    st.session_state["pending_page"] = page
+    st.rerun()
+
+
+def _restore_session(path, replacement=""):
+    from faradaiq.browser_data import load_session
+
+    path = Path(path).expanduser().resolve()
+    session = load_session(path)
+    fields = dict(session["browser_workspace"])
+    source = fields.get("source")
+    selections = fields.get("state") or {}
+    if isinstance(selections.get("multi_project"), dict):
+        from faradaiq.workbench_project import MultiInstrumentProject
+        project = MultiInstrumentProject.load(selections["multi_project"], root=replacement.strip() or None)
+        data = project.combined_data()
+        fields['state'] = dict(selections, **project.state)
+        fields['source'] = str(data.source)
+        fields['analysis_root'] = str(data.analysis_root)
+        session['browser_workspace'] = fields
+        _accept_data(data, metadata=fields.get("metadata"), restored=fields, clear_project=False)
+        st.session_state["multi_project"] = project
+    else:
+        if replacement.strip():
+            source = replacement.strip()
+            fields["analysis_root"] = ""
+        _open_data(source, metadata=fields.get("metadata"), restored=fields)
+    st.session_state["restored_session"] = session
+    st.session_state["session_file"] = str(path)
+    st.session_state["pending_session_path"] = str(path)
+    _remember(path, "session")
+
+
+def _save_current_session(path=None):
+    from datetime import datetime
+    from faradaiq.browser_data import load_session, save_session
+    from faradaiq.readable_names import safe_component
+
+    data = st.session_state.get("dataset")
+    if data is None:
+        raise ValueError("Open data before saving a session.")
+    if path is None:
+        path = st.session_state.get("session_file")
+    if not path:
+        metadata = st.session_state.get("metadata", {})
+        name = safe_component(metadata.get("sample_name") or data.source.stem, max_chars=80)
+        stamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")[:-3]
+        path = _workspace() / "Sessions" / f"{name}_{stamp}.faradaiq_session.json"
+    from faradaiq.workbench_state import capture_settings, ephemeral_widget_keys
+    state = {"active_table": st.session_state.get("selected_table"),
+             "plot_recipe": st.session_state.get("plot_recipe"),
+             "multi_project": None,
+             "experiment_metadata": _experiment_metadata(),
+             "workbench_settings": capture_settings(st.session_state, excluded=ephemeral_widget_keys())}
+    project = st.session_state.get("multi_project")
+    if project is not None and data.metadata.get('project_id') == project.project_id:
+        project.state = {key: value for key, value in state.items() if key != 'multi_project'}
+        project.save()
+        state["multi_project"] = project.snapshot()
+    saved = save_session(path, source=data.source, analysis_root=data.analysis_root,
+                         metadata=st.session_state.get("metadata"), browser_state=state,
+                         previous=st.session_state.get("restored_session"))
+    st.session_state["restored_session"] = load_session(saved)
+    st.session_state["session_file"] = str(saved)
+    # The data page's path widget may already have been rendered.
+    st.session_state["pending_session_path"] = str(saved)
+    _remember(saved, "session")
+    return saved
+
+
+def _recent_work():
+    from faradaiq.browser_productivity import recent_items
+
+    items = recent_items(st.session_state["preferences"].get("recent"))
+    if not items:
+        return
+    with st.expander("Recent work", expanded=st.session_state.get("dataset") is None):
+        selected = st.selectbox("Recent data and sessions", range(len(items)),
+                                format_func=lambda index: f"{items[index]['label']} · {items[index]['kind']}")
+        item = items[selected]
+        st.caption(item["path"])
+        left, right = st.columns(2)
+        if left.button("Reopen recent work", disabled=_job_busy()):
+            try:
+                if item["kind"] == "session":
+                    _restore_session(item["path"])
+                else:
+                    _open_data(item["path"])
+                st.rerun()
+            except Exception as error:
+                st.error(f"Could not reopen this item: {error}")
+                st.caption("If the data moved, use Open or save a session below and enter a replacement data path.")
+        if right.button("Clear recent list"):
+            preferences = dict(st.session_state["preferences"], recent=[])
+            try:
+                _save_preferences(preferences)
+            except OSError as error:
+                st.error(str(error))
+            else:
+                st.session_state["preferences"] = preferences
+                st.rerun()
 
 
 def _show_file(label, path):
@@ -201,6 +340,7 @@ def _data_page():
 
     st.header("Data")
     st.caption("Open data on this computer. Use a local path for large files and network shares mounted here.")
+    _recent_work()
     path = st.text_input("Local file or folder")
     upload_folder = st.checkbox("Select an entire folder", help="Keeps relative paths and instrument companion files together.")
     uploads = st.file_uploader(
@@ -215,13 +355,20 @@ def _data_page():
             else:
                 source = stage_browser_uploads(uploads, _workspace() / "Uploads")
             _open_data(source)
+            st.rerun()
         except Exception as error:
             st.error(str(error))
 
     data = st.session_state.get("dataset")
     if data:
         st.write(f"{len(data.tables)} analysis tables loaded")
-        render_catalog(data)
+        if render_catalog(data):
+            _navigate("Analysis")
+        if st.button("Analyze loaded data", type="primary", disabled=_job_busy()):
+            _navigate("Analysis")
+        if st.button("Add instruments or manage this session", disabled=_job_busy()):
+            st.session_state["workbench_section"] = "Projects and imports"
+            _navigate("Workbench")
         st.subheader("Experiment context")
         metadata = dict(st.session_state.get("metadata", {}))
         with st.form(f"experiment:{data.source}"):
@@ -235,25 +382,25 @@ def _data_page():
                 st.session_state["metadata"] = metadata
 
     with st.expander("Open or save a session"):
-        session_path = st.text_input("Local session JSON path")
+        if pending := st.session_state.pop("pending_session_path", None):
+            st.session_state["session_path"] = pending
+        session_path = st.text_input("Local session JSON path", key="session_path",
+                                     help="Quick save in the sidebar creates a readable filename automatically.")
+        replacement = st.text_input("Replacement data path (if moved)",
+                                    help="Optional: locate the original data or an exported analysis folder when reopening a moved session.")
         load_column, save_column = st.columns(2)
         if load_column.button("Open session", disabled=not session_path.strip() or _job_busy()):
             try:
-                session = load_session(Path(session_path).expanduser())
-                fields = session["browser_workspace"]
-                _open_data(fields["source"], metadata=fields.get("metadata"), restored=fields)
-                st.session_state["restored_session"] = session
-                st.success("Session data reopened.")
+                _restore_session(session_path, replacement)
+                st.session_state["notice"] = ("success", "Session data reopened.")
+                st.rerun()
             except Exception as error:
                 st.error(str(error))
         if save_column.button("Save session", disabled=data is None or not session_path.strip() or _job_busy()):
             try:
-                saved = save_session(Path(session_path).expanduser(), source=data.source,
-                                     analysis_root=data.analysis_root, metadata=st.session_state.get("metadata"),
-                                     browser_state={"active_table": st.session_state.get("selected_table"),
-                                                    "plot_recipe": st.session_state.get("plot_recipe")},
-                                     previous=st.session_state.get("restored_session"))
-                st.success(f"Saved {saved}")
+                saved = _save_current_session(session_path)
+                st.session_state["notice"] = ("success", f"Saved {saved}")
+                st.rerun()
             except Exception as error:
                 st.error(str(error))
 
@@ -295,82 +442,146 @@ def _json_fallback(value):
 def _analysis_page():
     from faradaiq import browser_analysis as science
     from faradaiq.browser_plot_ui import measurement_technique, render_measurement_plot, render_native_views
+    from faradaiq.browser_analysis_ui import (apply_analysis_style, render_measurement_browser,
+                                              render_measurement_summary, is_support_record)
+    from faradaiq.browser_productivity import measurement_label, table_quality
 
-    st.header("Analysis")
+    apply_analysis_style()
     data = st.session_state.get("dataset")
-    if data is None or not data.tables:
-        st.info("Open data to choose a measurement and analysis.")
-        return
-    labels = _table_labels(data)
-    active = next((index for index, candidate in enumerate(data.tables)
-                   if labels[candidate] == st.session_state.get("selected_table")), 0)
-    path = st.selectbox("Active measurement", data.tables, index=active, format_func=labels.get, key="table")
-    st.session_state["selected_table"] = labels[path]
-    try:
-        table = data.read_table(path)
-    except Exception as error:
-        st.error(f"Could not read the selected measurement: {error}")
-        return
-    if table.empty or len(table.columns) < 2:
-        st.warning("Choose a table with at least two columns and one row.")
-        return
-    roles = science.measurement_roles(table)
-    technique_hint = measurement_technique(data, path, roles)
-    plot, tools, views = st.tabs(("Plots and table", "Analysis tools", "Interactive views"),
-                                 key="analysis-tabs", on_change="rerun")
-    with plot:
-        render_measurement_plot(data, labels, path, table, roles, technique_hint)
-        with st.expander("View measurement table"):
-            st.dataframe(table, hide_index=True)
-    with views:
-        render_native_views(data, labels, path, workspace=_workspace, submit=_submit,
-                            busy=_job_busy, show_file=_show_file)
-    with tools:
-        modes = ("EIS and DRT", "Voltammetry and transients", "CV peaks and baselines",
-                 "Tafel and corrosion", "Mott–Schottky", "Spatial points")
-        default_mode = ("Mott–Schottky" if roles.get("potential") and "mott" in path.stem.casefold()
-                        else "EIS and DRT" if roles.get("frequency") else "Voltammetry and transients")
-        mode = st.selectbox("Analysis tool", modes, index=modes.index(default_mode), key=f"analysis-tool:{path}")
-        if mode in {"EIS and DRT", "Mott–Schottky"}:
-            _impedance_tools(science, table, roles, path, mode)
-        elif mode == "Tafel and corrosion":
-            _tafel_tools(science, table, roles, path)
-        elif mode == "CV peaks and baselines":
-            _cv_tools(science, table, roles, path)
-        elif mode == "Spatial points":
-            _spatial_tools(science, table, roles, path)
+    with st.container(key="analysis-workspace"):
+        title, focus = st.columns((5, 1))
+        title.header("Analysis")
+        focused = focus.toggle("Focus plot", key="analysis_focus_plot", help="Expand the plot and put its controls in a popover.")
+        if data is None or not data.tables:
+            st.info("Open data to choose a measurement and analysis.")
+            return
+        labels = _table_labels(data)
+        if focused:
+            content = st.container()
+            candidates = list(data.tables)
+            display = {p: measurement_label(data, p) for p in data.tables}
+            path = st.session_state.get('table')
+            if path not in candidates:
+                path = next((p for p in candidates if labels[p] == st.session_state.get('selected_table')),
+                            next((p for p in candidates if not is_support_record(data,p)),candidates[0]))
         else:
-            with st.form(f"trace:{path}"):
-                default_technique = technique_hint
-                technique = st.selectbox("Technique", TECHNIQUES, index=TECHNIQUES.index(default_technique))
-                potential = _axis("Potential column", table, roles.get("potential"), True)
-                current = _axis("Current column", table, roles.get("current"), True)
-                time = _axis("Time column", table, roles.get("time"), True)
-                tail = st.number_input("OCP tail (% of recorded time)", min_value=1.0, max_value=100.0, value=20.0)
-                applied = st.text_input("Applied current for CP (A, optional)",
-                                        help="Used to calculate charge when a current column is absent.")
-                run = st.form_submit_button("Calculate trace metrics")
-            if run:
-                _calculate(path, mode, lambda: science.analyze_trace(
-                    table, technique, potential=potential, current=current, time=time, final_time_percent=tail,
-                    applied_current_A=float(applied) if technique == "CP" and applied.strip() else None))
-        result = st.session_state.get("analysis_result")
-        if result and result[:2] == (path, mode):
-            _render_value(result[2])
-            _download_analysis_artifacts(result[2])
-        drt = st.session_state.get("DRT")
-        if mode == "EIS and DRT" and drt and drt.get("source") == path:
-            if drt.get("completed_modes"):
-                st.success("Completed DRT methods: " + ", ".join(drt["completed_modes"]))
-            if drt.get("failed_modes"):
-                st.warning("DRT methods with errors: " + ", ".join(drt["failed_modes"]))
-            artifacts = (*drt["drt_csvs"], *drt.get("csvs", ()), drt.get("settings_path"), drt.get("summary_path"), drt.get("log_path"))
-            for artifact in dict.fromkeys(artifacts):
-                if artifact:
-                    _show_file(f"Download {Path(artifact).name}", artifact)
-            for figure in drt["figures"]:
-                st.image(str(figure))
-            st.code(str(drt["output_dir"]), language=None)
+            browser, content = st.columns((1.15, 5), gap="medium")
+            with browser, st.container(border=True, key="analysis-measurements"):
+                path, candidates, display = render_measurement_browser(data, labels)
+            if path is None:
+                return
+        with content:
+            try:
+                table = data.read_table(path)
+            except Exception as error:
+                st.error(f"Could not read the selected measurement: {error}")
+                return
+            if table.empty or len(table.columns) < 2:
+                st.warning("Choose a table with at least two columns and one row.")
+                return
+            roles = science.measurement_roles(table)
+            technique_hint = measurement_technique(data, path, roles)
+            render_measurement_summary(data, path, table, technique_hint)
+            plot, tools, views, comparison = st.tabs(("Plots and table", "Analysis tools", "Interactive views", "Compare trace metrics"),
+                                         key="analysis-tabs", on_change="rerun")
+            with plot:
+                render_measurement_plot(data, labels, path, table, roles, technique_hint, focus=focused)
+                with st.expander("View measurement table"):
+                    st.dataframe(table, hide_index=True)
+                with st.expander("Data quality and detected columns"):
+                    checks, issues = table_quality(table)
+                    st.caption(f"Checked all {len(table):,} rows. Source values are preserved.")
+                    if not checks.empty:
+                        st.dataframe(checks, hide_index=True)
+                    for issue in issues:
+                        st.warning(issue)
+                    if not issues and not checks.empty:
+                        st.success("No missing values, invalid frequencies, or time-order issues detected in recognized columns.")
+                    elif checks.empty:
+                        st.info("No standard measurement quantities were recognized. Select the axes explicitly before analysis.")
+                    st.caption("Column detection does not verify experimental calibration or reference-electrode identity.")
+            with comparison:
+                _comparison_tools(data, display, candidates, path)
+            with views:
+                render_native_views(data, labels, path, workspace=_workspace, submit=_submit,
+                                    busy=_job_busy, show_file=_show_file)
+            with tools:
+                modes = ("EIS and DRT", "Voltammetry and transients", "CV peaks and baselines",
+                         "Tafel and corrosion", "Mott–Schottky", "Spatial points")
+                default_mode = ("Mott–Schottky" if roles.get("potential") and "mott" in path.stem.casefold()
+                                else "EIS and DRT" if roles.get("frequency") else "Voltammetry and transients")
+                mode = st.selectbox("Analysis tool", modes, index=modes.index(default_mode), key=f"analysis-tool:{path}")
+                if mode in {"EIS and DRT", "Mott–Schottky"}:
+                    _impedance_tools(science, table, roles, path, mode)
+                elif mode == "Tafel and corrosion":
+                    _tafel_tools(science, table, roles, path)
+                elif mode == "CV peaks and baselines":
+                    _cv_tools(science, table, roles, path)
+                elif mode == "Spatial points":
+                    _spatial_tools(science, table, roles, path)
+                else:
+                    with st.form(f"trace:{path}"):
+                        default_technique = technique_hint
+                        technique = st.selectbox("Technique", TECHNIQUES, index=TECHNIQUES.index(default_technique))
+                        potential = _axis("Potential column", table, roles.get("potential"), True)
+                        current = _axis("Current column", table, roles.get("current"), True)
+                        time = _axis("Time column", table, roles.get("time"), True)
+                        tail = st.number_input("OCP tail (% of recorded time)", min_value=1.0, max_value=100.0, value=20.0)
+                        applied = st.text_input("Applied current for CP (A, optional)",
+                                                help="Used to calculate charge when a current column is absent.")
+                        run = st.form_submit_button("Calculate trace metrics")
+                    if run:
+                        _calculate(path, mode, lambda: science.analyze_trace(
+                            table, technique, potential=potential, current=current, time=time, final_time_percent=tail,
+                            applied_current_A=float(applied) if technique == "CP" and applied.strip() else None))
+                result = st.session_state.get("analysis_result")
+                if result and result[:2] == (path, mode):
+                    _render_value(result[2])
+                    _download_analysis_artifacts(result[2])
+                drt = st.session_state.get("DRT")
+                if mode == "EIS and DRT" and drt and drt.get("source") == path:
+                    if drt.get("completed_modes"):
+                        st.success("Completed DRT methods: " + ", ".join(drt["completed_modes"]))
+                    if drt.get("failed_modes"):
+                        st.warning("DRT methods with errors: " + ", ".join(drt["failed_modes"]))
+                    artifacts = (*drt["drt_csvs"], *drt.get("csvs", ()), drt.get("settings_path"), drt.get("summary_path"), drt.get("log_path"))
+                    for artifact in dict.fromkeys(artifacts):
+                        if artifact:
+                            _show_file(f"Download {Path(artifact).name}", artifact)
+                    for figure in drt["figures"]:
+                        st.image(str(figure))
+                    st.code(str(drt["output_dir"]), language=None)
+
+
+def _comparison_tools(data, display, candidates, active):
+    from faradaiq.browser_productivity import compare_trace_metrics
+
+    st.subheader("Compare trace metrics")
+    st.caption("Calculate the existing technique-specific metrics for selected CV, LSV, pulse, transient, or OCP measurements. Impedance uses EIS and DRT.")
+    if "comparison_selection" not in st.session_state:
+        st.session_state["comparison_selection"] = [active]
+    selected = st.multiselect("Measurements for metrics", data.tables,
+                              format_func=display.get, key="comparison_selection", disabled=_job_busy())
+    if st.button("Select filtered measurements", disabled=_job_busy()):
+        st.session_state["pending_metric_selection"] = list(candidates)
+        st.rerun()
+    technique = st.selectbox("Metrics technique", ("Auto", *TECHNIQUES), key="metric-technique",
+                             help="Auto uses recorded technique metadata and recognized columns. Choose a technique explicitly when the file does not identify it.")
+    st.caption("Auto uses the same technique detection as the single-measurement tools. Review the Technique column. CV/LSV comparisons include the first two sweeps' extrema and charge when available.")
+    if st.button("Calculate comparison", type="primary", disabled=not selected or _job_busy()):
+        chosen = tuple(selected)
+        _submit("Trace comparison", lambda cancel, report: {
+            "source": str(data.analysis_root), "table": compare_trace_metrics(
+                data, chosen, technique=technique, cancel=cancel, progress=report)}, cancelable=True)
+    result = st.session_state.get("Trace comparison")
+    if result and result.get("source") == str(data.analysis_root):
+        frame = result["table"]
+        st.dataframe(frame, hide_index=True)
+        unavailable = int(frame["Status"].ne("complete").sum()) if not frame.empty else 0
+        if unavailable:
+            st.warning(f"{unavailable} measurement(s) need review. The Detail column explains unavailable or incomplete results.")
+        st.download_button("Download comparison CSV", frame.to_csv(index=False).encode("utf-8"),
+                           file_name=f"trace_metrics_{APP_VERSION}.csv", mime="text/csv")
 
 
 def _axis(label, table, detected, optional=False):
@@ -683,9 +894,10 @@ def _scilink_page():
     name = st.text_input("Sample name for the bundle", value=str(metadata.get("sample_name") or ""),
                          key=f"bundle_name:{root}")
     if st.button("Make SciLink-ready bundle", type="primary", disabled=not root or _job_busy()):
+        output_root = _workspace() / 'SciLink'
         _submit("SciLink bundle", lambda cancel, report: make_scilink_ready_bundle(
             root_path, sample_name=name or None, metadata=metadata,
-            progress_callback=report, cancel_event=cancel), cancelable=True)
+            progress_callback=report, cancel_event=cancel, output_dir=output_root), cancelable=True)
 
     receipt = st.session_state.get("SciLink bundle")
     existing = st.text_input("Or reopen a SciLink-ready HDF5 bundle")
@@ -770,6 +982,109 @@ def _settings_page():
     st.write(str(ROOT))
 
 
+def _experiment_metadata():
+    metadata = st.session_state.get('metadata') or {}
+    return {key: metadata[key] for key in ('sample_name', 'session_id', 'description',
+                                         'experimental_description', 'project_name') if key in metadata}
+
+
+def _invalidate_analysis_outputs():
+    for key in list(st.session_state):
+        if key in {'measurement_catalog', 'prepared_plot', 'displayed_plot', 'analysis_result', 'Trace comparison',
+                   'DRT', 'PowerPoint', 'Portable HTML', 'SciLink bundle', 'Interactive view', 'Canonical HDF5'}:
+            st.session_state.pop(key, None)
+        elif key.startswith('w340_') and any(token in key for token in ('_result', '_latest_', '_receipt')):
+            st.session_state.pop(key, None)
+
+
+def _sync_project():
+    project = st.session_state.get('multi_project')
+    if project is None or not st.session_state.pop('project_changed', False):
+        return
+    old = st.session_state.get('dataset')
+    restoring = st.session_state.pop('project_restore_state', False)
+    changed_root = old is None or old.source != project.root
+    carry_metadata = (_experiment_metadata() if not restoring and old is not None
+                      and not old.metadata.get('project_id')
+                      and any(h.get('source_path') == str(old.source) for h in project.handles) else {})
+    _invalidate_analysis_outputs()
+    if changed_root:
+        watch_settings = ({key: st.session_state[key] for key in st.session_state
+                           if key in {'w340_project_watch_folder', 'w340_project_watch_seconds', 'w340_project_watch_enabled'}}
+                          if not restoring else {})
+        for key in list(st.session_state):
+            if key.startswith('w340_') or key in {'session_file', 'session_path', 'pending_session_path',
+                                                'restored_session', 'metadata'}:
+                st.session_state.pop(key, None)
+        st.session_state.update(watch_settings)
+    if not project.handles:
+        for key in ('dataset', 'table', 'selected_table', 'plot_recipe', 'prepared_plot', 'displayed_plot'):
+            st.session_state.pop(key, None)
+        st.session_state['metadata'] = {'project_name': project.name}
+        project.state = {}
+        project.save()
+        return
+    data = project.combined_data()
+    st.session_state['dataset'] = data
+    if old is None or old.analysis_root != data.analysis_root:
+        for key in list(st.session_state):
+            if key.startswith(('plot:', 'analysis-tool:', 'native-view:', 'catalog-')) or key in {
+                'table', 'selected_table', 'plot_recipe', 'comparison_selection', 'Trace comparison', 'plot_history'}:
+                st.session_state.pop(key, None)
+    elif st.session_state.get('table') not in data.tables:
+        st.session_state.pop('table', None)
+    from faradaiq.workbench_state import capture_settings, restore_settings, ephemeral_widget_keys
+    if restoring:
+        for key in list(st.session_state):
+            if key.startswith('plot:'):
+                st.session_state.pop(key, None)
+        selections = project.state
+        st.session_state['selected_table'] = selections.get('active_table')
+        st.session_state['plot_recipe'] = selections.get('plot_recipe')
+        restore_settings(st.session_state, selections.get('workbench_settings'))
+        st.session_state['metadata'] = dict(data.metadata) | selections.get('experiment_metadata', {})
+    else:
+        if changed_root:
+            st.session_state['metadata'] = dict(data.metadata) | carry_metadata
+        project.state = {'active_table': st.session_state.get('selected_table'),
+                         'plot_recipe': st.session_state.get('plot_recipe'),
+                         'experiment_metadata': _experiment_metadata(),
+                         'workbench_settings': capture_settings(st.session_state, excluded=ephemeral_widget_keys())}
+    project.save()
+
+
+def _workbench_page():
+    from faradaiq.workbench_app import render
+    render(st.session_state.get('dataset'), workspace=_workspace())
+
+
+def _stop_active_job():
+    job = st.session_state.get('job')
+    if job is not None and job.cancelable and not job.future.done():
+        job.stop()
+
+
+def _plot_history_action(direction):
+    history = st.session_state.get('plot_history')
+    if history is None:
+        return
+    recipe = getattr(history, direction)()
+    if recipe is None:
+        return
+    for key in list(st.session_state):
+        if key.startswith('plot:'):
+            st.session_state.pop(key, None)
+    st.session_state['plot_recipe'] = recipe
+    st.session_state.pop('prepared_plot', None)
+    st.session_state.pop('displayed_plot', None)
+    data = st.session_state.get('dataset')
+    if data is not None:
+        path = next((p for p, label in _table_labels(data).items() if label == recipe.get('measurement')), None)
+        if path is not None:
+            st.session_state['table'] = path
+            st.session_state['selected_table'] = recipe['measurement']
+
+
 def main():
     st.set_page_config(
         page_title=f"{APP_NAME} Browser {APP_VERSION}",
@@ -777,20 +1092,57 @@ def main():
     )
     if "preferences" not in st.session_state:
         st.session_state["preferences"] = _load_preferences()
+    if not st.session_state.get('initial_handoff_checked'):
+        st.session_state['initial_handoff_checked'] = True
+        if st.query_params.get('page') == 'Workbench':
+            st.session_state['workspace_page'] = 'Workbench'
+        if source := st.query_params.get('source'):
+            try:
+                _open_data(source)
+            except Exception as error:
+                st.session_state['notice'] = ('error', f'Could not open the desktop data source: {error}')
+    if pending := st.session_state.pop("pending_page", None):
+        st.session_state["workspace_page"] = pending
+    if pending := st.session_state.pop("pending_metric_selection", None):
+        st.session_state["comparison_selection"] = pending
     _take_job_result()
+    _sync_project()
     if notice := st.session_state.pop("notice", None):
         getattr(st, notice[0])(notice[1])
     with st.sidebar:
         st.title(APP_NAME)
         st.caption(f"{APP_VERSION}  ·  Local browser")
-        page = st.radio("Workspace", PAGES, label_visibility="collapsed")
+        page = st.radio("Workspace", PAGES, key="workspace_page", label_visibility="collapsed")
+        active_job = st.session_state.get('job')
+        st.button('STOP', key='global_stop_job', on_click=_stop_active_job,
+                  disabled=(active_job is None or active_job.future.done() or not active_job.cancelable
+                            or active_job.cancel.is_set()), use_container_width=True)
         st.caption("Local session")
         if data := st.session_state.get("dataset"):
-            st.write(data.source.name)
+            project = st.session_state.get("multi_project")
+            st.write(project.name if project is not None else data.source.name)
+            if project is not None:
+                st.caption(f"{len(project.handles)} source handles")
+            undo, redo = st.columns(2)
+            undo.button("Undo plot", on_click=_plot_history_action, args=("undo",))
+            redo.button("Redo plot", on_click=_plot_history_action, args=("redo",))
+            st.caption(f"{len(data.tables)} measurements")
+            if st.button("Quick save session", disabled=_job_busy(), use_container_width=True):
+                try:
+                    saved = _save_current_session()
+                    st.session_state["notice"] = ("success", f"Saved {saved}")
+                    st.rerun()
+                except Exception as error:
+                    st.error(str(error))
+            if session_file := st.session_state.get("session_file"):
+                st.caption(f"Session: {Path(session_file).name}")
     _job_panel()
-    pages = {"Data": _data_page, "Analysis": _analysis_page, "Batch jobs": _batch_page, "Reports": _reports_page,
+    pages = {"Data": _data_page, "Analysis": _analysis_page, "Workbench": _workbench_page, "Batch jobs": _batch_page, "Reports": _reports_page,
              "SciLink": _scilink_page, "Settings": _settings_page}
     pages[page]()
+    if st.session_state.get("project_changed"):
+        _sync_project()
+        st.rerun()
 
 
 if __name__ == "__main__":

@@ -4,11 +4,12 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 import json
+import os
 from pathlib import Path, PurePosixPath, PureWindowsPath
 import re
 import shutil
 import stat
-from tempfile import NamedTemporaryFile
+from tempfile import NamedTemporaryFile, TemporaryDirectory, gettempdir
 from typing import Any, BinaryIO, Iterable, Mapping
 from zipfile import ZipFile
 
@@ -23,6 +24,10 @@ _DOCUMENT_EXTENSIONS = TABLE_EXTENSIONS | {'.json', '.jsonl', '.md', '.log'}
 _COPY_BLOCK_SIZE = 8 * 1024 * 1024
 _DESKTOP_SCHEMA = 'faradaiq_main_session_v199'
 _SESSION_SCHEMAS = {_DESKTOP_SCHEMA, 'faradaiq_main_session_v106'}
+_PORTABLE_PATH_LIMIT = 235
+_IMPORT_MANIFEST = 'analysis_ready_manifest.json'
+_ARCHIVE_CONTENTS = 'raw_export_siblings'
+_DESKTOP_SCRIPT_COPY = 'pyseccm_tools_scripts'
 
 
 def _mapping(value: Any) -> dict:
@@ -103,6 +108,42 @@ def _portable_parts(name: str) -> tuple[str, ...]:
     return path.parts
 
 
+def _path_units(value: str | Path) -> int:
+    return len(str(value).encode('utf-16-le')) // 2
+
+
+def _compact_component(label: str, budget: int, *, byte_limit: int = 255) -> str:
+    for length in range(min(len(label), budget), 0, -1):
+        name = safe_component(label, max_chars=length)
+        if _path_units(name) <= budget and len(name.encode('utf-8')) <= byte_limit:
+            return name
+    raise ValueError(f'The file name {label!r} has no readable portable form.')
+
+
+def _workspace_folder(parent: Path, label: str, *, descendants: int,
+                      preferred: int | None = None) -> Path:
+    """Create an import directory with enough room for its actual descendants."""
+    label = safe_component(label, max_chars=70)
+    available = _PORTABLE_PATH_LIMIT - _path_units(parent) - 1
+    minimum = min(12, _path_units(label))
+    for index in range(1, 10000):
+        serial = '' if index == 1 else f'_{index:02d}'
+        budget = available - len(serial) - descendants
+        if budget < minimum:
+            raise ValueError(f'The selected output folder is too deep for this data import.\n{parent}\n'
+                             'In Settings → Local output folder, choose a shorter path such as '
+                             'C:\\Data\\FaradaIQ on Windows or ~/FaradaIQ on macOS or Linux, then open the data again.')
+        if preferred is not None:
+            budget = min(budget, max(minimum, available - len(serial) - preferred))
+        folder = parent / f'{_compact_component(label, budget, byte_limit=255 - len(serial))}{serial}'
+        try:
+            folder.mkdir(parents=True)
+        except FileExistsError:
+            continue
+        return folder
+    raise FileExistsError(f'Too many imports named {label!r} in {parent}.')
+
+
 def stage_browser_uploads(files: Iterable[BinaryIO], workspace: str | Path) -> Path:
     """Copy browser uploads locally, keeping instrument companions and subfolders together."""
     members = []
@@ -124,7 +165,8 @@ def stage_browser_uploads(files: Iterable[BinaryIO], workspace: str | Path) -> P
     if any(any(key[:depth] in leaves for depth in range(1, len(key))) for key in leaves):
         raise ValueError('An uploaded file has the same path as an uploaded folder.')
     common_top = {parts[0] for parts, _ in members}
-    folder = new_folder(Path(workspace).expanduser().resolve(), 'Browser uploads', reserve=66)
+    descendants = max(_path_units(Path(*parts)) + 1 for parts, _ in members)
+    folder = _workspace_folder(Path(workspace).expanduser().resolve(), 'Browser uploads', descendants=descendants)
     try:
         for parts, upload in members:
             target = folder.joinpath(*parts)
@@ -162,6 +204,9 @@ def classify_source(path: str | Path) -> str:
         # A known export tree is already curated. Prefer its explicit title over
         # auxiliary binary files copied into the export by desktop tools.
         if source.name.lower().endswith(('_analysis_ready_csv', '_for_plotting_analysis')):
+            return 'tables'
+        browser_manifest = source / _IMPORT_MANIFEST
+        if browser_manifest.is_file() and _json_mapping(browser_manifest.read_bytes()).get('browser_import'):
             return 'tables'
         if any(p.is_file() and p.suffix.lower() in INSTRUMENT_EXTENSIONS
                for p in source.rglob('*')):
@@ -423,8 +468,8 @@ def _numeric_numpy(source: Path, root: Path) -> None:
         raise
 
 
-def _native_vendor(source: Path, destination: Path, description: str) -> tuple[Path, Path, dict]:
-    from .parsers.pssession import PSSessionCollection
+def _native_vendor(source: Path, destination: Path, description: str) -> tuple[Path, Path, dict, dict]:
+    from .parsers.pssession import PSSessionCollection, PSSessionParser
 
     if source.suffix.lower() == '.psbd':
         stem = source.name[:-5]
@@ -438,9 +483,185 @@ def _native_vendor(source: Path, destination: Path, description: str) -> tuple[P
     metadata = collection.summarize()
     if description:
         metadata['experimental_description'] = description
-    label = safe_component(source.name if source.is_dir() else source.stem, max_chars=65)
-    output = collection.export_analysis_ready_csv(destination, label)
-    return Path(output['analysis_ready_root']), Path(output['manifest_path']), metadata
+    # The desktop writer uses basename for generated paths and relative_path for
+    # source identity. Keep the latter and give each generated stem room for its
+    # technique, curve and vendor suffixes before the legacy writer appends them.
+    identities = {}
+    stems_by_folder: dict[tuple[str, ...], set[str]] = {}
+    for index, entry in enumerate(collection.entries, 1):
+        context = entry['path_metadata']
+        basename = Path(context['basename'])
+        original = PSSessionParser._sanitize_filename(basename.stem)
+        used = stems_by_folder.setdefault(tuple(p.casefold() for p in context['subfolder_names']), set())
+        stem = _compact_component(original, 24)
+        serial = 1
+        while stem.casefold() in used:
+            serial += 1
+            ending = f'_{serial}'
+            stem = f'{_compact_component(original, 24 - len(ending))}{ending}'
+        used.add(stem.casefold())
+        identities[f'e{index:04d}'] = {'source_path': context['virtual_source'],
+                                     'source_filename': basename.name}
+        entry['path_metadata'] = dict(context, basename=stem + basename.suffix)
+    output = collection.export_analysis_ready_csv(destination, 'Analysis')
+    return Path(output['analysis_ready_root']), Path(output['manifest_path']), metadata, identities
+
+
+def _import_tempdir(workspace: Path, source: Path) -> TemporaryDirectory:
+    temporary_root = Path(gettempdir()).resolve()
+    if source.is_dir() and temporary_root.is_relative_to(source):
+        workspace.mkdir(parents=True, exist_ok=True)
+        temporary_root = workspace
+    # Windows legacy readers append vendor paths before we can budget the final
+    # names. Extended paths are limited to this disposable staging directory.
+    if os.name == 'nt':
+        path = str(temporary_root)
+        path = '\\\\?\\UNC\\' + path[2:] if path.startswith('\\\\') else '\\\\?\\' + path
+        temporary_root = Path(path)
+    return TemporaryDirectory(prefix='fq-', dir=temporary_root)
+
+
+def _generated_tail(path: Path) -> str:
+    if path.name.endswith('_freq_zreal_zimag.csv'):
+        return '_freq_zreal_zimag.csv'
+    return path.suffix
+
+
+def _generated_paths(root: Path, files: list[Path], directories: list[Path]) -> dict[Path, Path]:
+    """Keep hierarchy names and shorten individual generated files only as needed."""
+    occupied = {str(path).casefold() for path in directories}
+    occupied.update({_IMPORT_MANIFEST.casefold(), _ARCHIVE_CONTENTS.casefold()})
+    paths = {}
+    for relative in files:
+        if (_path_units(root / relative) <= _PORTABLE_PATH_LIMIT
+                and len(relative.name.encode('utf-8')) <= 255
+                and str(relative).casefold() not in occupied):
+            paths[relative] = relative
+            occupied.add(str(relative).casefold())
+    for relative in files:
+        if relative in paths:
+            continue
+        tail = _generated_tail(relative)
+        stem = relative.name[:-len(tail)] if tail else relative.name
+        budget = _PORTABLE_PATH_LIMIT - _path_units(root / relative.parent) - 1 - _path_units(tail)
+        for index in range(1, 10000):
+            serial = '' if index == 1 else f'_{index:02d}'
+            name = _compact_component(stem, budget - len(serial), byte_limit=255 - len((serial + tail).encode('utf-8')))
+            target = relative.with_name(f'{name}{serial}{tail}')
+            if str(target).casefold() not in occupied:
+                occupied.add(str(target).casefold())
+                paths[relative] = target
+                break
+        else:
+            raise FileExistsError(f'Too many generated files named {relative.name!r}.')
+    return paths
+
+
+def _rebase_import_json(value, old_root: Path, root: Path, paths: Mapping[Path, Path],
+                        archive: Path | None, *, key: str = '', relative_base: Path = Path()):
+    if isinstance(value, dict):
+        return {k: _rebase_import_json(v, old_root, root, paths, archive, key=k, relative_base=relative_base)
+                for k, v in value.items()}
+    if isinstance(value, list):
+        return [_rebase_import_json(v, old_root, root, paths, archive, key=key, relative_base=relative_base)
+                for v in value if not (key == 'traditional_folders' and v == _DESKTOP_SCRIPT_COPY)]
+    if not isinstance(value, str) or not value:
+        return value
+    path = Path(value.replace('\\', '/'))
+    if path.is_absolute():
+        if path.is_relative_to(old_root):
+            relative = path.relative_to(old_root)
+            if key == 'script_bundle_copy' and relative.name == _DESKTOP_SCRIPT_COPY:
+                return ''
+            return str(root / paths.get(relative, relative))
+        if archive is not None and path.is_relative_to(archive):
+            return str(root / _ARCHIVE_CONTENTS / path.relative_to(archive))
+    elif key in {'relative_csv_path', 'relative_drt_path', 'relative_path'}:
+        if path in paths:
+            return paths[path].as_posix()
+        if relative_base / path in paths:
+            return paths[relative_base / path].relative_to(relative_base).as_posix()
+    return value
+
+
+def _open_native(source: Path, active: Path, workspace: Path, staging: Path,
+                 archive: Path | None, description: str) -> BrowserData:
+    from faradaiq_canonical_bundle import EXCLUDED_DIR_TOKENS
+    from .v273_short_names import alias_entry
+
+    stage_root, stage_manifest, metadata, identities = _native_vendor(active, staging, description)
+    manifest = _json_mapping(stage_manifest.read_text(encoding='utf-8'))
+    for record in manifest.get('csv_entries', []):
+        record.update(identities.get(record.get('entry_id'), {}))
+    files, directories = [], []
+    for path in sorted(stage_root.rglob('*')):
+        relative = path.relative_to(stage_root)
+        # Desktop exports may embed another copy of the installed pySECCM tools.
+        # The browser runs its installed tools and only needs their scientific inputs.
+        if _DESKTOP_SCRIPT_COPY in relative.parts or relative.name == 'Run_all_traditional_pySECCM_parsers.bat':
+            continue
+        if path.is_file():
+            files.append(relative)
+        elif path.is_dir():
+            directories.append(relative)
+    fixed = [_path_units(_IMPORT_MANIFEST) + 1, _path_units('name_mapping.json') + 1]
+    fixed.extend(_path_units(p) + 1 for p in directories)
+    if archive is not None:
+        fixed.extend(_path_units(Path(_ARCHIVE_CONTENTS) / p.relative_to(archive)) + 1 for p in archive.rglob('*'))
+    minimum = max([*fixed, *(_path_units(p.parent / 'x')
+                            + min(_path_units(p.name), 12 + _path_units(_generated_tail(p))) for p in files)])
+    preferred = max([*fixed, *(_path_units(p) + 1 for p in files)])
+    label = source.name if source.is_dir() else source.stem
+    folder_label = safe_component(label)
+    if folder_label.casefold() in EXCLUDED_DIR_TOKENS or folder_label.startswith('.'):
+        folder_label += ' analysis'
+    root = _workspace_folder(workspace, folder_label, descendants=minimum, preferred=preferred)
+    try:
+        paths = _generated_paths(root, files, directories)
+        path_aliases = {old.as_posix(): new.as_posix() for old, new in paths.items() if old != new}
+        aliases = [alias_entry(label, root.name, kind='physical_output_base', context='browser_import')]
+        aliases.extend(alias_entry(old, new, kind='generated_path', context='browser_import')
+                       for old, new in path_aliases.items())
+        aliases = [alias for alias in aliases if alias]
+        if archive is not None:
+            shutil.copytree(archive, root / _ARCHIVE_CONTENTS)
+        for relative in directories:
+            (root / relative).mkdir(parents=True, exist_ok=True)
+        for relative in files:
+            path = stage_root / relative
+            target = root / paths[relative]
+            if path.suffix.lower() == '.json':
+                payload = json.loads(path.read_text(encoding='utf-8-sig'))
+                payload = _rebase_import_json(payload, stage_root, root, paths, archive, relative_base=relative.parent)
+                if relative == Path('short_name_map.json'):
+                    payload['name_aliases'] = aliases
+                target.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding='utf-8')
+            else:
+                shutil.copy2(path, target)
+                if archive is not None and path.name.endswith('_heka_raw_traces.h5'):
+                    import h5py
+
+                    with h5py.File(target, 'r+') as raw:
+                        source_file = raw.attrs.get('source_file')
+                        if source_file:
+                            raw.attrs['source_file'] = _rebase_import_json(source_file, stage_root, root, paths, archive)
+        metadata = _rebase_import_json(metadata, stage_root, root, paths, archive)
+        manifest = _rebase_import_json(manifest, stage_root, root, paths, archive)
+        provenance = {'source_path': str(source), 'source_filename': source.name,
+                      'original_label': label, 'folder_name': root.name,
+                      'generated_path_aliases': path_aliases}
+        if manifest.get('short_name_policy'):
+            manifest['short_name_policy']['name_aliases'] = aliases
+        manifest.update(browser_import=provenance, experiment_metadata=metadata,
+                        original_requested_base_name=label, physical_generated_base_name=root.name,
+                        canonical_identity_base_name=label)
+        (root / 'name_mapping.json').write_text(json.dumps(provenance, ensure_ascii=False, indent=2), encoding='utf-8')
+        manifest_path = root / _IMPORT_MANIFEST
+        manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding='utf-8')
+        return _build_dataset(source, root, manifest_path, metadata)
+    except BaseException:
+        shutil.rmtree(root, ignore_errors=True)
+        raise
 
 
 def open_data(source: str | Path, workspace: str | Path, *, description: str = '') -> BrowserData:
@@ -453,15 +674,28 @@ def open_data(source: str | Path, workspace: str | Path, *, description: str = '
     workspace = Path(workspace).expanduser().resolve()
     if source.is_dir() and workspace.is_relative_to(source):
         raise ValueError('Choose a browser workspace outside the source data directory.')
+    if kind in {'instrument', 'archive'}:
+        with _import_tempdir(workspace, source) as directory:
+            staging = Path(directory)
+            if kind == 'instrument':
+                return _open_native(source, source, workspace, staging, None, description)
+            archive = staging / 'raw'
+            active = _unpack_archive(source, archive)
+            kind = classify_source(active)
+            if kind == 'instrument':
+                return _open_native(source, active, workspace, staging, archive, description)
+            return _open_prepared(source, active, kind, workspace, archive)
+    return _open_prepared(source, source, kind, workspace)
+
+
+def _open_prepared(source: Path, active: Path, kind: str, workspace: Path,
+                   archive: Path | None = None) -> BrowserData:
     folder = new_folder(workspace, source.stem, reserve=66)
     try:
-        active = source
-        if kind == 'archive':
-            active = _unpack_archive(source, folder / 'Archive contents')
-            kind = classify_source(active)
-        if kind == 'instrument':
-            root, manifest, metadata = _native_vendor(active, folder, description)
-            return _build_dataset(source, root, manifest, metadata)
+        if archive is not None:
+            contents = folder / 'Archive contents'
+            shutil.copytree(archive, contents)
+            active = contents / active.relative_to(archive)
         if kind == 'bundle':
             if active.is_dir():
                 candidates = [p for p in active.iterdir() if p.is_file() and p.suffix.lower() in _HDF5_EXTENSIONS]
